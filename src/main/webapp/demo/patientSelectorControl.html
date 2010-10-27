@@ -1,0 +1,57 @@
+<html>
+<head>
+    <title>Patient Selector Control Test Page</title>
+    <link rel="stylesheet" type="text/css" href="/addama/ui/ext-js-3.2.1/resources/css/ext-all.css">
+    <link rel="stylesheet" type="text/css" href="/addama/ui/ext-js-3.2.1/examples/shared/examples.css"/>
+    <link rel="stylesheet" type="text/css" href="/addama/ui/ext-js-3.2.1/examples/ux/treegrid/treegrid.css"/>
+        <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+        google.load("prototype", "1.6.1.0");
+    </script>
+    <script type="text/javascript" src="/addama/ui/ext-js-3.2.1/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="/addama/ui/ext-js-3.2.1/ext-all.js"></script>
+    <script type="text/javascript" src="/addama/ui/ext-js-3.2.1/examples/ux/treegrid/TreeGridSorter.js"></script>
+    <script type="text/javascript" src="/addama/ui/ext-js-3.2.1/examples/ux/treegrid/TreeGridColumnResizer.js"></script>
+    <script type="text/javascript" src="/addama/ui/ext-js-3.2.1/examples/ux/treegrid/TreeGridNodeUI.js"></script>
+    <script type="text/javascript" src="/addama/ui/ext-js-3.2.1/examples/ux/treegrid/TreeGridLoader.js"></script>
+
+    <script type="text/javascript" src="/addama/ui/ext-js-3.2.1/examples/ux/treegrid/TreeGridColumns.js"></script>
+    <script type="text/javascript" src="/addama/ui/ext-js-3.2.1/examples/ux/treegrid/TreeGrid.js"></script>
+
+    <script type="text/javascript" src="js/patientSelectorControl.js"></script>
+
+    <script type="text/javascript">
+        var  patientControl;
+        Ext.onReady(function(){
+
+            Ext.QuickTips.init();
+            
+            patientControl = new PatientSelectorControl("container_main","https://addama-systemsbiology-public.appspot.com/addama/repositories/workspaces/aeakin@systemsbiology.org/ae");
+            patientControl.addSelectionListener({
+                onPatientSelection: function(patientArray){
+                    var patientString = "";
+                    $A(patientArray).each(function(patient){
+                        patientString= patient.id + ", " + patientString;
+                    })
+
+                    $("container_msg").innerHTML = patientString;
+                },
+                onPatientsLoaded: function(){
+                    patientControl.loadControl();
+                }
+            });
+
+
+        });
+
+
+
+    </script>
+</head>
+<body>
+    <div id="container_main" class="x-hidden">
+        <div id="container_tree" class="x-hidden"></div>
+    </div>
+<div id="container_msg"></div>
+</body>
+</html>

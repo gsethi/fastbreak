@@ -1,0 +1,209 @@
+<html>
+    <head>
+        <title>Import your data for Analysis</title>
+        <link rel="stylesheet" type="text/css" href="/addama/ui/ext-js-3.2.1/resources/css/ext-all.css">
+        <link rel="stylesheet" type="text/css" href="/addama/ui/ext-js-3.2.1/examples/shared/examples.css"/>
+        <link rel="stylesheet" type="text/css" href="/addama/ui/ext-js-3.2.1/examples/ux/fileuploadfield/css/fileuploadfield.css"/>
+        <script type="text/javascript" src="/addama/ui/prototype-1.6.0.3.js"></script>
+        <script type="text/javascript" src="/addama/ui/ext-js-3.2.1/adapter/ext/ext-base.js"></script>
+        <script type="text/javascript" src="/addama/ui/ext-js-3.2.1/ext-all.js"></script>
+        <script type="text/javascript" src="/js/topbar.js"></script>
+        <script type="text/javascript" src="/addama/ui/ext-js-3.2.1/examples/ux/fileuploadfield/FileUploadField.js"></script>
+        <script type="text/javascript" src="/addama/ui/ext-js-3.2.1/examples/ux/SearchField.js"></script>
+        <script type="text/javascript" src="js/refgenome.js"></script>
+        <script type="text/javascript" language="javascript" src="/addama/ui/protovis-r3.2.js"></script>
+       <script type="text/javascript" language="javascript" src="/addama/ui/visdata.js"></script>
+       <script type="text/javascript" language="javascript" src="/addama/ui/flexscroll.js"></script>
+               <script type="text/javascript" src="js/multidom.js"></script>
+        <script type="text/javascript" src="js/mif.js"></script>
+       <script type="text/javascript" src="js/datasetsTree.js"></script>
+        <script type="text/javascript" src="js/datasetsForms.js"></script>
+        <script type="text/javascript">
+            var centertabs = null;
+            var email = "";
+
+
+             Ext.onReady(function(){
+                 Ext.QuickTips.init();
+                 new TopBar("container_north");
+
+                 centertabs = new Ext.TabPanel({
+                    resizeTabs:true, // turn on tab resizing
+                    minTabWidth: 180,
+                    enableTabScroll:true,
+                    height: "100%",
+                    width:"100%",
+                    renderTo: 'container_topTabs',
+                     activeTab:0,
+                    defaults: {
+                        style:{position:!Ext.isIE?'absolute':'relative'},
+                        hideMode: !Ext.isIE?'visibility':'display'
+                    },
+                     items:[{width: "100%",contentEl:"container_details",title:"Details",frame:true}]
+
+                });
+
+                
+
+                 var westPanel = new Ext.Panel({
+                     height: 700,
+                     width: 200,
+                     layout: "vbox",
+                     renderTo: 'container_west',
+                     autoScroll: true,
+                     items:[{
+                         height: 600,
+                         width: 200,
+                         contentEl: 'container_userDataSets'
+                     },{
+                         height: 20,
+                         width: 200,
+                         xtype: "button",
+                         text: "Create new dataset",
+                         handler: function(){
+                             renderCreateDatasetForm("/addama/repositories/workspaces/" + email);
+                        }
+                     }]
+                 });
+
+                 new Ajax.Request("/addama/users/whoami", {
+                    method: "get",
+                    onSuccess: function(o) {
+                        var json = o.responseJSON;
+                        if (json && json.email) {
+                            email = json.email;
+                            loadDataSets(json.email, "container_userDataSets", centertabs,"User DataSets", "Public DataSets");
+                            
+                        } else {
+                            showError("Authentication", "User is not logged in");
+                        }
+                    }
+                });
+
+
+
+                 new Ext.Viewport({
+    layout: 'border',
+    renderTo: Ext.getBody(),
+    items: [{
+    region: 'north',
+    xtype: 'panel',
+    contentEl: 'container_north'
+    },{
+    title: 'Datasets',
+    region: 'west',
+    split: true,
+    autoWidth: true,
+    bodyStyle: 'padding:5px;',
+    collapsible: true,
+    expanded: true,
+    collapseMode:'mini',
+    contentEl: 'container_west'
+    },{
+        region: 'center',
+        contentEl: 'container_topTabs',
+        split: true
+    }]
+});
+
+             });
+            function showError(title, msg) {
+                Ext.MessageBox.show({
+                   title: title,
+                   msg: msg,
+                   buttons: Ext.MessageBox.OK,
+                   icon: Ext.MessageBox.ERROR
+               });
+            }
+
+            function loadJobs(items, tabPanel){
+                var jobData = [];
+                var count = items.length;
+                 $A(items).each(function(item) {
+                     new Ajax.Request(item.uri + "/jobs",{
+                         method: "get",
+                         onSuccess: function(o){
+                             count--;
+                             var json = o.responseJSON;
+                             if(json && json.items){
+                                 $A(json.items).each(function(job){
+                                     new Ajax.Request("/addama/tools/transplantdemo/workspace/jobs/" + email + "/" + job.name,{
+                                        method: "get",
+                                         onSuccess: function(o){
+                                             var jobJSON = o.responseJSON;
+                                             if(jobJSON){
+                                                 jobData[jobData.length] = [item.name,job.name,jobJSON.status];
+                                             }
+                                             loadJobGrid(jobData);
+                                         }
+                                     });
+                                 })
+                             }
+
+                         }
+                       
+                     })
+
+                });
+
+            }
+
+            function loadJobGrid(jobData){
+                                                 // create the data store
+                var store = new Ext.data.ArrayStore({
+                    fields: [
+                        {name: 'datasetname'},
+                       {name: 'jobid'},
+                       {name: 'status'}
+                    ]
+                });
+
+                // manually load local data
+                store.loadData(jobData);
+                              if(jobData.length > 0){
+                            $('container_details').innerHTML="";
+                              }
+                             else
+                              {
+                                  $('container_details').innerHTML="<p>No jobs found</p>";
+                                  return;
+                              }
+                // create the Grid
+                var grid = new Ext.grid.GridPanel({
+                    store: store,
+                    columns: [
+                        {header: 'Dataset Name', width: 150, sortable: true, dataIndex: 'datasetname'},
+                        {header: 'Job ID', width: 250, sortable: true, dataIndex: 'jobid'},
+                        {header: 'Status', width: 75, sortable: true, dataIndex: 'status'}
+                    ],
+                    stripeRows: true,
+                    height: 500,
+                    width: "100%",
+                    title: 'Jobs',
+                    // config options for stateful behavior
+                    renderTo:$('container_details')
+                });
+            }
+        </script>
+    </head>
+    <body>
+    <div id="container_top"></div>
+            <div id="container_north"></div>
+            <div id="container_west">
+                <div id="container_userDataSets"></div>
+                <div id="container_informaticsDataSets"></div>
+                <div id="container_treeContextMenu"></div>
+            </div>
+            <div id="container_topTabs">
+                <div id="container_details">
+                    <div id="span_progress" class="x-hidden"></div>
+                </div>
+                <div id="container_resultsMenu">
+                    <div id="container_visualization"></div>
+                    <div id="container_visParameters"></div>
+                </div>
+            </div>
+            <div id="container_parameters">
+       </div>
+    </body>
+</html>
