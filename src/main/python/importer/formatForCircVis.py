@@ -8,6 +8,7 @@ def formatMatrix(matrixfilen, gl):
     fout = open(matrixfilen+".for.circvis.txt","w")
     fout.write("chr1\tstart1\tend1\toptions1\tchr2\tstart2\tend2\toptions2\tlinkValue\n")
     columns = fo.next().lstrip().rstrip().replace('"','').split("\t")
+    print columns[0]
     for line in fo:
     	vals = line.rstrip().replace('"','').split("\t")
     	gene = vals[0]
