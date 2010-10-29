@@ -4,7 +4,7 @@ import sys
 
 
 def formatMatrix(matrixfilen, gl):
-    fo = open(mstrixfilen,"r")
+    fo = open(matrixfilen,"r")
     fout = open(mstrixfilen+".for.circvis.txt","w")
     fout.write("chr1\tstart1\tend1\toptions1\tchr2\tstart2\tend2\toptions2\tlinkValue\n")
     columns = fo.next().lstrip().rstrip().replace('"','').split("\t")
