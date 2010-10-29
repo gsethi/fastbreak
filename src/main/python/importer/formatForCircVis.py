@@ -21,16 +21,16 @@ def formatMatrix(matrixfilen, gl):
     			
 
 def formatList(listfilen,gl):
-    fo = open(listfilen,"r")
-    fout = open(listfilen+".for.circvis.txt","w")
-    fo.next()
+	fo = open(listfilen,"r")
+	fout = open(listfilen+".for.circvis.txt","w")
+	columns = fo.next()
 	for line in fo:
 		vals = line.rstrip().replace('"','').split()
 		gene = vals[0]
 		go1=gl[gene]
 		fout.write("\t".join(["%s"%(i) for i in [go1["chr"],go1["start"],go1["end"],vals[1],"label="+go1["name"]]])+"\n")
-    fout.close()
-    fo.close()
+	fout.close()
+	fo.close()
 
 
 
