@@ -1,5 +1,6 @@
 __author__ = 'rbressle'
 import genelist
+import sys
 
 
 def formatMatrix(matrixfilen, gl):
