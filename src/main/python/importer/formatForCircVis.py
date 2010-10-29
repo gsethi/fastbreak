@@ -5,7 +5,7 @@ import sys
 
 def formatMatrix(matrixfilen, gl):
     fo = open(matrixfilen,"r")
-    fout = open(mstrixfilen+".for.circvis.txt","w")
+    fout = open(matrixfilen+".for.circvis.txt","w")
     fout.write("chr1\tstart1\tend1\toptions1\tchr2\tstart2\tend2\toptions2\tlinkValue\n")
     columns = fo.next().lstrip().rstrip().replace('"','').split("\t")
     for line in fo:
@@ -22,7 +22,7 @@ def formatMatrix(matrixfilen, gl):
 
 def formatList(listfilen,gl):
     fo = open(listfilen,"r")
-    fout = open(mstrixfilen+".for.circvis.txt","w")
+    fout = open(listfilen+".for.circvis.txt","w")
 
 
 
