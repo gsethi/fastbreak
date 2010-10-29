@@ -8,7 +8,6 @@ def formatMatrix(matrixfilen, gl):
     fout = open(matrixfilen+".for.circvis.txt","w")
     fout.write("chr1\tstart1\tend1\toptions1\tchr2\tstart2\tend2\toptions2\tlinkValue\n")
     columns = fo.next().lstrip().rstrip().replace('"','').split()
-    print columns[0]
     for line in fo:
     	vals = line.rstrip().replace('"','').split()
     	gene = vals[0]
@@ -24,13 +23,22 @@ def formatMatrix(matrixfilen, gl):
 def formatList(listfilen,gl):
     fo = open(listfilen,"r")
     fout = open(listfilen+".for.circvis.txt","w")
+    fo.next()
+	for line in fo:
+		vals = line.rstrip().replace('"','').split()
+		gene = vals[0]
+		go1=gl[gene]
+		fout.write("\t".join(["%s"%(i) for i in [go1["chr"],go1["start"],go1["end"],vals[1],"label="+go1["name"]]])+"\n")
+    fout.close()
+    fo.close()
 
 
 
 if __name__ == "__main__":
 
     gl = genelist.loadGenesByName(sys.argv[1])
-    formatMatrix("Fastbreak_tumor_cutoff_3_by_gene_MIdist.txt",gl) 
+    formatMatrix("Fastbreak_tumor_cutoff_3_by_gene_MIdist.txt",gl)
+    formatList("Fastbreak_tumor_cutoff_3_by_gene_Counts.txt",gl)
     
     
 
