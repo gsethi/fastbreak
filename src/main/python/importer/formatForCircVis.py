@@ -10,7 +10,7 @@ def formatMatrix(matrixfilen, gl):
     for line in fo:
     	vals = line.rstrip().replace('"','').split("\t")
     	gene = vals[0]
-    	for i,val in enumerate(vals[1:])
+    	for i,val in enumerate(vals[1:]):
     		if columns[i]!=gene and float(val)<1.0:
     		go1 = gl[gene]
     		go2 = gl[columns[i]]
