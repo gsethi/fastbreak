@@ -19,6 +19,6 @@ def loadGenesByName(filen):
 		vs = gene.strip().split("\t")
 		if not vs[0] in genes:
 		    vdict = {"name":vs[0],"chr":vs[2], "start":int(vs[4]),"end":int(vs[5]),"or":vs[3]}
-		    genes[vs[0]].append(vdict)
+		    genes[vs[0]]=append(vdict)
 	genelist.close()
 	return genes
