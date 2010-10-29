@@ -23,6 +23,7 @@ def formatMatrix(matrixfilen, gl):
 def formatList(listfilen,gl):
 	fo = open(listfilen,"r")
 	fout = open(listfilen+".for.circvis.txt","w")
+	fout.write("chr\tstart\tend\tvalue\toptions\n")
 	columns = fo.next()
 	for line in fo:
 		vals = line.rstrip().replace('"','').split()
