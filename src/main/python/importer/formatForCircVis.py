@@ -12,9 +12,9 @@ def formatMatrix(matrixfilen, gl):
     	gene = vals[0]
     	for i,val in enumerate(vals[1:]):
     		if columns[i]!=gene and float(val)<1.0:
-    		go1 = gl[gene]
-    		go2 = gl[columns[i]]
-    		fout.write("\t".join([go1["chr"],go1["start"],go1["end"],"label="+go1["name"],go2["chr"],go2["start"],go2["end"],"label="+go2["name"],val])+"\n")
+				go1 = gl[gene]
+				go2 = gl[columns[i]]
+				fout.write("\t".join([go1["chr"],go1["start"],go1["end"],"label="+go1["name"],go2["chr"],go2["start"],go2["end"],"label="+go2["name"],val])+"\n")
     fout.close()
     fo.close()
     			
