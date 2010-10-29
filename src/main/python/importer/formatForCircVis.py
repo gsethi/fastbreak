@@ -28,6 +28,7 @@ def formatList(listfilen,gl):
 if __name__ == "__main__":
 
     gl = genelist.loadGenesByName(sys.argv[1])
+    formatMatrix("Fastbreak_tumor_cutoff_3_by_gene_MIdist.txt",gl) 
     
     
 
