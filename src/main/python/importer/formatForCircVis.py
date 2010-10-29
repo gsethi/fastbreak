@@ -7,10 +7,10 @@ def formatMatrix(matrixfilen, gl):
     fo = open(matrixfilen,"r")
     fout = open(matrixfilen+".for.circvis.txt","w")
     fout.write("chr1\tstart1\tend1\toptions1\tchr2\tstart2\tend2\toptions2\tlinkValue\n")
-    columns = fo.next().lstrip().rstrip().replace('"','').split("\t")
+    columns = fo.next().lstrip().rstrip().replace('"','').split()
     print columns[0]
     for line in fo:
-    	vals = line.rstrip().replace('"','').split("\t")
+    	vals = line.rstrip().replace('"','').split()
     	gene = vals[0]
     	for i,val in enumerate(vals[1:]):
     		if columns[i]!=gene and float(val)<1.0:
