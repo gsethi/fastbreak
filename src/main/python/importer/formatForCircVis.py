@@ -40,6 +40,10 @@ if __name__ == "__main__":
     gl = genelist.loadGenesByName(sys.argv[1])
     formatMatrix("Fastbreak_tumor_cutoff_3_by_gene_MIdist.txt",gl)
     formatList("Fastbreak_tumor_cutoff_3_by_gene_Counts.txt",gl)
+    formatMatrix("Fastbreak_tumor_cutoff_GBM_3_by_gene_MIdist.txt",gl)
+    formatList("Fastbreak_tumor_cutoff_GBM_3_by_gene_Counts.txt",gl)
+    formatMatrix("Fastbreak_tumor_cutoff_OV_3_by_gene_MIdist.txt",gl)
+    formatList("Fastbreak_tumor_cutoff_OV_3_by_gene_Counts.txt",gl)
     
     
 

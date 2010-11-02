@@ -90,29 +90,31 @@ def getBreakFilter(patterns,minBreak):
     breakCount = 0
     for pattern in patterns:
         for filen in glob.glob(pattern):
-            breakf = open(filen)
-
-
-            breakDic  = {}
-
-
-            for line in breakf:
-                chr1, pos1, chr2, pos2 = line.split("\t")[0:4]
-
-                for chr,pos in [[chr1, makeCalls.getTile(pos1)],[chr1,makeCalls.getTile(pos1)]]:
-                    if chr not in breakDic:
-                        breakDic[chr]={}
-                    if pos not in breakDic[chr]:
-                        breakDic[chr][pos] = 1
-                    else:
-                        breakDic[chr][pos]+=1
-
-                    if breakDic[chr][pos] >= minBreak:
-                        if chr not in returnBreakDic:
-                            returnBreakDic[chr]={}
-                        if pos not in returnBreakDic[chr]:
-                            breakCount+=1
-                            returnBreakDic[chr][pos] = 1
+			print "Loading "+filen
+			breakf = open(filen)
+			
+			
+			breakDic  = {}
+			
+			
+			for line in breakf:
+				chr1, pos1, chr2, pos2 = line.split("\t")[0:4]
+			
+				for chr,pos in [[chr1, makeCalls.getTile(pos1)],[chr2,makeCalls.getTile(pos2)]]:
+					if chr not in breakDic:
+						breakDic[chr]={}
+					if pos not in breakDic[chr]:
+						breakDic[chr][pos] = 1
+					else:
+						breakDic[chr][pos]+=1
+			
+					if breakDic[chr][pos] >= minBreak:
+						if chr not in returnBreakDic:
+							returnBreakDic[chr]={}
+						if pos not in returnBreakDic[chr]:
+							breakCount+=1
+							returnBreakDic[chr][pos] = 1
+			breakf.close()
 
     print "%i tiles have at least one break"%(breakCount)
     return returnBreakDic,breakCount
@@ -139,6 +141,7 @@ if __name__ == "__main__":
         pattern2 = "*oddreads.listcalled"
 
         breakFilter,breakCount = getBreakFilter([pattern1,pattern2],minBreaks)
+
 
         fn = "breakdancerCoverageCorelations_breakMin_%i.txt"%(minBreaks)
 
