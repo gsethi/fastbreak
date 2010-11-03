@@ -1,6 +1,7 @@
 #findtrans.py
-#usage nice samtools view somefile.bam | nice python findtrans.py cancertype[ov,gbm,mix] patientLabel prognosis tileWindow transRange1 transRange2 reportOrientationAndDistance[0,1] generateFastQ[0,1] reportMappingMetrics[0,1] DoReadGroup[0,1]
-#ie nice ../bin/samtools-0.1.7_x86_64-linux/samtools view  /titan/cancerregulome1/TCGA/clinical-data-repository/dbgap.ncbi.nlm.nih.gov/ov/phs000178v1/p1/tranche_07/TCGA-25-1328-10A-01W-0492-08.sorted.bam | nice /tools/bin/python findtrans.py ov TCGA-25-1328-10A-01W-0492-08-medium-0630 medium 1000 50 1000 1 0 1 1 > TCGA-25-1328-10A-01W-0492-08-medium-0630.log
+#usage samtools view -h XXX.sorted.bam | python findtrans.py sample-label myConfig.config   
+#ie nice /titan/cancerregulome2/bin/samtools-0.1.7_x86_64-linux/samtools view -h /titan/cancerregulome8/TCGA/clinical-data-repository/dbgap.ncbi.nlm.nih.gov/coad/wugsc/exchange/TCGA_phs000178/TCGA-AA-A02J-01A-01W-A00E-09_IlluminaGA-DNASeq_exome.sorted.bam | nice /tools/bin/python /titan/cancerregulome2/synthetic_cancer/python/findtrans.py TCGA-AA-A02J-01A-01W_refactored /titan/cancerregulome2/synthetic_cancer/python/configs/pass1.config	 	 	 
+#See Jake/Ryan if you need more help or have questions
 
 ##commenting courtesy of Sheila Reynold
 ## the SAM format is tab-delimited with 12 columns expected:
@@ -52,50 +53,85 @@
 ## -------------------------------------------------------------------------- ##
 
 import sys
+import os
+import errno
 import string
+import ConfigParser
 import time
 from time import gmtime, strftime, localtime
 import math
 try: import json #python 2.6 included simplejson as json
 except ImportError: import simplejson as json
 
-#take in class parameters
-cancerType = sys.argv[1]
-patientLabel = sys.argv[2]
-prognosis = sys.argv[3]
-tileWindow = 1000
-if len(sys.argv) == 5:
-	tileWindow = sys.argv[4]
-transRange1 = int(sys.argv[5])
-transRange2 = int(sys.argv[6])
-reportOrientationAndDistance = int(sys.argv[7])
-generateFastQ = int(sys.argv[8])	
-reportMappingMetrics = int(sys.argv[9])
-doReadGroups = int(sys.argv[10])
+patientLabel = sys.argv[1]
+configFile = sys.argv[2]
+# = sys.argv[3]
+# = ''
+#tileWindow = 1000
+#if len(sys.argv) == 5:
+#tileWindow = sys.argv[4]
+#transRange1 = int(sys.argv[5])
+#transRange2 = int(sys.argv[6])
+#reportOrientationAndDistance = int(sys.argv[7])
+#generateFastQ = int(sys.argv[8])	
+#reportMappingMetrics = int(sys.argv[9])
+#doReadGroups = int(sys.argv[10])
+#if doReadGroups == 0:
+#	print "ignore readgroups as one file\n"
+#	doReadGroups = False
+#else:
+#	print "do each readgroup as separate files\n"
+#	doReadGroups = True
+#saveSkippedInfo = False
+#if len(sys.argv) == 12:
+#        if int(sys.argv[11]) == 1:
+#		saveSkippedInfo = True
+
+config = ConfigParser.RawConfigParser()
+config.read(configFile)
+
+initialized = False
+transLowerBound = config.getint("Translocation_Parameters", "LowerBound")
+tileWindow = config.get("Translocation_Parameters", "TileWindow")
+transRange1 = config.getint("Translocation_Parameters", "TransRange1")
+transRange2 = config.getint("Translocation_Parameters", "TransRange2")
+resultsRelativePath = config.get("Translocation_Parameters", "ResultsRelativePath")
+jobFolder = config.get("Translocation_Parameters", "JobFolder")
+
+reportOrientationAndDistance = config.getint("Translocation_Output_Settings", "ReportOrientationAndDistance")
+generateFastQ = config.getint("Translocation_Output_Settings", "GenerateFastQ")
+reportMappingMetrics = config.getint("Translocation_Output_Settings", "ReportMappingMetrics")
+doReadGroups = config.getint("Translocation_Output_Settings", "DoReadGroups")
+saveSkippedInfo = config.getint("Translocation_Output_Settings", "SaveSkippedInfo")
+
 if doReadGroups == 0:
-	print "ignore readgroups as one file\n"
 	doReadGroups = False
 else:
-	print "do each readgroup as separate files\n"
 	doReadGroups = True
-saveSkippedInfo = False
-if len(sys.argv) == 12:
-        if int(sys.argv[11]) == 1:
-		saveSkippedInfo = True
-initialized = False
+
+if saveSkippedInfo == 0:
+	saveSkippedInfo = False
+else:
+	saveSkippedInfo = True
+
+resultsRelativePath = resultsRelativePath + jobFolder
+try:
+	os.makedirs(resultsRelativePath)
+except OSError, exc:
+	if exc.errno == errno.EEXIST: pass
+	else: raise
+
 outhash = {}
 rghash = {}
 rpthash = {}
 
 timenow = time.strftime("%c")
-print 'FindTrans Execution begins: %s for patient %s prognosis %s tileWindow %s transRange1 %i transRange2 %i reportOD %s genFastq %s reportMapping %s' % (timenow, patientLabel, prognosis, tileWindow, transRange1, transRange2, str(reportOrientationAndDistance), str(generateFastQ), str(reportMappingMetrics))
+print 'FindTrans Execution begins: %s for patient  %s tileWindow %s transRange1 %i transRange2 %i reportOD %s genFastq %s reportMapping %s results path %s' % (timenow, patientLabel, tileWindow, transRange1, transRange2, str(reportOrientationAndDistance), str(generateFastQ), str(reportMappingMetrics), resultsRelativePath)
 i = 1
 beginRangePos = 0
-
 currentRangeChrom = "chrM"
 currentTileChrom = "chrM"
 currentTile10Chrom = "chrM"
-
 rangeWidth = int(tileWindow)
 samcolumns = ["qname","flag","rname","pos","mapq","ciagr","mrnm","mpos","isize","seq","qual","opt"]
 samcolumnslen = len(samcolumns)
@@ -106,44 +142,47 @@ tileWidth = int(tileWindow)
 
 def initialize():
 	global outhash, rghash, rpthash, patientLabel, doReadGroups
+	#config = ConfigParser.RawConfigParser()
+	#config.read('./configs/pass1.config')
+	#transLowerBound = config.getint("Translocation_Parameters", "LowerBound")
 	if not doReadGroups:
 		rghash["rg_all"] = "rg_all"
-	relativePath = "/titan/cancerregulome2/synthetic_cancer/trans_out_patient/" + cancerType + "/"	
+	#resultsRelativePath = "/titan/cancerregulome2/synthetic_cancer/trans_out_patient/" + cancerType + "/"	
 
 	for rid in rghash:
 		plr = patientLabel + rid		
-		#outhash["bucket" + rid] = open(relativePath + prognosis + "/" + plr + "_AllBinsSameChrom_500K", 'w')
+		#outhash["bucket" + rid] = open(resultsRelativePath + "/" + plr + "_AllBinsSameChrom_500K", 'w')
 		if generateFastQ == 1:
-			outhash["fastq" + rid] = open(relativePath + prognosis + "/" + plr + ".fastq", 'w')		
-		outhash["tilecov" + rid] = open(relativePath + prognosis + "/" + plr + ".tile.cov", 'w')		
-		outhash["tile10" + rid] = open(relativePath + prognosis + "/" + plr + ".tile10.wig", 'w')		
+			outhash["fastq" + rid] = open(resultsRelativePath + "/" + plr + ".fastq", 'w')		
+		outhash["tilecov" + rid] = open(resultsRelativePath + "/" + plr + ".tile.cov", 'w')		
+		outhash["tile10" + rid] = open(resultsRelativePath + "/" + plr + ".tile10.wig", 'w')		
 		outhash["tile10" + rid].write('variableStep\tchrom=chrM\tspan=%s\n' % tileWindow)		
-		outhash["tile" + rid] = open(relativePath + prognosis + "/" + plr + ".tile.wig", 'w')		
+		outhash["tile" + rid] = open(resultsRelativePath + "/" + plr + ".tile.wig", 'w')		
 		outhash["tile" + rid].write('variableStep\tchrom=chrM\tspan=%s\n' % tileWindow)
-		outhash["oddreadbed" + rid] = open(relativePath + prognosis + "/" + plr+"oddreads.bed", 'w')		
+		outhash["oddreadbed" + rid] = open(resultsRelativePath + "/" + plr+"oddreads.bed", 'w')		
 		outhash["oddreadbed" + rid].write('\t'.join(["Chromosome","Start","End","Feature","Translocations\n"]))
-		outhash["oddreadlist" + rid] = open(relativePath + prognosis + "/" + plr+"oddreads.list", 'w')
+		outhash["oddreadlist" + rid] = open(resultsRelativePath + "/" + plr+"oddreads.list", 'w')
 		outhash["oddreadlist" + rid].write('\t'.join(["FromChr","FromPos","ToChr","ToPos","MapQ","Distance","StrandQ","StrandM\n"]))
-		outhash["wigsame" + rid] = open(relativePath + prognosis + "/" + plr + ".same.wig", 'w')		
+		outhash["wigsame" + rid] = open(resultsRelativePath + "/" + plr + ".same.wig", 'w')		
 		outhash["wigsame" + rid].write('variableStep\tchrom=chrM\tspan=%s\n' % tileWindow)
-		outhash["wigdiff" + rid] = open(relativePath + prognosis + "/" + plr + ".diff.wig", 'w')
+		outhash["wigdiff" + rid] = open(resultsRelativePath + "/" + plr + ".diff.wig", 'w')
 		outhash["wigdiff" + rid].write('variableStep\tchrom=chrM\tspan=%s\n' % tileWindow)
-		outhash["alldistance" + rid] = open(relativePath + prognosis + "/" + plr + "_distanceAll", 'w')
-		outhash["alldistanceMapQ" + rid] = open(relativePath + prognosis + "/" + plr + "_distanceAllMapQ", 'w')
-		outhash["distance11" + rid] = open(relativePath + prognosis + "/" + plr + "_distance11", 'w')
-		outhash["distance11MapQ" + rid] = open(relativePath + prognosis + "/" + plr + "_distance11MapQ", 'w')
-		outhash["distance10" + rid] = open(relativePath + prognosis + "/" + plr + "_distance10", 'w')
-		outhash["distance10MapQ" + rid] = open(relativePath + prognosis + "/" + plr + "_distance10MapQ", 'w')
-		outhash["distance01" + rid] = open(relativePath + prognosis + "/" + plr + "_distance01", 'w')
-		outhash["distance01MapQ" + rid] = open(relativePath + prognosis + "/" + plr + "_distance01MapQ", 'w')
-		outhash["distance00" + rid] = open(relativePath + prognosis + "/" + plr + "_distance00", 'w')
-		outhash["distance00MapQ" + rid] = open(relativePath + prognosis + "/" + plr + "_distance00MapQ", 'w')
-		outhash["outlier" + rid] = open(relativePath + prognosis + "/" + plr + "_outlierReadings", 'w')
+		outhash["alldistance" + rid] = open(resultsRelativePath + "/" + plr + "_distanceAll", 'w')
+		outhash["alldistanceMapQ" + rid] = open(resultsRelativePath + "/" + plr + "_distanceAllMapQ", 'w')
+		outhash["distance11" + rid] = open(resultsRelativePath + "/" + plr + "_distance11", 'w')
+		outhash["distance11MapQ" + rid] = open(resultsRelativePath + "/" + plr + "_distance11MapQ", 'w')
+		outhash["distance10" + rid] = open(resultsRelativePath + "/" + plr + "_distance10", 'w')
+		outhash["distance10MapQ" + rid] = open(resultsRelativePath + "/" + plr + "_distance10MapQ", 'w')
+		outhash["distance01" + rid] = open(resultsRelativePath + "/" + plr + "_distance01", 'w')
+		outhash["distance01MapQ" + rid] = open(resultsRelativePath + "/" + plr + "_distance01MapQ", 'w')
+		outhash["distance00" + rid] = open(resultsRelativePath + "/" + plr + "_distance00", 'w')
+		outhash["distance00MapQ" + rid] = open(resultsRelativePath + "/" + plr + "_distance00MapQ", 'w')
+		outhash["outlier" + rid] = open(resultsRelativePath + "/" + plr + "_outlierReadings", 'w')
 		outhash["outlier" + rid].write('read pos chromosome qname seq score distance\n')
         	if saveSkippedInfo:
-			outhash["skipped" + rid] = open(relativePath + prognosis + "/" + plr + "_skipped", 'w')
+			outhash["skipped" + rid] = open(resultsRelativePath + "/" + plr + "_skipped", 'w')
                 	outhash["skipped" + rid].write('rname\tmPos\tmapQScore\tdupeFlag\tfailedQC\trandomIndex\n')
-		outhash["summary" + rid] = open(relativePath + "/" + prognosis + "/" + plr + "_summary", 'w')
+		outhash["summary" + rid] = open(resultsRelativePath  + "/" + plr + "_summary", 'w')
         
 		rpthash["nreads" + rid] = 0
 		rpthash["rangeReads"+rid] = 0				
@@ -510,7 +549,7 @@ for line in sys.stdin:
 			if trans == False:
 				if not(same_chrom):
 					trans = True
-				elif distance > 1000:
+				elif distance > transLowerBound:
 					trans = True
 					rpthash["numTransNotStrand"+rgid] += 1
 					
@@ -534,7 +573,7 @@ for line in sys.stdin:
 			if trans == True:
 				rpthash["ntrans"+rgid]+=1			
 				outhash["oddreadbed"+rgid].write('\t'.join([rname,read["pos"],str(rPos+length),"na",'1\n']))
-				outhash["oddreadlist"+rgid].write('\t'.join([rname,read["pos"],read["mrnm"],read["mpos"],read["mapq"],str(distance),str(strandQ),str(strandM)])+"\n")
+				outhash["oddreadlist"+rgid].write('\t'.join([rname,read["pos"],read["mrnm"],read["mpos"],read["mapq"],str(distance),str(strandQ),str(strandM),qname])+"\n")
 						 
 			#if i%timefirstn==0:
 			#	avgdistance = 0
