@@ -65,45 +65,25 @@ except ImportError: import simplejson as json
 
 patientLabel = sys.argv[1]
 configFile = sys.argv[2]
-# = sys.argv[3]
-# = ''
-#tileWindow = 1000
-#if len(sys.argv) == 5:
-#tileWindow = sys.argv[4]
-#transRange1 = int(sys.argv[5])
-#transRange2 = int(sys.argv[6])
-#reportOrientationAndDistance = int(sys.argv[7])
-#generateFastQ = int(sys.argv[8])	
-#reportMappingMetrics = int(sys.argv[9])
-#doReadGroups = int(sys.argv[10])
-#if doReadGroups == 0:
-#	print "ignore readgroups as one file\n"
-#	doReadGroups = False
-#else:
-#	print "do each readgroup as separate files\n"
-#	doReadGroups = True
-#saveSkippedInfo = False
-#if len(sys.argv) == 12:
-#        if int(sys.argv[11]) == 1:
-#		saveSkippedInfo = True
 
+#Read in Fastbreak configurations
 config = ConfigParser.RawConfigParser()
 config.read(configFile)
 
+transLowerBound = config.getint("Fastbreak_Called_Parameters", "LowerBound")
+tileWindow = config.get("Fastbreak_QA_Parameters", "TileWindow")
+transRange1 = config.getint("Fastbreak_QA_Parameters", "TransRange1")
+transRange2 = config.getint("Fastbreak_QA_Parameters", "TransRange2")
+outlierDistance = config.getint("Fastbreak_QA_Parameters", "OutlierDistance")
+resultsRelativePath = config.get("Fastbreak_Output_Parameters", "ResultsRelativePath")
+jobFolder = config.get("Fastbreak_Output_Parameters", "JobFolder")
+reportOrientationAndDistance = config.getint("Fastbreak_Output_Parameters", "ReportOrientationAndDistance")
+generateFastQ = config.getint("Fastbreak_Output_Parameters", "GenerateFastQ")
+reportMappingMetrics = config.getint("Fastbreak_Output_Parameters", "ReportMappingMetrics")
+doReadGroups = config.getint("Fastbreak_Output_Parameters", "DoReadGroups")
+saveSkippedInfo = config.getint("Fastbreak_Output_Parameters", "SaveSkippedInfo")
+
 initialized = False
-transLowerBound = config.getint("Translocation_Parameters", "LowerBound")
-tileWindow = config.get("Translocation_Parameters", "TileWindow")
-transRange1 = config.getint("Translocation_Parameters", "TransRange1")
-transRange2 = config.getint("Translocation_Parameters", "TransRange2")
-resultsRelativePath = config.get("Translocation_Parameters", "ResultsRelativePath")
-jobFolder = config.get("Translocation_Parameters", "JobFolder")
-
-reportOrientationAndDistance = config.getint("Translocation_Output_Settings", "ReportOrientationAndDistance")
-generateFastQ = config.getint("Translocation_Output_Settings", "GenerateFastQ")
-reportMappingMetrics = config.getint("Translocation_Output_Settings", "ReportMappingMetrics")
-doReadGroups = config.getint("Translocation_Output_Settings", "DoReadGroups")
-saveSkippedInfo = config.getint("Translocation_Output_Settings", "SaveSkippedInfo")
-
 if doReadGroups == 0:
 	doReadGroups = False
 else:
@@ -114,6 +94,7 @@ if saveSkippedInfo == 0:
 else:
 	saveSkippedInfo = True
 
+#Create results path if necessary
 resultsRelativePath = resultsRelativePath + jobFolder
 try:
 	os.makedirs(resultsRelativePath)
@@ -139,15 +120,11 @@ samcolumnslen = len(samcolumns)
 tileStart = 0
 tileWidth = int(tileWindow)
 
-
+# Function that inits a set of filenames to capture results and qa and store them inside a class hash 
 def initialize():
 	global outhash, rghash, rpthash, patientLabel, doReadGroups
-	#config = ConfigParser.RawConfigParser()
-	#config.read('./configs/pass1.config')
-	#transLowerBound = config.getint("Translocation_Parameters", "LowerBound")
 	if not doReadGroups:
 		rghash["rg_all"] = "rg_all"
-	#resultsRelativePath = "/titan/cancerregulome2/synthetic_cancer/trans_out_patient/" + cancerType + "/"	
 
 	for rid in rghash:
 		plr = patientLabel + rid		
@@ -214,6 +191,7 @@ def initialize():
 		rpthash["rangeSameChrTransCount"+rid] = 0
 		rpthash["rangeDiffChrTransCount"+rid] = 0
 
+#Metrics Summary reporting, called at the end of processing bam file
 def reportSummary():
 	#Summary Reporting
 	global rghash, outhash, rpthash
@@ -247,7 +225,7 @@ def reportSummary():
 		#rptJson = {"bamTotalReads":str(nreads),"numTranslocations":str(foundntrans),"cumulativeAvg":str(cumulativeAvg),"pairsGT0":str(pairsGT0),"cumulativeRangedAvg":str(cumulativeRangedAvg),"numTranslocationsSamChrom":str(nsamechromtrans),"numTranslocationsDiffChrom":str(ndiffchromtrans),"numTransNotStrand":str(numTransNotStrand),"pairsRangedGT0":str(pairsRangedGT0),"num11":str(num11),"num10":str(num10),"num01":str(num01),"num00":str(num00),"zeroDistance":str(zeroDistance),"numSkipped":str(numSkipped), "numPairedUnmapped":str(numPairedUnmapped), "numQueryUnmapped":str(numQueryUnmapped), "numMateUnmapped":str(numMateUnmapped), "numUnmappedFirst":str(numUnmappedFirst)}
 		#cumRptFile.write("\n" + json.dumps(rptJson) + "\n")
 
-
+#Cleanup
 def cleanup():
 	global outhash
 	for o in outhash:
@@ -287,19 +265,15 @@ def isDuplicate(fval):
         return ((fval & 0x0400) > 0)
 
 
-#print out some statistics about what has been found
-#hopefully enough to figure out if it is in fact an illumina faile with
-#mate pairs
-#usage : summarize(pairs,trans,sumedlength/(i+1),sumeddistance/(i+1))
-#cumulativeAvg = float(0.0)
-def updateCumulativeAvg(rgid, i,val):
+#updates cumulative average
+def updateCumulativeAvg(rgid, i, val):
 	global rpthash
 	i = float(i)
 	val = float(val)
 	rpthash["cumulativeAvg"+rgid] = (val + (i-1)*rpthash["cumulativeAvg"+rgid])/i
 
-#cumulativeRangedAvg = float(0.0)
-def updateCumulativeRangedAvg(rgid, i,val):
+#updates cumulative ranged average
+def updateCumulativeRangedAvg(rgid, i, val):
 	global rpthash
 	i = float(i)
 	val = float(val)
@@ -347,20 +321,22 @@ def reportOrientationAndDistanceQS(rgid, strandQ, strandM, myDistance, mapQScore
 	return trans
 
 		
-
+#Captures Distance for all reads
 def putInAllBuckets(rgid, myDistance, read, chrom, pos, qname, seq, mapQScore):
 	global outhash
 	outhash["alldistance" + rgid].write('%s,' % str(myDistance))
 	outhash["alldistanceMapQ" + rgid].write('%s,' % str(mapQScore))
-	if myDistance > 500000:
+	if myDistance > outlierDistance:
 		#bucketArray[499999]+=1
 		outhash["outlier" + rgid].write('%s,%s,%s,%s,%s,%s,%s\n' % (str(read), chrom, str(pos), qname, seq, str(mapQScore), str(myDistance)))
 	#else:
 	#	bucketArray[int(math.floor(myDistance/10))]+=1
 
+#returns tile hash of read position
 def getTile(pos):
         return int(math.floor(float(pos)/float(tileWidth)))
-		
+
+#Persisting wig (covereage)		
 def writeWig(chr,pos):
 	global beginRangePos,currentRangeChrom,outhash,rghash,rpthash
 	for rgid in rghash:
@@ -382,6 +358,7 @@ def writeWig(chr,pos):
 		rpthash["rangeReads"+rgid] = 0
 		beginRangePos = int(pos)
 
+# writing tiles for 01 read strands
 def writeTile(chr,pos):
         global tileStart, outhash, rpthash, rghash, currentTileChrom
 	binStart = tileStart
@@ -424,27 +401,26 @@ def writeTile10(chr,pos,currentReadIs10):
 # seq
 # +
 # qual
+# Outputs huge file, use with caution
 def writeBam2Fastq(rgid, qname,seq,qual):
         global outhash
         outhash["fastq"+rgid].write('@%s\n%s\n+\n%s\n' % (qname, seq, qual))
 
+# Calculates read totals for different strands 
 def reportMappingMetrics(rgid, queryUnmapped,mateUnmapped,isFirstR):
 	global rpthash
         if queryUnmapped or mateUnmapped:
                 if not queryUnmapped:
                         rpthash["numMateUnmapped"+rgid] += 1
                 if not mateUnmapped:
-                        #numQueryUnmapped +=1
                         rpthash["numQueryUnmapped"+rgid] += 1	
                 if isFirstR:
-                        #numUnmappedFirst += 1
                         rpthash["numUnmappedFirst"+rgid] += 1	
                 if queryUnmapped and mateUnmapped:
-                        #numPairedUnmapped +=1
                         rpthash["numPairedUnmapped"+rgid] += 1	
                         
 
-#begin main 
+#begin main - receives IO from samtools -view 
 rgid = "rg_all"
 currentPos = 0
 for line in sys.stdin:
