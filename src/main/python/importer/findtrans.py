@@ -79,7 +79,7 @@ resultsRelativePath = config.get("Fastbreak_Output_Parameters", "ResultsRelative
 jobFolder = config.get("Fastbreak_Output_Parameters", "JobFolder")
 reportOrientationAndDistance = config.getint("Fastbreak_Output_Parameters", "ReportOrientationAndDistance")
 generateFastQ = config.getint("Fastbreak_Output_Parameters", "GenerateFastQ")
-reportMappingMetrics = config.getint("Fastbreak_Output_Parameters", "ReportMappingMetrics")
+doReportMappingMetrics = config.getint("Fastbreak_Output_Parameters", "ReportMappingMetrics")
 doReadGroups = config.getint("Fastbreak_Output_Parameters", "DoReadGroups")
 saveSkippedInfo = config.getint("Fastbreak_Output_Parameters", "SaveSkippedInfo")
 
@@ -107,7 +107,7 @@ rghash = {}
 rpthash = {}
 
 timenow = time.strftime("%c")
-print 'FindTrans Execution begins: %s for patient  %s tileWindow %s transRange1 %i transRange2 %i reportOD %s genFastq %s reportMapping %s results path %s' % (timenow, patientLabel, tileWindow, transRange1, transRange2, str(reportOrientationAndDistance), str(generateFastQ), str(reportMappingMetrics), resultsRelativePath)
+print 'FindTrans Execution begins: %s for patient  %s tileWindow %s transRange1 %i transRange2 %i reportOD %s genFastq %s reportMapping %s results path %s' % (timenow, patientLabel, tileWindow, transRange1, transRange2, str(reportOrientationAndDistance), str(generateFastQ), str(doReportMappingMetrics), resultsRelativePath)
 i = 1
 beginRangePos = 0
 currentRangeChrom = "chrM"
@@ -194,8 +194,7 @@ def initialize():
 
 #Metrics Summary reporting, called at the end of processing bam file
 def reportSummary():
-	#Summary Reporting
-	global rghash, outhash, rpthash
+	global rghash, outhash, rpthash, doReportMappingMetrics
 	for rgid in rghash:
 		print("summarizing readgroup:" + rgid + "\n")
 		cumRptFile = outhash["summary" + rgid]
@@ -220,8 +219,8 @@ def reportSummary():
 		cumRptFile.write("cumulativeAvg %f\n"%(rpthash["cumulativeAvg"+rgid]))
 		cumRptFile.write("cumulativeRangedAvg %f\n"%(rpthash["cumulativeRangedAvg"+rgid]))
 		
-		if reportMappingMetrics == 1:
-			cumRptFile.write("numNotProperPair %i numPairedUnmapped %i numUnmappedFirst %i numQueryUnmapped %i numMateUnmapped %i\n"%(rpthash["numNotProperPair"+rgid], rpthash["numPairedUnmapped"+rgid], rpthash["numUnmappedFirst"+rgid], rpthash["numQueryUnmapped"+rgid], rpthash["numMateUnmapped"+rgid]))
+		if doReportMappingMetrics == 1:
+			cumRptFile.write("numNotProperPair %i \nnumPairedUnmapped %i \nnumUnmappedFirst %i \nnumQueryUnmapped %i \nnumMateUnmapped %i\n"%(rpthash["numNotProperPair"+rgid], rpthash["numPairedUnmapped"+rgid], rpthash["numUnmappedFirst"+rgid], rpthash["numQueryUnmapped"+rgid], rpthash["numMateUnmapped"+rgid]))
 
 #Cleanup
 def cleanup():
@@ -489,7 +488,7 @@ for line in sys.stdin:
 		writeBam2Fastq(rgid, qname, seq, qual)
 
 	#report Mapping metrics
-	if reportMappingMetrics == 1:
+	if doReportMappingMetrics == 1:
 		reportMappingMetrics(rgid, properPair, queryUnmapped, mateUnmapped, isFirstR)
 
 	#wig coverage tile
