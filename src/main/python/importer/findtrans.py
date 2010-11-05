@@ -181,6 +181,7 @@ def initialize():
 		rpthash["num00"+rid] = 0
 		rpthash["zeroDistance"+rid] = 0
 		rpthash["numSkipped"+rid] = 0
+		rpthash["numNotProperPair"+rid] = 0
 		rpthash["numPairedUnmapped"+rid] = 0
 		rpthash["numUnmappedFirst"+rid] = 0
 		rpthash["numQueryUnmapped"+rid] = 0
@@ -220,10 +221,7 @@ def reportSummary():
 		cumRptFile.write("cumulativeRangedAvg %f\n"%(rpthash["cumulativeRangedAvg"+rgid]))
 		
 		if reportMappingMetrics == 1:
-			cumRptFile.write("numPairedUnmapped %i numUnmappedFirst %i numQueryUnmapped %i numMateUnmapped %i\n"%(rpthash["numPairedUnmapped"+rgid], rpthash["numUnmappedFirst"+rgid], rpthash["numQueryUnmapped"+rgid], rpthash["numMateUnmapped"+rgid]))
-
-		#rptJson = {"bamTotalReads":str(nreads),"numTranslocations":str(foundntrans),"cumulativeAvg":str(cumulativeAvg),"pairsGT0":str(pairsGT0),"cumulativeRangedAvg":str(cumulativeRangedAvg),"numTranslocationsSamChrom":str(nsamechromtrans),"numTranslocationsDiffChrom":str(ndiffchromtrans),"numTransNotStrand":str(numTransNotStrand),"pairsRangedGT0":str(pairsRangedGT0),"num11":str(num11),"num10":str(num10),"num01":str(num01),"num00":str(num00),"zeroDistance":str(zeroDistance),"numSkipped":str(numSkipped), "numPairedUnmapped":str(numPairedUnmapped), "numQueryUnmapped":str(numQueryUnmapped), "numMateUnmapped":str(numMateUnmapped), "numUnmappedFirst":str(numUnmappedFirst)}
-		#cumRptFile.write("\n" + json.dumps(rptJson) + "\n")
+			cumRptFile.write("numNotProperPair %i numPairedUnmapped %i numUnmappedFirst %i numQueryUnmapped %i numMateUnmapped %i\n"%(rpthash["numNotProperPair"+rgid], rpthash["numPairedUnmapped"+rgid], rpthash["numUnmappedFirst"+rgid], rpthash["numQueryUnmapped"+rgid], rpthash["numMateUnmapped"+rgid]))
 
 #Cleanup
 def cleanup():
@@ -233,6 +231,11 @@ def cleanup():
 	print("Program completed: Done cleaning up:" + str(time.strftime("%c")))
 
 #list of functions to check filter flag to find information about read/strand info
+#dec 2 2^1 - depends on protocol and inferred during alignment
+def getProperPair(fval):
+	return ((fval & 0x0002) > 0)
+
+#dec 4 2^2
 def getQueryUnmapped(fval):
         return ((fval & 0x0004) > 0)
 
@@ -402,14 +405,16 @@ def writeTile10(chr,pos,currentReadIs10):
 # +
 # qual
 # Outputs huge file, use with caution
-def writeBam2Fastq(rgid, qname,seq,qual):
+def writeBam2Fastq(rgid,qname,seq,qual):
         global outhash
         outhash["fastq"+rgid].write('@%s\n%s\n+\n%s\n' % (qname, seq, qual))
 
 # Calculates read totals for different strands 
-def reportMappingMetrics(rgid, queryUnmapped,mateUnmapped,isFirstR):
+def reportMappingMetrics(rgid,properPair,queryUnmapped,mateUnmapped,isFirstR):
 	global rpthash
-        if queryUnmapped or mateUnmapped:
+	if not properPair:
+		rpthash["numNotProperPair"+rgid] += 1
+        if queryUnmapped or mateUnmapped:	
                 if not queryUnmapped:
                         rpthash["numMateUnmapped"+rgid] += 1
                 if not mateUnmapped:
@@ -445,8 +450,6 @@ for line in sys.stdin:
 		if doReadGroups:
 			if term.startswith("RG:Z:"):
 				rgid = "rg" + term.split(":")[2].rstrip()
-		#else:
-		#	rgid = "rg_all"
 		if j<samcolumnslen:
 			read[samcolumns[j]]=term
 				
@@ -459,6 +462,7 @@ for line in sys.stdin:
 	rname = read["rname"]
 	randomIndex = string.find(rname, "random")
 	myFlag = int(read["flag"])
+	properPair = getProperPair(myFlag)
 	queryUnmapped = getQueryUnmapped(myFlag)
 	mateUnmapped = getMateUnmapped(myFlag)
 	isFirstR = isFirstRead(myFlag)
@@ -486,7 +490,7 @@ for line in sys.stdin:
 
 	#report Mapping metrics
 	if reportMappingMetrics == 1:
-		reportMappingMetrics(rgid, queryUnmapped, mateUnmapped, isFirstR)
+		reportMappingMetrics(rgid, properPair, queryUnmapped, mateUnmapped, isFirstR)
 
 	#wig coverage tile
         if ((rPos - tileStart) >  tileWidth or currentTileChrom != rname) and (rname != "*" or randomIndex == -1):
@@ -521,7 +525,6 @@ for line in sys.stdin:
 			same_chrom= (rname == read["mrnm"] or read["mrnm"] == "=")
 		
 			trans = reportOrientationAndDistanceQS(rgid, strandQ, strandM, distance, mapQScore, rPos, mPos)
-			#place below into function	
 			if trans == False:
 				if not(same_chrom):
 					trans = True
@@ -530,7 +533,6 @@ for line in sys.stdin:
 					rpthash["numTransNotStrand"+rgid] += 1
 					
 			if same_chrom:
-				#sumeddistance += distance
 				putInAllBuckets(rgid, distance, i, rname, rPos, qname, seq, mapQScore)
 				rpthash["numSamechrom"+rgid] += 1
 				if not trans:
@@ -551,13 +553,6 @@ for line in sys.stdin:
 				outhash["oddreadbed"+rgid].write('\t'.join([rname,read["pos"],str(rPos+length),"na",'1\n']))
 				outhash["oddreadlist"+rgid].write('\t'.join([rname,read["pos"],read["mrnm"],read["mpos"],read["mapq"],str(distance),str(strandQ),str(strandM),qname])+"\n")
 						 
-			#if i%timefirstn==0:
-			#	avgdistance = 0
-			#	avgnontrandistance=0
-			#	if numSamechrom>0:
-			#		avgdistance= sumeddistance/numSamechrom
-			#	if nontranpairs > 0:
-			#		avgnontrandistance = nontrandistance/nontranpairs			
 		i+=1
 #end of for loop
 #remaining reads
