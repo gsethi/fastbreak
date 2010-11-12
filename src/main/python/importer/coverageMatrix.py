@@ -20,17 +20,18 @@ def score(genelistfn):
 		for chr in genes:
 			for j, gene in enumerate(genes[chr]):
 				for tile in xrange(makeCalls.getTile(int(gene["start"])-int(padby)),makeCalls.getTile(int(gene["end"])+int(padby))):
-					if not chr in wig:
-						chr = chr.replace("chr","")
-					if chr in wig and tile in wig[chr]:
+					wigchr=chr
+					if not wigchr in wig:
+						wigchr = wigchr.replace("chr","")
+					if wigchr in wig and tile in wig[chr]:
 						if includeAllGenes == False:
-							if int(wig[chr][tile])>10:
+							if int(wig[wigchr][tile])>10:
 								genes[chr][j][wigfn] = 1
 						else:
-							if int(wig[chr][tile])>0:
+							if int(wig[wigchr][tile])>0:
 								if not wigfn in genes[chr][j]:
 									genes[chr][j][wigfn] = 0
-								genes[chr][j][wigfn]+=int(wig[chr][tile])
+								genes[chr][j][wigfn]+=int(wig[wigchr][tile])
 		
 								
 	
