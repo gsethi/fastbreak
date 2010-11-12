@@ -292,17 +292,17 @@ if __name__ == "__main__":
 		fitleredcount = 0
 		passedCount = 0
 		for chr in wig:
-			chr = addChr(chr)
-			if not chr in coveredregions:
-				coveredregions[chr] = {}
+			chrNorm = addChr(chr)
+			if not chrNorm in coveredregions:
+				coveredregions[chrNorm] = {}
 			for tile in wig[chr]:
 				if int(wig[chr][tile]) >= int(coveragecutoff):
 					passedCount +=1
 					if firstpass == True:
-						coveredregions[chr][tile] = True
+						coveredregions[chrNorm][tile] = True
 									
 				else:
-					coveredregions[chr][tile] = False
+					coveredregions[chrNorm][tile] = False
 					fitleredcount += 1
 		print "Found %i tiles covered over cutoff and %i tiles covered but below cutoff"%(passedCount,fitleredcount)
 					
