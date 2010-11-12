@@ -53,7 +53,7 @@ def scoreFilesByTile(inFilePattern,scorecolid,filenamebase):
 
 		
 	
-	outf.write("\t".join(cols)+"\n")		
+	outf.write("\t".join(cols).rstrip()+"\n")		
 	for chr in chrList:
 		print "Checking bins for chr: %s %i to %i"%(chr,0,int(chrMax[chr]))
 		for pos in xrange(0,int(chrMax[chr]),1000):
