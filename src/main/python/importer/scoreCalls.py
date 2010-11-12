@@ -29,14 +29,23 @@ def addEvent(chr,pos,vs,type):
 		globaldict[chr][pos][type]=[]
 	globaldict[chr][pos][type].append(vs)
 		
+def addChr(chr):
+	chr=str(chr)
+	if not chr.startswith("chr"):
+		chr = "chr"+chr
+	return chr
+	
+
 def loadCalledFile(fname,type):
 	global globaldict
 
 	fo = open(fname,"r")
 	for line in fo:
 		vs = tsvparser.parseLine(line,calledHeaders)
-		addEvent(vs["fromC"],vs["fromP"],vs,type)
-		addEvent(vs["toC"],vs["toP"],vs,type)
+		
+		
+		addEvent(addChr(vs["fromC"]),vs["fromP"],vs,type)
+		addEvent(addChr(vs["toC"]),vs["toP"],vs,type)
 	fo.close()
 
 		
@@ -159,12 +168,9 @@ def scoreBreakDancer(outfn,infn,genelistfn,coveredregions,minscore=0):
 		if(len(values)>7):
 			if values[typei] in types and int(values[scorei])>=minscore:
 				#add both lines
-				chr1 = values[chr1i]
-				chr2 = values[chr2i]
-				if not chr1.startswith("chr"):
-					chr1 = "chr"+chr1
-				if not chr2.startswith("chr"):
-					chr2 = "chr"+chr2
+				chr1 = addChr(values[chr1i])
+				chr2 = addChr(values[chr2i])
+				
 				
 				for pos in [{"c":chr1,"p":int(values[pos1i])}, {"c":chr2,"p":int(values[pos2i])}]:
 					p = pos["p"]
@@ -286,6 +292,7 @@ if __name__ == "__main__":
 		fitleredcount = 0
 		passedCount = 0
 		for chr in wig:
+			chr = addChr(chr)
 			if not chr in coveredregions:
 				coveredregions[chr] = {}
 			for tile in wig[chr]:
