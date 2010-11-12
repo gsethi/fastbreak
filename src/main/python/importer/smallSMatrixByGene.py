@@ -1,5 +1,6 @@
 import os, glob, errno
 import makeCalls
+import scoreCalls
 
 def scoreFilesByTile(inFilePattern,scorecolid,filenamebase):
 	outf = open(filenamebase+".matrix.tsv","w")
