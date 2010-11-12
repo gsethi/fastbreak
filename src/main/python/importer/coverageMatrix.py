@@ -23,7 +23,7 @@ def score(genelistfn):
 					wigchr=chr
 					if not wigchr in wig:
 						wigchr = wigchr.replace("chr","")
-					if wigchr in wig and tile in wig[chr]:
+					if wigchr in wig and tile in wig[wigchr]:
 						if includeAllGenes == False:
 							if int(wig[wigchr][tile])>10:
 								genes[chr][j][wigfn] = 1
