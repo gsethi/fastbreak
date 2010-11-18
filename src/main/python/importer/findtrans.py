@@ -1,7 +1,23 @@
 #findtrans.py
-#usage samtools view -h XXX.sorted.bam | python findtrans.py sample-label myConfig.config   
+#Usage with config file samtools view -h XXX.sorted.bam | python findtrans.py sample-label myConfig.config   
 #ie nice /titan/cancerregulome2/bin/samtools-0.1.7_x86_64-linux/samtools view -h /titan/cancerregulome8/TCGA/clinical-data-repository/dbgap.ncbi.nlm.nih.gov/coad/wugsc/exchange/TCGA_phs000178/TCGA-AA-A02J-01A-01W-A00E-09_IlluminaGA-DNASeq_exome.sorted.bam | nice /tools/bin/python /titan/cancerregulome2/synthetic_cancer/python/findtrans.py TCGA-AA-A02J-01A-01W_refactored /titan/cancerregulome2/synthetic_cancer/python/configs/pass1.config	 	 	 
-#See Jake/Ryan if you need more help or have questions
+
+#Alternative usage with inline arguments ie 
+
+detailedText = """nice /path/samtools-0.1.7_x86_64-linux/samtools view -h /bamPath/myBam.sorted.bam | nice /tools/bin/python /path/findtrans.py BAMLabel resultsDir 1000 1000 50 1000 500000 1 0 1 0 0
+resultsDir = output directory 
+1000 = calledTransSize
+1000 = tileWindow
+50 = transRangeStart
+1000 = transRangeEnd
+500000 = outlierDistance
+1 = reportOrientationAndDistance 
+0 = generateFastQ (uses lots of disk space)
+1 = reportMappingMetrics
+0 = readGroups (Group outputs by readGroupID for QA purposes, see SAM Format Manual)
+0 = savedDiscarded Reads (uses lots of disk space)
+"""
+#Email jlin or rbressler@systemsbiology.org if you need more help or have questions
 
 ##commenting courtesy of Sheila Reynold
 ## the SAM format is tab-delimited with 12 columns expected:
@@ -57,45 +73,60 @@ import os
 import errno
 import string
 import ConfigParser
+import optparse
 import time
 from time import gmtime, strftime, localtime
 import math
 try: import json #python 2.6 included simplejson as json
 except ImportError: import simplejson as json
 
-patientLabel = sys.argv[1]
-configFile = sys.argv[2]
+usage = "usage: Fastbreak Pass1 module is used to collect reads with odd distances and orientations. See Readme for more information. This script is designed to use samtools view -h with paired end bam files sorted by chromosome position. \nsamtools view -h XXX.sorted.bam | python findtrans.py sample-bam-label myConfig.config(see ./configs/pass1.config for template) \n[In-line Parameters mode ie\n %s]" % detailedText
+parser = optparse.OptionParser(usage=usage)
 
-#Read in Fastbreak configurations
-config = ConfigParser.RawConfigParser()
-config.read(configFile)
+args = parser.parse_args()
+argsLen = len(sys.argv)
+print argsLen
 
-transLowerBound = config.getint("Fastbreak_Called_Parameters", "LowerBound")
-tileWindow = config.get("Fastbreak_QA_Parameters", "TileWindow")
-transRange1 = config.getint("Fastbreak_QA_Parameters", "TransRange1")
-transRange2 = config.getint("Fastbreak_QA_Parameters", "TransRange2")
-outlierDistance = config.getint("Fastbreak_QA_Parameters", "OutlierDistance")
-resultsRelativePath = config.get("Fastbreak_Output_Parameters", "ResultsRelativePath")
-jobFolder = config.get("Fastbreak_Output_Parameters", "JobFolder")
-reportOrientationAndDistance = config.getint("Fastbreak_Output_Parameters", "ReportOrientationAndDistance")
-generateFastQ = config.getint("Fastbreak_Output_Parameters", "GenerateFastQ")
-doReportMappingMetrics = config.getint("Fastbreak_Output_Parameters", "ReportMappingMetrics")
-doReadGroups = config.getint("Fastbreak_Output_Parameters", "DoReadGroups")
-saveSkippedInfo = config.getint("Fastbreak_Output_Parameters", "SaveSkippedInfo")
+if argsLen < 2:
+	parser.error("BAMLabel is required")
+if argsLen > 3 and argsLen != 13:
+	parser.error("Tried running inline mode, missing required arguments, follow this example %s\n" %(detailedText))
+sampleBamLabel = sys.argv[1]
+if argsLen == 3:
+	configFile = sys.argv[2]
+	if not os.path.exists(configFile):
+		parser.error("Config file %s does not exist" % configFile)
+
+#Read in Fastbreak Pass 1 configurations or In-line parameters
+	config = ConfigParser.RawConfigParser()
+	config.read(configFile)
+	transLowerBound = config.getint("Fastbreak_Called_Parameters", "CalledTransSize")
+	tileWindow = config.getint("Fastbreak_QA_Parameters", "TileWindow")
+	transRange1 = config.getint("Fastbreak_QA_Parameters", "TransRange1")
+	transRange2 = config.getint("Fastbreak_QA_Parameters", "TransRange2")
+	outlierDistance = config.getint("Fastbreak_QA_Parameters", "OutlierDistance")
+	resultsRelativePath = config.get("Fastbreak_Output_Parameters", "ResultsRelativePath")
+	reportOrientationAndDistance = config.getint("Fastbreak_Output_Parameters", "ReportOrientationAndDistance")
+	generateFastQ = config.getint("Fastbreak_Output_Parameters", "GenerateFastQ")
+	doReportMappingMetrics = config.getint("Fastbreak_Output_Parameters", "ReportMappingMetrics")
+	doReadGroups = config.getint("Fastbreak_Output_Parameters", "DoReadGroups")
+	saveSkippedInfo = config.getint("Fastbreak_Output_Parameters", "SaveSkippedInfo")
+else:
+	resultsRelativePath = sys.argv[2]
+	transLowerBound = int(sys.argv[3])
+	tileWindow = int(sys.argv[4])
+	transRange1 = int(sys.argv[5])
+	transRange2 = int(sys.argv[6])
+	outlierDistance = int(sys.argv[7])
+	reportOrientationAndDistance = int(sys.argv[8])
+	generateFastQ = int(sys.argv[9])
+	doReportMappingMetrics = int(sys.argv[10])
+	doReadGroups = int(sys.argv[11])
+	saveSkippedInfo = int(sys.argv[12])
 
 initialized = False
-if doReadGroups == 0:
-	doReadGroups = False
-else:
-	doReadGroups = True
-
-if saveSkippedInfo == 0:
-	saveSkippedInfo = False
-else:
-	saveSkippedInfo = True
 
 #Create results path if necessary
-resultsRelativePath = resultsRelativePath + jobFolder
 try:
 	os.makedirs(resultsRelativePath)
 except OSError, exc:
@@ -107,43 +138,40 @@ rghash = {}
 rpthash = {}
 
 timenow = time.strftime("%c")
-print 'FindTrans Execution begins: %s for patient  %s tileWindow %s transRange1 %i transRange2 %i reportOD %s genFastq %s reportMapping %s results path %s' % (timenow, patientLabel, tileWindow, transRange1, transRange2, str(reportOrientationAndDistance), str(generateFastQ), str(doReportMappingMetrics), resultsRelativePath)
+print 'FindTrans Execution begins: %s for sampleBam  %s calledTransSize %i tileWindow %i transRange1 %i transRange2 %i outLierSize %i reportOrientationAndDistance %s genFastq %s reportMapping %s results path %s' % (timenow, sampleBamLabel, transLowerBound, tileWindow, transRange1, transRange2, outlierDistance, str(reportOrientationAndDistance), str(generateFastQ), str(doReportMappingMetrics), resultsRelativePath)
 i = 1
 beginRangePos = 0
 currentRangeChrom = "chrM"
 currentTileChrom = "chrM"
 currentTile10Chrom = "chrM"
-rangeWidth = int(tileWindow)
 samcolumns = ["qname","flag","rname","pos","mapq","ciagr","mrnm","mpos","isize","seq","qual","opt"]
 samcolumnslen = len(samcolumns)
-
 tileStart = 0
-tileWidth = int(tileWindow)
 
 # Function that inits a set of filenames to capture results and qa and store them inside a class hash 
 def initialize():
-	global outhash, rghash, rpthash, patientLabel, doReadGroups
-	if not doReadGroups:
+	global outhash, rghash, rpthash, sampleBamLabel, doReadGroups
+	if doReadGroups == 0:
 		rghash["rg_all"] = "rg_all"
 
 	for rid in rghash:
-		plr = patientLabel + rid		
+		plr = sampleBamLabel + rid		
 		#outhash["bucket" + rid] = open(resultsRelativePath + "/" + plr + "_AllBinsSameChrom_500K", 'w')
 		if generateFastQ == 1:
 			outhash["fastq" + rid] = open(resultsRelativePath + "/" + plr + ".fastq", 'w')		
 		outhash["tilecov" + rid] = open(resultsRelativePath + "/" + plr + ".tile.cov", 'w')		
 		outhash["tile10" + rid] = open(resultsRelativePath + "/" + plr + ".tile10.wig", 'w')		
-		outhash["tile10" + rid].write('variableStep\tchrom=chrM\tspan=%s\n' % tileWindow)		
+		outhash["tile10" + rid].write('variableStep\tchrom=chrM\tspan=%i\n' % tileWindow)		
 		outhash["tile" + rid] = open(resultsRelativePath + "/" + plr + ".tile.wig", 'w')		
-		outhash["tile" + rid].write('variableStep\tchrom=chrM\tspan=%s\n' % tileWindow)
+		outhash["tile" + rid].write('variableStep\tchrom=chrM\tspan=%i\n' % tileWindow)
 		outhash["oddreadbed" + rid] = open(resultsRelativePath + "/" + plr+"oddreads.bed", 'w')		
 		outhash["oddreadbed" + rid].write('\t'.join(["Chromosome","Start","End","Feature","Translocations\n"]))
 		outhash["oddreadlist" + rid] = open(resultsRelativePath + "/" + plr+"oddreads.list", 'w')
 		outhash["oddreadlist" + rid].write('\t'.join(["FromChr","FromPos","ToChr","ToPos","MapQ","Distance","StrandQ","StrandM\n"]))
 		outhash["wigsame" + rid] = open(resultsRelativePath + "/" + plr + ".same.wig", 'w')		
-		outhash["wigsame" + rid].write('variableStep\tchrom=chrM\tspan=%s\n' % tileWindow)
+		outhash["wigsame" + rid].write('variableStep\tchrom=chrM\tspan=%i\n' % tileWindow)
 		outhash["wigdiff" + rid] = open(resultsRelativePath + "/" + plr + ".diff.wig", 'w')
-		outhash["wigdiff" + rid].write('variableStep\tchrom=chrM\tspan=%s\n' % tileWindow)
+		outhash["wigdiff" + rid].write('variableStep\tchrom=chrM\tspan=%i\n' % tileWindow)
 		outhash["alldistance" + rid] = open(resultsRelativePath + "/" + plr + "_distanceAll", 'w')
 		outhash["alldistanceMapQ" + rid] = open(resultsRelativePath + "/" + plr + "_distanceAllMapQ", 'w')
 		outhash["distance11" + rid] = open(resultsRelativePath + "/" + plr + "_distance11", 'w')
@@ -156,7 +184,7 @@ def initialize():
 		outhash["distance00MapQ" + rid] = open(resultsRelativePath + "/" + plr + "_distance00MapQ", 'w')
 		outhash["outlier" + rid] = open(resultsRelativePath + "/" + plr + "_outlierReadings", 'w')
 		outhash["outlier" + rid].write('read pos chromosome qname seq score distance\n')
-        	if saveSkippedInfo:
+        	if saveSkippedInfo == 1:
 			outhash["skipped" + rid] = open(resultsRelativePath + "/" + plr + "_skipped", 'w')
                 	outhash["skipped" + rid].write('rname\tmPos\tmapQScore\tdupeFlag\tfailedQC\trandomIndex\n')
 		outhash["summary" + rid] = open(resultsRelativePath  + "/" + plr + "_summary", 'w')
@@ -198,7 +226,7 @@ def reportSummary():
 	for rgid in rghash:
 		print("summarizing readgroup:" + rgid + "\n")
 		cumRptFile = outhash["summary" + rgid]
-		cumRptFile.write("Patient %s rg %s\n"%(patientLabel, rgid))
+		cumRptFile.write("Patient %s rg %s\n"%(sampleBamLabel, rgid))
 		cumRptFile.write("Total BAM Reads %i\n"%(rpthash["nreads"+rgid]))
 		if reportOrientationAndDistance == 1:
 			cumRptFile.write("numTranslocations %i\n"%(rpthash["ntrans"+rgid]))
@@ -336,7 +364,7 @@ def putInAllBuckets(rgid, myDistance, read, chrom, pos, qname, seq, mapQScore):
 
 #returns tile hash of read position
 def getTile(pos):
-        return int(math.floor(float(pos)/float(tileWidth)))
+        return int(math.floor(float(pos)/float(tileWindow)))
 
 #Persisting wig (covereage)		
 def writeWig(chr,pos):
@@ -352,8 +380,8 @@ def writeWig(chr,pos):
 		if currentRangeChrom != chr:
 			timenow = time.strftime("%c")
 			print 'FindTrans Executing finishing chromosome %s and beginning %s at time %s' % (currentRangeChrom, chr, timenow)
-			outhash["wigsame"+rgid].write('variableStep chrom=%s span=%s\n' % (chr, tileWindow))
-			outhash["wigdiff"+rgid].write('variableStep chrom=%s span=%s\n' % (chr, tileWindow))
+			outhash["wigsame"+rgid].write('variableStep chrom=%s span=%i\n' % (chr, tileWindow))
+			outhash["wigdiff"+rgid].write('variableStep chrom=%s span=%i\n' % (chr, tileWindow))
 			currentRangeChrom = chr
 		rpthash["rangeSameChrTransCount"+rgid] = 0
 		rpthash["rangeDiffChrTransCount"+rgid] = 0
@@ -366,7 +394,7 @@ def writeTile(chr,pos):
 	binStart = tileStart
 	#bin1 will hold the tileReads, tileReads - 1 to account for the pos read outside this bin
 	for rgid in rghash:
-		if (pos - tileStart > int(tileWindow)):
+		if ((pos - tileStart) > tileWindow):
 			rpthash["tilereads"+rgid] = rpthash["tilereads"+rgid] - 1
 		outhash["tilecov"+rgid].write('%s,' % str(rpthash["tilereads"+rgid]))
 		if rpthash["tilereads"+rgid] > 0:
@@ -374,7 +402,7 @@ def writeTile(chr,pos):
 		rpthash["tilereads"+rgid] = 1 
         
 		if currentTileChrom != chr:
-        		outhash["tile"+rgid].write('variableStep chrom=%s span=%s\n' % (chr, tileWindow))                     
+        		outhash["tile"+rgid].write('variableStep chrom=%s span=%i\n' % (chr, tileWindow))                     
 			currentTileChrom = chr
 			rpthash["tilereads"+rgid] = 0
 
@@ -384,7 +412,7 @@ def writeTile10(chr,pos,currentReadIs10):
         binStart = tileStart
        	for rgid in rghash:
         	#bin1 will hold the tileReads, tileReads - 1 if the current read counted and is outside the bin range
-        	if (rpthash["tilereads10"+rgid] > 1 and currentReadIs10 == True and (pos - tileStart > int(tileWindow))):
+        	if (rpthash["tilereads10"+rgid] > 1 and currentReadIs10 == True and ((pos - tileStart) > tileWindow)):
             		rpthash["tilereads10"+rgid] = rpthash["tilereads10"+rgid] - 1
         	if rpthash["tilereads10"+rgid] > 0:
 			outhash["tile10"+rgid].write('%s\t%i\n' % (binStart, rpthash["tilereads10"+rgid]))
@@ -394,7 +422,7 @@ def writeTile10(chr,pos,currentReadIs10):
 			rpthash["tilereads10"+rgid] = 1
 
         	if currentTile10Chrom != chr:
-            		outhash["tile10"+rgid].write('variableStep chrom=%s span=%s\n' % (chr, tileWindow))
+            		outhash["tile10"+rgid].write('variableStep chrom=%s span=%i\n' % (chr, tileWindow))
                 	currentTile10Chrom = chr
                 	rpthash["tilereads10"+rgid] = 0
 
@@ -431,7 +459,7 @@ for line in sys.stdin:
 	#this section splits the line into terns and checks to make sure it is in the readGroups if provided
 	read = {}
 	if line.startswith("@"):
-		if doReadGroups and line.startswith("@RG"):		
+		if doReadGroups == 1 and line.startswith("@RG"):		
 			rgterm = line.split("\t")[1]			
 			rgid = "rg" + rgterm.split(":")[1]
 			print "Doing readgroupids %s\n" % (rgid)
@@ -446,7 +474,7 @@ for line in sys.stdin:
 			initialized = True
 	
 	for j,term in enumerate(line.split("\t")):
-		if doReadGroups:
+		if doReadGroups == 1:
 			if term.startswith("RG:Z:"):
 				rgid = "rg" + term.split(":")[2].rstrip()
 		if j<samcolumnslen:
@@ -492,19 +520,19 @@ for line in sys.stdin:
 		reportMappingMetrics(rgid, properPair, queryUnmapped, mateUnmapped, isFirstR)
 
 	#wig coverage tile
-        if ((rPos - tileStart) >  tileWidth or currentTileChrom != rname) and (rname != "*" or randomIndex == -1):
+        if ((rPos - tileStart) >  tileWindow or currentTileChrom != rname) and (rname != "*" or randomIndex == -1):
 		writeTile(rname, rPos)
 		writeTile10(rname, rPos, currentReadIs10)
-		tileStart = getTile(rPos)*tileWidth
+		tileStart = getTile(rPos)*tileWindow
 		currentPos = rPos
 	#wig probability		
-	if ((rPos - beginRangePos) >  rangeWidth or currentRangeChrom != rname) and (rname != "*" or randomIndex == -1):
+	if ((rPos - beginRangePos) >  tileWindow or currentRangeChrom != rname) and (rname != "*" or randomIndex == -1):
 		writeWig(rname,rPos)
 
 	if reportOrientationAndDistance == 1:
 		if rname == "chrM" or mPos == 0 or mapQScore == 0 or dupeFlag or failedQC or randomIndex > 0:
 			rpthash["numSkipped"+rgid] +=1
-			if saveSkippedInfo:
+			if saveSkippedInfo == 1:
 				outhash["skipped"+rgid].write('\t'.join([rname, str(mPos), str(mapQScore), str(dupeFlag), str(failedQC), str(randomIndex) + '\n']))
 		else:	
 			rpthash["pairs"+rgid]+=1		
