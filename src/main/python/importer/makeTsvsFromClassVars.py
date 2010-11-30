@@ -14,7 +14,7 @@ samplefo = open("samples.tsv","w")
 patientfo = open("patients.tsv","w")
 
 for patient in patients.keys():
-	if "CANCER" in patients[patient] and "BLOOD" in patients[patient]:
+	if "CANCER" in patients[patient].keys() and "BLOOD" in patients[patient].keys():
 		print patient
 		patientfo.write(patients[patient]["line"])
 		
