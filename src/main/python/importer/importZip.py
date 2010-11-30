@@ -16,14 +16,16 @@ except ImportError: import simplejson as json
 		
 #config section. Should be moved to sperate file if it grows much
 
-
+def printandopen(arg1,arg2):
+	print "Opening "+arg1
+	return open(arg1,arg2)
 
 #this method is called as the main method when run as a scrip
 def importZip(zipfilen,genelistfile,picklepath,ws):
 
 	openAbstraction = lambda x : x
 	if zipfilen.find(".zip") == -1:
-		openAbstraction = lambda fn : open(os.path.join(zipfilen,fn),"r")
+		openAbstraction = lambda fn : printandopen(os.path.join(zipfilen,fn),"r")
 		
 	else:
 		zfile = zipfile.ZipFile(zipfilen, "r")
