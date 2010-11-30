@@ -99,9 +99,10 @@ def importZip(zipfilen,genelistfile,picklepath,ws):
 			if sample["classification"] == "Tumor" and sample["mate"] != "":
 				dict["tumor"] = sample["sample_id"]
 				dict["normal"] = sample["mate"]
+				pairs.append(dict)
 		
 		jsonIndex.append(patient)
-		pairs.append(dict)
+		
 	
 	patientjson = open("patients.json","w")
 	patientjson.write(json.dumps({"patients":jsonIndex}))
