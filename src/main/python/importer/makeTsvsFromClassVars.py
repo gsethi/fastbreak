@@ -14,7 +14,7 @@ def writeSampleLine(samplefo,patient,sample,type,mate):
 	listcalled = getfn(sample+"*.listcalled")
 	wig = getfn(sample+"*.tile.wig")
 	if listcalled != "NA" and wig != "NA":
-		samplefo.write("\t".join([sample, patient, type, mate, listcalled, wig ])+"\n")
+		samplefo.write("\t".join([sample, patient, type, mate, "", listcalled, wig ])+"\n")
 	
 foin = open("ClassVarsOld.txt","r")
 foin.next()
