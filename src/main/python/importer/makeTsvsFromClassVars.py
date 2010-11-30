@@ -1,5 +1,16 @@
 import glob
 
+def getfn(pattern):
+	li = glob.glob(ts[0]+"*.listcalled")
+	rv="NA"
+	if len(li)>0:
+		rv = li[0]
+	else:
+		print pattern + "not found"
+	
+	return rv
+	
+	
 foin = open("ClassVarsOld.txt","r")
 foin.next()
 
@@ -26,8 +37,8 @@ for patient in patients.keys():
 		
 		ts = patients[patient]["CANCER"]
 		bl = patients[patient]["BLOOD"]
-		samplefo.write("\t".join([ts[0], patient, "Tumor", bl[0], glob.glob(ts[0]+"*.listcalled")[0], glob.glob(ts[0]+"*.tile.wig")[0]])+"\n")
-		samplefo.write("\t".join([bl[0], patient,"Blood",ts[0], glob.glob(bl[0]+"*.listcalled")[0], glob.glob(bl[0]+"*.tile.wig")[0]]) +"\n")
+		samplefo.write("\t".join([ts[0], patient, "Tumor", bl[0], getfn(ts[0]+"*.listcalled"), getfn(ts[0]+"*.tile.wig")])+"\n")
+		samplefo.write("\t".join([bl[0], patient,"Blood",ts[0],getfn(bl[0]+"*.listcalled"), getfn(bl[0]+"*.tile.wig")]) +"\n")
 		
 		
 		
