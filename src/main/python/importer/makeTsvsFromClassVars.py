@@ -1,7 +1,7 @@
 import glob
 
 def getfn(pattern):
-	li = glob.glob(ts[0]+"*.listcalled")
+	li = glob.glob(pattern+"*.listcalled")
 	rv="NA"
 	if len(li)>0:
 		rv = li[0]
