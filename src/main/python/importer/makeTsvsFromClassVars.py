@@ -5,17 +5,19 @@ patients = {}
 for line in foin:
 	line = line.rstrip().replace(".","-").split("\t")
 	patient = line[0][0:12]
-	
+	print patient
 	
 	patients[patient]={"line":"\t".join([patient,line[2],"Status: "+line[3]+" Resistance: "+line[4]])+"\n"}
+	print line[1]
 	patients[patient][line[1]] = line
-	
+
+foin.close()	
 samplefo = open("samples.tsv","w")
 patientfo = open("patients.tsv","w")
 
 for patient in patients.keys():
 	if "CANCER" in patients[patient].keys() and "BLOOD" in patients[patient].keys():
-		print patient
+		
 		patientfo.write(patients[patient]["line"])
 		
 		ts = patients[patient]["CANCER"]
