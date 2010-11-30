@@ -47,7 +47,7 @@ for patient in patients.keys():
 		writeSampleLine(samplefo,patient,bl,"Blood", ts)
 		
 		
-		samplefo.write("\t".join([bl[0], patient,"Blood",ts[0],getfn(bl[0]+"*.listcalled"), getfn(bl[0]+"*.tile.wig")]) +"\n")
+		
 		
 		
 		
