@@ -26,8 +26,8 @@ for patient in patients.keys():
 		
 		ts = patients[patient]["CANCER"]
 		bl = patients[patient]["BLOOD"]
-		samplefo.write("\t".join([ts[0],patient,"Tumor",bl[0],glob.glob(ts+"*.listcalled")[0],glob.glob(ts+"*.tile.wig")[0]]))
-		samplefo.write("\t".join([bl[0],patient,"Blood",ts[0],glob.glob(bl+"*.listcalled")[0],glob.glob(bl+"*.tile.wig")[0]]))
+		samplefo.write("\t".join([ts[0], patient, "Tumor", bl[0], glob.glob(ts[0]+"*.listcalled")[0], glob.glob(ts[0]+"*.tile.wig")[0]])+"\n")
+		samplefo.write("\t".join([bl[0], patient,"Blood",ts[0], glob.glob(bl[0]+"*.listcalled")[0], glob.glob(bl[0]+"*.tile.wig")[0]]) +"\n")
 		
 		
 		
