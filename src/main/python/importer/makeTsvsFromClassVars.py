@@ -1,12 +1,12 @@
 import glob
 
 def getfn(pattern):
-	li = glob.glob(pattern+"*.listcalled")
+	li = glob.glob(pattern)
 	rv="NA"
 	if len(li)>0:
 		rv = li[0]
 	else:
-		print pattern + "not found"
+		print pattern + " not found"
 	
 	return rv
 	
