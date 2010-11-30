@@ -9,7 +9,12 @@ def getfn(pattern):
 		print pattern + " not found"
 	
 	return rv
-	
+
+def writeSampleLine(samplefo,patient,sample,type,mate):
+	listcalled = getfn(sample+"*.listcalled")
+	wig = getfn(sample+"*.tile.wig")
+	if listcalled != "NA" and wig != "NA":
+		samplefo.write("\t".join([sample, patient, type, mate, listcalled, wig ])+"\n")
 	
 foin = open("ClassVarsOld.txt","r")
 foin.next()
@@ -35,9 +40,13 @@ for patient in patients.keys():
 		
 		patientfo.write(patients[patient]["line"])
 		
-		ts = patients[patient]["CANCER"]
-		bl = patients[patient]["BLOOD"]
-		samplefo.write("\t".join([ts[0], patient, "Tumor", bl[0], getfn(ts[0]+"*.listcalled"), getfn(ts[0]+"*.tile.wig")])+"\n")
+		ts = patients[patient]["CANCER"][0]
+		bl = patients[patient]["BLOOD"][0]
+		
+		writeSampleLine(samplefo,patient,ts,"Tumor", bl)
+		writeSampleLine(samplefo,patient,bl,"Blood", ts)
+		
+		
 		samplefo.write("\t".join([bl[0], patient,"Blood",ts[0],getfn(bl[0]+"*.listcalled"), getfn(bl[0]+"*.tile.wig")]) +"\n")
 		
 		
