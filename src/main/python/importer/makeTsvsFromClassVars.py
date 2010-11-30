@@ -1,3 +1,5 @@
+import glob
+
 foin = open("ClassVarsOld.txt","r")
 foin.next()
 
