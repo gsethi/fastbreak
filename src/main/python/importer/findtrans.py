@@ -141,6 +141,7 @@ timenow = time.strftime("%c")
 print 'FindTrans Execution begins: %s for sampleBam  %s calledTransSize %i tileWindow %i transRange1 %i transRange2 %i outLierSize %i reportOrientationAndDistance %s genFastq %s reportMapping %s results path %s' % (timenow, sampleBamLabel, transLowerBound, tileWindow, transRange1, transRange2, outlierDistance, str(reportOrientationAndDistance), str(generateFastQ), str(doReportMappingMetrics), resultsRelativePath)
 i = 1
 beginRangePos = 0
+#sorted bams are sorted by chromosome and position, chrM are the initial chromosome and we disregard these reads 
 currentRangeChrom = "chrM"
 currentTileChrom = "chrM"
 currentTile10Chrom = "chrM"
