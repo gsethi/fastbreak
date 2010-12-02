@@ -1,4 +1,5 @@
-#findtrans.py
+__author__ = 'RyanBressler_JakeLin'
+#findtrans.py - fastbreak pass1
 #Usage with config file samtools view -h XXX.sorted.bam | python findtrans.py sample-label myConfig.config   
 #ie nice /titan/cancerregulome2/bin/samtools-0.1.7_x86_64-linux/samtools view -h /titan/cancerregulome8/TCGA/clinical-data-repository/dbgap.ncbi.nlm.nih.gov/coad/wugsc/exchange/TCGA_phs000178/TCGA-AA-A02J-01A-01W-A00E-09_IlluminaGA-DNASeq_exome.sorted.bam | nice /tools/bin/python /titan/cancerregulome2/synthetic_cancer/python/findtrans.py TCGA-AA-A02J-01A-01W_refactored /titan/cancerregulome2/synthetic_cancer/python/configs/pass1.config	 	 	 
 
@@ -370,6 +371,9 @@ def getTile(pos):
 #Persisting wig (covereage)		
 def writeWig(chr,pos):
 	global beginRangePos,currentRangeChrom,outhash,rghash,rpthash
+	if beginRangePos >= tileWindow:
+		#to account for span nature of wig format
+		beginRangePos = beginRangePos - tileWindow + 1
 	for rgid in rghash:
 		sameRangeProb = 0.0
 		diffRangeProb = 0.0
@@ -572,7 +576,7 @@ for line in sys.stdin:
 			if trans == True and same_chrom:
 				rpthash["nsamechromtrans"+rgid]+=1
 				rpthash["rangeSameChrTransCount"+rgid]+=1			
-			elif trans == False:
+			elif trans == True:
 				rpthash["rangeDiffChrTransCount"+rgid]+=1
 				rpthash["ndiffchromtrans"+rgid]+=1
 				
