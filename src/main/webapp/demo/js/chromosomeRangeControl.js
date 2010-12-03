@@ -135,9 +135,9 @@ var ChromosomeRangeControl = Class.create({
             control.publishSelection(control.startPosition, control.endPosition);
         }
 
-        var flexbar = new org.systemsbiology.visualization.protovis.FlexScroll( Ext.getDom(this.container), listener);
+        var flexbar = new isbv.FlexScroll( Ext.getDom(this.container), listener);
 
-        var data ={DATATYPE : "org.systemsbiology.visualization.protovis.models.FlexScrollData", CONTENTS : "test"};
+        var data ={DATATYPE : "isbv.models.FlexScrollData", CONTENTS : "test"};
 
 
         var options = {plotWidth : 700, plotHeight: 50,

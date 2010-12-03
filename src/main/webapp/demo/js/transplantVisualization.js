@@ -200,7 +200,7 @@ var TransplantVisualization = Class.create({
         var control = this;
         if(control.patients.length == 0 || control.chromosomeRange == '')
         {
-            control.container.innerHTML=<p><b>A chromosome range and set of patients must be selected to view visualizations.</b></p>;
+            control.container.innerHTML="<p><b>A chromosome range and set of patients must be selected to view visualizations.</b></p>";
             return;
         }
         if(!control.rangechanged && !control.patientchanged && !control.parameterschanged){

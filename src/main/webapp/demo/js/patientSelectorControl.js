@@ -112,7 +112,7 @@ var filters = new Ext.ux.grid.GridFilters({
         }, {
             type: 'list',
             dataIndex: 'resistance',
-            options: ['NA','FALSE','PRIMARY-RESISTANCE','SENSITIVE']
+            options: ['NA','FALSE','PRIMARY-RESISTANCE']
         }]
     });
 
