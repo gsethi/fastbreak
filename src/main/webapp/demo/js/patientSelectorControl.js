@@ -1,11 +1,12 @@
 var PatientSelectorControl = Class.create({
-    initialize: function(container,workspaceUri){
-        this.container = $(container);
+
+    initialize: function(workspaceUri,loadedcallback,selpatientscallback){
+        this.patientGrid = null;
+        this.loadedCallback = loadedcallback;
+        this.selpatientsCallback = selpatientscallback;
         this.workspaceUri = workspaceUri;
-        this.selectedPatients = new Array();
-        this.selectionListeners = new Array();
-        this.patients = new Array();
         this.loadPatients();
+        this.selectedPatients = new Array();
 
     },
 
@@ -21,121 +22,190 @@ var PatientSelectorControl = Class.create({
                 }
                 control.loadControl();
             }
-        });      
+        });
     },
 
     loadControl: function(){
-         var control = this;
-        //go thru and put patient info into array
-                   var i=0;
-                    var patientsArray = new Array();
+        var control = this;
                     var newJson = [];
 
                     $A(control.patients).each(function(patient) {
-                        var patientArray = new Array();
-                        patientArray[0] = patient.id;
-                        patientArray[1] = "";
-                        patientArray[2] = "";
-                        patientArray[3] = patient;
-                        patientArray[4] = false;
-                        patientsArray[i]=patientArray;
-                        var patientJson = {"patientid": patient.id, "patient": patient, "sampleclassification": '', "sampleid": '', "expanded" : true, "text": patient.id, "checked": true, "children":[]};
-
-                        i++;
-                        if (patient.samples) {
-                            var samples = patient.samples;
-                            $A(samples).each(function(sample) {
-                                patientArray = new Array();
-                                patientArray[0]=patient.id;
-                                patientArray[1] = sample.id;
-                                patientArray[2] = sample.classification;
-                                patientArray[3] = "";
-                                patientsArray[i]=patientArray;
-                                var sampleJson = {"patientid": '', "patient": {}, "sampleclassification": sample.classification, "sampleid": sample.id, "leaf": true};
-                                patientJson.children[patientJson.children.length] = sampleJson;
-
-                                i++;
-
-                            });
-                        }
+                        var patientJson = {"patientid": patient.id, "patientclassification": patient.classification, "status": patient.status, "resistance": patient.resistance, "patient": patient};
 
                          newJson[newJson.length] = patientJson;
 
                     });
 
+        var rootJson = {"data":newJson};
+
+        var patientReader = new Ext.data.JsonReader({
+               idProperty: 'patientid',
+               root: 'data',
+               fields: [{
+                   name: 'patientid'
+               }, {
+                   name: 'patientclassification'
+               },  {
+                   name: 'status'
+               },  {
+                   name: 'resistance'
+               }, {
+                   name: 'patient'
+               }]
+        });
+
+        var groupingstore = new Ext.data.GroupingStore({
+            reader: patientReader,
+            data: rootJson,
+            sortInfo: {
+                   field: 'patientid',
+                   direction: 'ASC'
+            },
+            groupField: 'patientclassification'
+        });
+
+        //initialize the store now that we have the json
+        var patientstore = new Ext.data.JsonStore({
+               // store configs
+               autoDestroy: true,
+               data: rootJson,
+               remoteSort: false,
+               sortInfo: {
+                   field: 'patientid',
+                   direction: 'ASC'
+               },
+               storeId: 'patientStore',
+               // reader configs
+               idProperty: 'patientid',
+               root: 'data',
+               fields: [{
+                   name: 'patientid'
+               }, {
+                   name: 'patientclassification'
+               },  {
+                   name: 'status'
+               },  {
+                   name: 'resistance'
+               }, {
+                   name: 'patient'
+               }]
+           });
 
 
-         var tree2 = new Ext.ux.tree.TreeGrid({
-width: 500,
-height: 300,
-             itemId: 'patientGrid',
-renderTo: $('container_tree'),
-enableDD: true,
-columns:[{
-header: 'Patient',
-dataIndex: 'patientid',
-width: 200
-},{
-header: 'Sample Id',
-dataIndex: 'sampleid',
-width: 300
-},{
-header: 'Sample Classification',
-width: 100,
-dataIndex: 'sampleclassification'
-}]
-});
 
 
+var filters = new Ext.ux.grid.GridFilters({
+        // encode and local configuration options defined previously for easier reuse
+        encode: false, // json encode the filter query
+        local: true,   // defaults to false (remote filtering)
+        filters: [{
+            type: 'string',
+            dataIndex: 'patientid'
+        },  {
+            type: 'list',
+            dataIndex: 'patientclassification',
+            options: ['OVARIAN','GBM']
+        }, {
+            type: 'list',
+            dataIndex: 'status',
+            options: ['NA','DECEASED','LIVING']
+        }, {
+            type: 'list',
+            dataIndex: 'resistance',
+            options: ['NA','FALSE','PRIMARY-RESISTANCE','SENSITIVE']
+        }]
+    });
 
 
-var root = new Ext.tree.AsyncTreeNode({text:'patienttree',draggable:false,id:'source',children: newJson});
-
-tree2.setRootNode(root);
-tree2.render();
-root.expand(false, false);
-     //   loadPatientTree(control.workspaceUri,$('container_tree'),function(){});
-        var fpPatients = new Ext.FormPanel({
-                    frame: true,
-                    layout: 'fit',
-                    buttonAlign: 'center',
-                    items: tree2,
-                    renderTo: $(control.container),
-                    buttons: [{
-                        text: 'Submit',
-                        handler: function(){
-                            if(fpPatients.getForm().isValid())
-                            {
-                                control.selectedPatients = new Array();
-                                fpPatients.getComponent('patientGrid').getChecked().each(function(rec){
-                                    control.selectedPatients[control.selectedPatients.length] = rec.attributes.patient;
-
-                                });
-
-                              control.publishPatientSelection(control.selectedPatients);
-
-                            }
-                        }
-                    }]
+// use a factory method to reduce code while demonstrating
+        // that the GridFilter plugin may be configured with or without
+        // the filter types (the filters may be specified on the column model
+        var sm = new Ext.grid.CheckboxSelectionModel({
+            listeners: {
+            'rowselect': function(sm, rowIndex,record){
+                selectedItems = sm.getSelections();
+                control.selectedPatients = new Array();
+                $A(selectedItems).each(function(item){
+                    control.selectedPatients[control.selectedPatients.length]=item.json.patient;
                 });
+                control.selpatientsCallback(control.selectedPatients);
+            },
+            'rowdeselect': function(sm,rowIndex,record){
+                selectedItems = sm.getSelections();
+                control.selectedPatients = new Array();
+                $A(selectedItems).each(function(item){
+                    control.selectedPatients[control.selectedPatients.length]=item.json.patient;
+                });
+                control.selpatientsCallback(control.selectedPatients);
+                
+            }
+        }
+        });
+        var createColModel = function (finish, start) {
+
+            var columns = [
+                sm,
+                {
+                dataIndex: 'patientid',
+                header: 'Patient Id',
+                // instead of specifying filter config just specify filterable=true
+                // to use store's field's type property (if type property not
+                // explicitly specified in store config it will be 'auto' which
+                // GridFilters will assume to be 'StringFilter'
+                filterable: true,
+                width: 200
+                //,filter: {type: 'numeric'}
+            },  {
+                dataIndex: 'patientclassification',
+                header: 'Patient Classification',
+                filterable: true,
+                width: 150
+            },  {
+                dataIndex: 'status',
+                header: 'Status',
+                filter: {
+                    type: 'list',
+                    options: ['NA','LIVING','DECEASED']
+                },
+                width: 150
+            },  {
+                dataIndex: 'resistance',
+                header: 'Resistance',
+                filterable: true,
+                width: 150
+            }];
+
+            return new Ext.grid.ColumnModel({
+                columns: columns.slice(start || 0, finish),
+                defaults: {
+                    sortable: true,
+                    width: 120
+                }
+            });
+        };
+
+         control.patientGrid = new Ext.grid.GridPanel({
+        border: true,
+        store: groupingstore,
+        colModel: createColModel(5),
+             columnLines: true,
+             sm: sm,
+             frame: true,
+             iconCls:'icon-grid',
+             stripeRows: true,
+             height: 400,
+             width: 700,
+             title: 'Patients',
+        loadMask: true,
+        view: new Ext.grid.GroupingView({
+            forceFit: true,
+            groupTextTpl: '{text} ({[values.rs.length]} {[values.rs.length > 1 ? "Items" : "Item"]})'
+        }),
+        plugins: [filters]
+    });
 
 
-    },
+        control.loadedCallback();
 
-
-    addSelectionListener: function(listener){
-             this.selectionListeners[this.selectionListeners.length] = listener;
-    },
-
-    publishPatientSelection: function(patients){
-        this.selectionListeners.each(function(listener){
-            listener.onPatientSelection(patients);
-        })
-    },
-
-    publishPatientsLoaded: function(){
-        this.selectionListeners.each(function(listener){
-            listener.onPatientsLoaded();
-        })
     }
 })

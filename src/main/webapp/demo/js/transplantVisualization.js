@@ -31,6 +31,11 @@ var TransplantParameters = Class.create({
                     store: breakpointdata,
                     forceSelection: true,
                     triggerAction: 'all',
+//                    listeners:{
+//                        'afterrender': function(item){
+//
+//                        }
+//                    }
                     selectOnFocus: true,
                     ref: '../breakwidth',
                     autoSelect: true
@@ -140,41 +145,47 @@ var TransplantParameters = Class.create({
 
 
 var TransplantVisualization = Class.create({
-    initialize: function(container, refgenUri, coverageDatasourceUri){
+    initialize: function(container, refgenUri, coverageDatasourceUri,chromRangeUri){
         this.container = $(container);
         this.refgenUri = refgenUri;
         this.coverageDatasourceUri = coverageDatasourceUri;
-        var html = "<p><b>Patients and a chromosome range must be selected before visualizations can be shown</b></p>";
-        this.container.innerHTML =html;
         this.advParameters = new TransplantParameters();
         this.patients = new Array();
-        this.chromosomeRange = '';
+        this.chromosomeRange = chromRangeUri;
+        this.parameterschanged = false;
+        this.patientchanged = false;
+        this.rangechanged = false;
+        this.transplants=[];
+        this.locationhistory=[];
+       
 
     },
 
     onPatientSelection: function(patientArray){
         var control = this;
         control.patients = patientArray;
-
-        if(patientArray.length > 0 && control.chromosomeRange != '')
-        {
-            control.loadVisualizationForSelectedPatients();
-        }
+        control.patientchanged = true;
+      //  if(patientArray.length > 0 && control.chromosomeRange != '')
+      //  {
+      //      control.loadVisualizationForSelectedPatients();
+      //  }
     },
 
     onRangeSelection: function(chromRangeUri){
         var control = this;
         control.chromosomeRange = chromRangeUri;
+        control.rangechanged = true;
 
-        if(control.patients.length > 0 && control.chromosomeRange != '')
-        {
-            control.loadVisualizationForSelectedPatients();
-        }
+       // if(control.patients.length > 0 && control.chromosomeRange != '')
+      //  {
+       //     control.loadVisualizationForSelectedPatients();
+      //  }
     },
 
     onParameterSelection: function(parameters){
         var control = this;
         control.advParameters = parameters;
+        control.parameterschanged = true;
         control.loadVisualizationForSelectedPatients();
     },
 
@@ -186,8 +197,19 @@ var TransplantVisualization = Class.create({
 
 
     loadVisualizationForSelectedPatients: function () {
-           Ext.Msg.alert('Status','Visualization requested submitted');
-          var control = this;
+        var control = this;
+        if(control.patients.length == 0 || control.chromosomeRange == '')
+        {
+            control.container.innerHTML=<p><b>A chromosome range and set of patients must be selected to view visualizations.</b></p>;
+            return;
+        }
+        if(!control.rangechanged && !control.patientchanged && !control.parameterschanged){
+            return;
+        }
+
+        //reloading the visualization, reset the array of visualizations
+        control.transplants=[];
+    
     var compAN = function (a,b)
     {
            a= a.toLowerCase();
@@ -205,7 +227,7 @@ var TransplantVisualization = Class.create({
        }
     control.patients = control.patients.sort(sortpatientorsample);
 
-    var html = "<p align=\"right\"><a href=\"#\" onClick=loadVisualizationParameters()>Advanced Parameters</a></p><div id='legenddiv'></div></br>";
+    var html = "";
     var transplantws = "/addama/tools/breakpoint";
 
         var rangeItems = control.chromosomeRange.split("/");
@@ -220,17 +242,17 @@ var TransplantVisualization = Class.create({
         for(var i=0;i<p.samples.length; i++)
         {
             var s = p.samples[i];
-            html+="<td>"+s.id+" "+s.classification+"<br/><div id='" + s.id +"div'></div></td>";
+            html+="<td class='outlined'>"+s.id+" "+s.classification+"<br/><div id='" + s.id +"div'></div></td>";
             var filters = JSON.stringify(control.getfilters());
             //var query = new google.visualization.Query(transplantws+'?key='+apiKey+'&filters='+filters+'&chr='+document.getElementById('chr').value+'&start='+document.getElementById('start').value+'&end='+document.getElementById('end').value+'&depth='+document.getElementById('depth').value+'&radius='+document.getElementById('radius').value+'&file='+s.pickleFile);
             var query = new google.visualization.Query(transplantws+'?chr='+chr+'&start='+start+'&end='+end+'&depth=' + control.advParameters.branchdepth + '&radius=' + control.advParameters.radius + '&file='+s.pickleFile);
-            query.send(control.getVisResponseHandler(s.id,s.file,transplantws,control.refgenUri,control.coverageDatasourceUri));
+            query.send(control.getVisResponseHandler(s.id,s.pickleFile,transplantws,control.refgenUri,control.coverageDatasourceUri));
         }
         html +="</tr></table>";
         //html += "<div>" + Ext.encode(p) + "</div>";
     });
     control.container.innerHTML=html;
-        org.systemsbiology.visualization.transplant.colorkey(org.systemsbiology.visualization.transplant.chrmcolors.human,document.getElementById('legenddiv'));
+   // org.systemsbiology.visualization.transplant.colorkey(org.systemsbiology.visualization.transplant.chrmcolors.human,document.getElementById('legenddiv'));
 },
 
 getVisResponseHandler: function(id,file,transplantws,genedatasource,trackds)
@@ -255,10 +277,10 @@ visResponseHandler: function(response,id,file,transplantws,genedatasource,trackd
         var chr = rangeItems[0];
         var start = rangeItems[1];
         var end = rangeItems[2];
-        //transplants.push(vis);
+        control.transplants.push(vis);
 
-        //google.visualization.events.addListener(vis, "select", getSelectionHandler(vis) );
-        //google.visualization.events.addListener(vis, "recenter", getRecenterListener(vis) );
+        google.visualization.events.addListener(vis, 'select', control.getSelectionHandler(vis) );
+        google.visualization.events.addListener(vis, 'recenter', control.getRecenterListener(vis) );
         var filters = control.getfilters();
         vis.draw(data,{
             trackds:trackds,
@@ -273,6 +295,44 @@ visResponseHandler: function(response,id,file,transplantws,genedatasource,trackd
             dataservice:transplantws+"?file="+file,
             refgenomeUri: control.refgenUri
         });
+},
+
+getRecenterListener: function(vis)
+{
+    var control = this;
+	return function (loc) {
+	//	log("recenter event");
+		control.locationhistory.push(loc);
+	//	document.getElementById('chr').value = loc.chr;
+	//	document.getElementById('start').value = loc.start;
+	//	document.getElementById('end').value = loc.end;
+        control.onRangeSelection(loc.chr + '/' + loc.start + '/' + loc.end);
+		for(var i in control.transplants)
+		{
+			if(control.transplants[i]!=vis)
+				control.transplants[i].recenteronlocation(loc.chr,loc.start,loc.end);
+		}
+	}
+
+},
+
+getSelectionHandler: function(vis)
+{
+    var control = this;
+	return function () {
+		//log("selection event");
+		var loc = vis.recenteronrow(vis.getSelection());
+		control.locationhistory.push(loc);
+	//	document.getElementById('start').value = loc.start;
+	//	document.getElementById('end').value = loc.end;
+        control.onRangeSelection(loc.chr + '/' + loc.start + '/' + loc.end);
+		for(var i in control.transplants)
+		{
+			if(control.transplants[i]!=vis)
+				control.transplants[i].recenteronlocation(loc.chr,loc.start,loc.end);
+		}
+	}
+
 },
 
 getfilters: function(){
