@@ -7,6 +7,7 @@ if(!org) {
         org.systemsbiology.visualization = {};
 }
 
+
 org.systemsbiology.visualization.transplant = function(container) {
 	this.containerElement = container;
 	this.logbase = .5;//Math.log(10);
@@ -804,9 +805,10 @@ org.systemsbiology.visualization.transplant.prototype.handleChromosomeRangeItems
   	for (var i = 0; i < this.chromosomeRangeUris.length; i++) {
         var chromUri = this.chromosomeRangeUris[i];
 
-        new Ajax.Request(chromUri + "/genes", {
-            method: "get",
-            onSuccess: function(o) {
+//        new Ajax.Request(chromUri + "/genes", {
+//            method: "get",
+//            onSuccess: function(o) {
+          geneRequestPool.request(chromUri, function(o){
                 var json = o.responseJSON;
                 if (json && json.items) {
                     for (var it = 0; it < json.items.length; it++) {
@@ -825,12 +827,14 @@ org.systemsbiology.visualization.transplant.prototype.handleChromosomeRangeItems
                         me.chrs[chromosome].decorations[name]=geneObj;
                     }
                 }
-            },
-            onComplete: function(o) {
                 me.genesloading--;
                 me.decorateTree();
-            }
-        });
+            })
+//            onComplete: function(o) {
+//                me.genesloading--;
+//                me.decorateTree();
+//            }
+//        });
     }
 };
 
@@ -1052,4 +1056,21 @@ org.systemsbiology.visualization.transplant.chrmcolors={
 	}
 }
 
+var geneRequestPool = {};
 
+geneRequestPool.requestMap = {};
+geneRequestPool.request = function(uri,callback) {
+    if (geneRequestPool.requestMap[uri] != undefined) {
+        callback(geneRequestPool.requestMap[uri]);
+    }
+    else{
+        new Ajax.Request(uri + "/genes", {
+            method: "get",
+            onSuccess: function(o) {
+                geneRequestPool.requestMap[uri] = o;
+                callback(o);
+            }
+
+        })
+    }
+};
