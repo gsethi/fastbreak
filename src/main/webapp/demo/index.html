@@ -1,14 +1,412 @@
 <html>
     <head>
-        <title>Welcome to...</title>
+        <title>Transplant Visualization</title>
+        <style type="text/css">
+        body {
+        font: 8pt helvetica neue;
+        color: #666;
+        }
+        td {
+        font: 8pt helvetica neue;
+        color: #666;
+        }
+        input {
+        font: 8pt helvetica neue;
+
+
+        }
+        .outlined {
+            color: #666;
+            border-color: #F5F5F5;
+            border-width: 2px 2px 2px 2px;
+            border-style: solid;
+            border-spacing: 0px;
+
+            }
+    </style>
+        <link rel="stylesheet" type="text/css" href="/addama/ui/ext-js-3.3.0/resources/css/ext-all.css">
+        <script type="text/javascript" language="javascript" src="/addama/ui/prototype.js"></script>
+        <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+        <script type="text/javascript">
+ google.load("prototype", "1.6.1.0");
+ google.load('visualization','1', {packages:['table']});
+</script>
+<script type="text/javascript" src="/addama/ui/protovis-1.0/protovis-r3.3.1.js"></script>
+<script type="text/javascript" src="/addama/ui/protovis-1.0/visdata.js"></script>
+<script type="text/javascript" src="/addama/ui/protovis-1.0/google-ds-utils.js"></script>
+<script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/utilities.js"></script>
+
+<script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/data_retrieval.js"></script>
+<script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/circvis.js"></script>
+
+        <script type="text/javascript" src="/addama/ui/ext-js-3.3.0/adapter/ext/ext-base.js"></script>
+        <script type="text/javascript" src="/addama/ui/ext-js-3.3.0/ext-all.js"></script>
+         <script type="text/javascript" src="/addama/ui/ext-js-3.3.0/examples/shared/examples.js"></script>
+        <script type="text/javascript" src="/addama/ui/ext-js-3.3.0/examples/ux/ux-all.js"></script>
+        <script type="text/javascript" src="/js/topbar.js"></script>
+        <script type="text/javascript" src="/addama/ui/refgenome/refgenome.js"></script>
+       <script type="text/javascript" language="javascript" src="/addama/ui/flexscroll/flexscroll.js"></script>
+         <script type="text/javascript" src="./js/chromosomeRangeControl.js"></script>
+            <script type="text/javascript" src="./js/transplantVisualization.js"></script>
+    <script type="text/javascript" src="./js/transplant.js"></script>
+        <script type="text/javascript" src="./js/patientSelectorControl.js"></script>
+             <script type="text/javascript">
+                Ext.BLANK_IMAGE_URL = '/addama/ui/ext-js-3.3.0/resources/images/default/s.gif';
+            </script>
+           <script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/wedge_plot.js"></script>
+        
+        <script type="text/javascript">
+            var centertabs = null;
+            var email = "";
+            var topBarPanel = null;
+            var topMenuPanel = null;
+            var currentRange = null;
+            var currentDataset = null;
+            var currentPatients = null;
+            var dataSetChangeListeners = new Array();
+            var patientSelector = null;
+            var visualizationControl = null;
+            var transplantParameters;
+            var selectedChromRangeUri;
+            var chromosomeRangeLoaded = false;
+            var workspacesLoaded=false;
+            var rangeControl=null;
+            var westPanel = null;
+            var viewPort = null;
+            var workspaceUri = "/addama/repositories/workspaces/informatics@systemsbiology.org/ov_gbm_dataset";
+
+            var tick_listener = function(chr,start,stop,label){
+                if(chr.indexOf("OV") > -1){
+                    chr=chr.substring(2,chr.length);
+                    datasettype="OV";
+                }
+                else if(chr.indexOf("GBM") > -1){
+                    chr=chr.substring(3,chr.length);
+                    datasettype="GBM";
+                }
+                else {
+                    datasettype="None";
+                }
+                
+                onRangeSelection("chr"+chr+"/"+start+"/"+stop);
+                onDatasetChange(datasettype);
+            };
+
+             Ext.onReady(function(){
+                 Ext.QuickTips.init();
+                 new TopBar().initialize("container_north", {});
+
+                 topBarPanel = new Ext.Panel({
+                     contentEl: $("container_north")
+
+                 });
+
+                 currentRange =  new Ext.Panel({
+                     flex: 2,
+                     padding: '5',
+                     autoScroll: true
+                 });
+
+                 currentPatients =  new Ext.Panel({
+                        flex:10,
+                     padding: '5',
+                     autoScroll: true
+                 });
+
+                 westPanel = new Ext.Panel({
+                                region: 'west',
+                                collapsible: true,
+                                expanded: true,
+                                collapseMode:'mini',
+                                width: 180,
+                                layout: {
+                                    type: 'vbox',
+                                    padding: '5',
+                                    align: 'stretch'
+                                },
+                                autoScroll: true,
+                                items: [currentRange,currentPatients]
+                 });
+
+
+                 rangeControl = new ChromosomeRangeControl("container_rangeControl","/addama/refgenome/hg18","chr22",0,51304566,29576000,750000);
+
+                 rangeControl.addSelectionListener(this);
+
+                 circvisPanel = new Ext.Panel({
+                                    contentEl: $("chromovis_ov_div"),
+                                    autoScroll: true,
+                                    anchor: '100%'
+                                 });
+
+                 circvisCombo = new Ext.form.ComboBox({
+                     fieldLabel: 'Datatype',
+                     displayField: 'name',
+                     mode: 'local',
+                     forceSelection: true,
+                     triggerAction: 'all',
+                     hiddenName: 'value',
+                     valueField: 'value',
+                     store: new Ext.data.JsonStore({
+                         fields: ['name', 'value'],
+                         data: [
+                             {name : 'OV vs. GBM', value: 'ov_gbm'},
+                             {name : 'OV', value: 'ov'},
+                             {name : 'GBM', value: 'gbm'}
+                         ]
+                     }),
+                     listeners:{
+                         'select': this.onCircvisTypeSelected
+                     },
+                     flex: 1,
+                     editable: false,
+                     align: 'left',
+                     anchor: '25%'
+                 });
+
+                 circvisCombo.setValue('OV vs. GBM');
+                 
+                 circvisTab = new Ext.form.FormPanel({
+                     title: 'Circvis Selector',
+                     id: 'circvistab',
+                     padding: '5 5 5 5',
+                     labelWidth: 55,
+                     items: [circvisCombo,circvisPanel],
+                     autoScroll: true
+                 });
+
+
+                 chromSelectionTab = new Ext.Panel({
+                    title: 'Chromosome Location Selector',
+                    items: []
+                 });
+
+                 patientSelectionTab = new Ext.Panel({
+                    title: 'Patient Selector',
+                     layout: 'fit'
+                 });
+
+                 visualizationTab = new Ext.Panel({
+                    title: 'Visualizations',
+                     id: 'viztab',
+                     layout: {
+                         type: 'vbox',
+                         padding: '5',
+                         align: 'stretch'
+                     },
+                     items: [],
+                     autoScroll: true
+                 });
+
+
+
+                 centertabs = new Ext.TabPanel({
+                    resizeTabs:true, // turn on tab resizing
+                    minTabWidth: 220,
+                    enableTabScroll:true,
+                    activeTab:0,
+                    autoScroll:false,
+                     height: 800,
+                    items:[circvisTab,chromSelectionTab,patientSelectionTab,visualizationTab],
+                    listeners: {
+                        'tabchange': function(tp,newtab){
+                            if(newtab.id == 'viztab'){
+                                visualizationControl.loadVisualizationForSelectedPatients();
+                                 visualizationControlPanel = new Ext.Panel({
+                                    contentEl: $("container_visualization"),
+                                    autoScroll: true,
+                                    flex: 15
+                                 });
+                                $("container_visheader").innerHTML = "<p align=\"right\"><a href=\"#\" onClick=loadVisualizationParameters()>Advanced Parameters</a></p><div align='center' id='legenddiv'></div>";
+                                org.systemsbiology.visualization.transplant.colorkey(org.systemsbiology.visualization.transplant.chrmcolors.human,document.getElementById('legenddiv'));
+                                visHeaderControlPanel = new Ext.Panel({
+                                    contentEl: $("container_visheader"),
+                                    autoScroll: false,
+                                    flex: 1
+                                });
+                                visualizationTab.removeAll();
+                                visualizationTab.add(visHeaderControlPanel);
+                                visualizationTab.add(visualizationControlPanel);
+                                centertabs.doLayout();
+                            }
+                        }
+                    }
+
+                });
+
+                 new Ajax.Request("/addama/users/whoami", {
+                    method: "get",
+                    onSuccess: function(o) {
+                        var json = o.responseJSON;
+                        if (json && json.email) {
+                            email = json.email;
+                            
+                            
+                        } else {
+                            showError("Authentication", "User is not logged in");
+                        }
+                    }
+                });
+
+                patientSelectorControl = new PatientSelectorControl(workspaceUri,onPatientSelectorLoaded,onPatientSelectionChange);
+                visualizationControl = new TransplantVisualization("container_visualization","/addama/refgenome/hg18",workspaceUri +"/track.tsv",selectedChromRangeUri);
+                transplantParameters = new TransplantParameters();
+                transplantParameters.addListener(visualizationControl);
+
+                onCircvisTypeSelected(circvisCombo,circvisCombo.store.data.items[0],0);
+
+                loadPage();
+
+      });
+
+
+    //function called when data load for circvis is complete
+    function onLoadDataComplete() {
+        $('chromovis_ov_div').innerHTML="";
+        wedge_plot($('chromovis_ov_div'));
+        if(viewPort != null){
+	        viewPort.doLayout();
+	    }
+    }
+
+    function onLoadOVGBMDataComplete() {
+        $('chromovis_ov_div').innerHTML="";
+        wedge_plot_ov_gbm($('chromovis_ov_div'));
+        if(viewPort != null){
+	        viewPort.doLayout();
+	    }
+    }
+
+    function onCircvisTypeSelected(combo, record, index){
+        if(record.json.value == 'ov_gbm'){
+            loadDataOVGBM(onLoadOVGBMDataComplete,500,0);
+        }
+        else{
+            loadData(onLoadDataComplete,record.json.value,500,0);
+        }
+
+    }
+
+    function onDatasetChange(datasettype){
+
+        //TODO: should potentially sort by this datatype in patient selector....
+
+    }
+
+    function onPatientSelectionChange(patientItems){
+        var patienthtml="<ul>Selected Patients";
+           $A(patientItems).each(function(item){
+               patienthtml = patienthtml + "<li>" + item.id + "</li>";
+           });
+
+        patienthtml = patienthtml + "</ul>";
+
+        currentPatients.html = patienthtml;
+        
+        if(currentPatients.getEl() != null)
+          Ext.fly(currentPatients.body).update(patienthtml);
+
+        visualizationControl.onPatientSelection(patientItems);
+
+    }
+
+    function onPatientSelectorLoaded(){
+        patientSelectionTab.removeAll();
+        patientSelectionTab.add(patientSelectorControl.patientGrid);
+        centertabs.doLayout();
+    }
+
+
+    function onRangeSelection(chromRangeUri){
+        var firstindex = chromRangeUri.indexOf("/");
+        var secondindex = chromRangeUri.lastIndexOf("/");
+        var chrom = chromRangeUri.substring(0,firstindex);
+        var startpos = chromRangeUri.substring(firstindex+1,secondindex);
+        var endpos = chromRangeUri.substring(secondindex+1,chromRangeUri.length);
+        if(currentRange.getEl() == null){
+            currentRange.html =  "<ul>Current Range:<li>" + chrom + ":" + formatNumber(startpos) + "-" + formatNumber(endpos) + "</li></ul>";
+        }
+        else{
+          Ext.fly(currentRange.body).update( "<ul>Current Range:<li>" + chrom + ":" + formatNumber(startpos) + "-" + formatNumber(endpos) + "</li></ul>");
+
+        }
+
+        if(visualizationControl != null)
+            visualizationControl.onRangeSelection(chromRangeUri);
+
+        selectedChromRangeUri = chromRangeUri;
+
+    }
+
+    function onChromosomeRangeLoaded(){
+        chromosomeRangeLoaded=true;
+        chromSelectionTab.removeAll();
+        chromSelectionTab.add(rangeControl.radioPanel);
+    }
+
+
+            
+    function loadPage( ){
+
+     topPanel = new Ext.Panel({
+        region: 'north',
+         height: 26,
+         items:[topBarPanel]
+     });
+
+    viewPort = new Ext.Viewport({
+        layout: 'border',
+        renderTo: Ext.getBody(),
+        items: [    topPanel
+        ,westPanel,
+            {
+            region: 'center',
+            padding:5,
+            border:true,
+            items: centertabs
+        }]
+});
+
+
+}
+            function showError(title, msg) {
+                Ext.MessageBox.show({
+                   title: title,
+                   msg: msg,
+                   buttons: Ext.MessageBox.OK,
+                   icon: Ext.MessageBox.ERROR
+               });
+            }
+
+            function formatNumber(number) {
+            number = '' + number;
+            if (number.length > 3) {
+            var mod = number.length % 3;
+            var output = (mod > 0 ? (number.substring(0,mod)) : '');
+            for (i=0 ; i < Math.floor(number.length / 3); i++) {
+            if ((mod == 0) && (i == 0))
+            output += number.substring(mod+ 3 * i, mod + 3 * i + 3);
+            else
+            output+= ',' + number.substring(mod + 3 * i, mod + 3 * i + 3);
+            }
+            return (output);
+            }
+            else return number;
+            }
+
+        function loadVisualizationParameters(){
+            transplantParameters.show();
+        }
+
+        </script>
     </head>
     <body>
-        <h3>Welcome to ...</h3>
-        <div>Description of service</div>
-
-        <hr/>
-        <h3>Getting Started</h3>
-        <a href="import.html">Import Patient Data</a>
+    <div id="container_top"></div>
+            <div hidden='true' id="container_north"></div>
+            <div align='center' hidden='true' id="container_rangeControl"></div>
+            <div align='center' hidden='true' id="container_visheader"></div>
+            <div  hidden='true' id="container_visualization"></div>
+            <div id="chromovis_ov_div"></div>
 
     </body>
 </html>
