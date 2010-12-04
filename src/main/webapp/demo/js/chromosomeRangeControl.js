@@ -73,6 +73,7 @@ var ChromosomeRangeControl = Class.create({
         control.radioPanel = new Ext.form.FormPanel({
             height: 150,
             padding: '5 5 5 5',
+            autoShow: true,
             items: [{
                 xtype: 'fieldset',
                 align: 'center',
