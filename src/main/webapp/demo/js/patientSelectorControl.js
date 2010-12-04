@@ -205,6 +205,7 @@ var filters = new Ext.ux.grid.GridFilters({
     });
 
 
+
         control.loadedCallback();
 
     }
