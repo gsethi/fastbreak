@@ -73,6 +73,7 @@
             var rangeControl=null;
             var westPanel = null;
             var viewPort = null;
+            var loadMask = null;
             var workspaceUri = "/addama/repositories/workspaces/informatics@systemsbiology.org/ov_gbm_dataset";
 
             var tick_listener = function(chr,start,stop,label){
@@ -102,93 +103,123 @@
                  });
 
                  currentRange =  new Ext.Panel({
+                     title: 'Current Selections',
                      flex: 2,
                      padding: '5',
                      autoScroll: true
                  });
 
-                 currentPatients =  new Ext.Panel({
-                        flex:10,
+                 geneSearchPanel = new Ext.Panel({
+                     title: 'Gene Search',
+                     flex: 5,
                      padding: '5',
-                     autoScroll: true
+                     autoScroll:true
+
                  });
-
-                 westPanel = new Ext.Panel({
-                                region: 'west',
-                                collapsible: true,
-                                expanded: true,
-                                collapseMode:'mini',
-                                width: 180,
-                                layout: {
-                                    type: 'vbox',
-                                    padding: '5',
-                                    align: 'stretch'
-                                },
-                                autoScroll: true,
-                                items: [currentRange,currentPatients]
-                 });
-
-
+                 
                  rangeControl = new ChromosomeRangeControl("container_rangeControl","/addama/refgenome/hg18","chr22",0,51304566,29576000,750000);
 
                  rangeControl.addSelectionListener(this);
 
-                 circvisPanel = new Ext.Panel({
+                 circvis_ov = new Ext.Panel({
                                     contentEl: $("chromovis_ov_div"),
                                     autoScroll: true,
                                     anchor: '100%'
                                  });
 
-                 circvisCombo = new Ext.form.ComboBox({
-                     fieldLabel: 'Datatype',
-                     displayField: 'name',
-                     mode: 'local',
-                     forceSelection: true,
-                     triggerAction: 'all',
-                     hiddenName: 'value',
-                     valueField: 'value',
-                     store: new Ext.data.JsonStore({
-                         fields: ['name', 'value'],
-                         data: [
-                             {name : 'OV vs. GBM', value: 'ov_gbm'},
-                             {name : 'OV', value: 'ov'},
-                             {name : 'GBM', value: 'gbm'}
-                         ]
-                     }),
-                     listeners:{
-                         'select': this.onCircvisTypeSelected
-                     },
-                     flex: 1,
-                     editable: false,
-                     align: 'left',
-                     anchor: '25%'
+                                  circvis_gbm = new Ext.Panel({
+                                    contentEl: $("chromovis_gbm_div"),
+                                    autoScroll: true,
+                                    anchor: '100%'
+                                 });
+
+                                  circvis_ov_gbm = new Ext.Panel({
+                                    contentEl: $("chromovis_ov_gbm_div"),
+                                    autoScroll: true,
+                                    anchor: '100%'
+                                 });
+
+
+                 var comparatorButton = new Ext.Button({
+                      id: 'comparatorButton',
+                      text: 'Table View',
+                      handler: onItemToggle
+
                  });
 
-                 circvisCombo.setValue('OV vs. GBM');
-                 
-                 circvisTab = new Ext.form.FormPanel({
-                     title: 'Circvis Selector',
-                     id: 'circvistab',
+                 comparatorPanel = new Ext.form.FormPanel({
+                     title: 'Cancer Comparator',
+                     id: 'comparator-panel',
                      padding: '5 5 5 5',
-                     labelWidth: 55,
-                     items: [circvisCombo,circvisPanel],
-                     autoScroll: true
+                     items: [comparatorButton,circvis_ov_gbm],
+                     autoScroll: true,
+                     tools: [{
+                         id: 'help',
+                         handler: function(event, toolEl, panel){
+                             //
+                         }
+                     }]
+                 });
+
+                  ovPanel = new Ext.Panel({
+                     title: 'OV Gene Disruption',
+                     id: 'ov-panel',
+                     padding: '5 5 5 5',
+                     items: [circvis_ov],
+                     autoScroll: true,
+                     tools: [{
+                         id: 'help',
+                         handler: function(event, toolEl, panel){
+                             //
+                         }
+                         
+                     }]
+                 });
+
+                  gbmPanel = new Ext.Panel({
+                     title: 'GBM Gene Disruption',
+                     id: 'gbm-panel',
+                     padding: '5 5 5 5',
+                     items: [circvis_gbm],
+                     autoScroll: true,
+                                           tools: [{
+                         id: 'help',
+                         handler: function(event, toolEl, panel){
+                             //
+                         }
+
+                     }]
                  });
 
 
-                 chromSelectionTab = new Ext.Panel({
-                    title: 'Chromosome Location Selector',
-                    items: []
+                 chromSelectionPanel = new Ext.Panel({
+                    title: 'Chromosome Range',
+                    region: 'north',
+                     layout: 'fit',
+                    items: [],
+                     height: 150,
+                     collapsed: true,
+                     collapsible: true,
+                     animFloat: false,
+                           floatable: false
+
                  });
 
-                 patientSelectionTab = new Ext.Panel({
-                    title: 'Patient Selector',
-                     layout: 'fit'
+                 patientSelectionPanel = new Ext.Panel({
+                    title: 'Patients',
+                     layout: 'fit',
+                     region: 'south',
+                     height: 400,
+                     collapsible: true,
+                     collapsed: true,
+                     animFloat: false,
+                           floatable: false
+
                  });
 
-                 visualizationTab = new Ext.Panel({
-                    title: 'Visualizations',
-                     id: 'viztab',
+                 visualizationCenter = new Ext.Panel({
+                     region: 'center',
+                     collapsible: false,
                      layout: {
                          type: 'vbox',
                          padding: '5',
@@ -198,20 +229,110 @@
                      autoScroll: true
                  });
 
+                 visualizationPanel = new Ext.Panel({
+                       title: 'Fastbreak',
+                       id: 'fastbreak-panel',
+                       layout: 'border',
+                       defaults: {
+                           bodyStyle: 'padding:15px',
+                           animFloat: false,
+                           floatable: false
+
+                       },
+                       items: [chromSelectionPanel,visualizationCenter,patientSelectionPanel],
+                                          tools: [{
+                         id: 'help',
+                         handler: function(event, toolEl, panel){
+                             //
+                         }
+
+                     }]
+                 })
 
 
-                 centertabs = new Ext.TabPanel({
-                    resizeTabs:true, // turn on tab resizing
-                    minTabWidth: 220,
-                    enableTabScroll:true,
-                    activeTab:0,
-                    autoScroll:false,
+
+                 centerPanel = new Ext.Panel({
+                     id: 'center-panel',
+                    layout:'card',
+                    region: 'center',
+                     border:false,
+                     closable:false,
+                     activeItem:0,
                      height: 800,
-                    items:[circvisTab,chromSelectionTab,patientSelectionTab,visualizationTab],
-                    listeners: {
-                        'tabchange': function(tp,newtab){
-                            if(newtab.id == 'viztab'){
-                                visualizationControl.loadVisualizationForSelectedPatients();
+                     margins: '2 5 5 0',
+                    items:[{
+                        id:'homepage-panel',
+                        layout: 'fit',
+                        html:'This is the homepage!',
+                        title: 'Home'
+                    },comparatorPanel,ovPanel,gbmPanel,visualizationPanel]
+
+
+                });
+
+                  navigationPanel =  new Ext.tree.TreePanel({
+                     title: 'Navigation',
+                     rootVisible: false,
+                     lines: false,
+                     singleExpand: true,
+                     useArrows: true,
+                     flex:10,
+                     padding: '5',
+                     autoScroll: true,
+                        loader: new Ext.tree.TreeLoader(),
+                    root: new Ext.tree.AsyncTreeNode({
+                        expanded: true,
+                        children: [{
+                            text: 'Home Page',
+                            leaf: true,
+                            id: 'homepage'
+                         }, {
+                            text: 'Cancer Comparator',
+                            leaf: true,
+                            id: 'comparator'
+                        },{
+                            text: 'Gene Disruption',
+                            leaf: false,
+                            id: 'genedisruption',
+                            children: [{
+                                text: 'OV',
+                                leaf: true,
+                                id: 'ov'
+                            },{
+                                text: 'GBM',
+                                leaf: true,
+                                id: 'gbm'
+                            }]
+                        },{
+                            text: 'Fastbreak',
+                            leaf: true,
+                            id: 'fastbreak'
+                        }]
+                     })
+                 });
+
+                 westPanel = new Ext.Panel({
+                                region: 'west',
+                                collapsible: true,
+                                expanded: true,
+                                collapseMode:'mini',
+                                width: 180,
+                                split: true,
+                                layout: {
+                                    type: 'vbox',
+                                    padding: '5',
+                                    align: 'stretch'
+                                },
+                                autoScroll: true,
+                                items: [currentRange,navigationPanel,geneSearchPanel]
+                 });
+
+                 navigationPanel.on('click', function(n){
+    	var sn = this.selModel.selNode || {}; // selNode is null on initial selection
+    	if(n.leaf && n.id != sn.id){  // ignore clicks on folders and currently selected node
+    		Ext.getCmp('center-panel').layout.setActiveItem(n.id + '-panel');
+    		if(n.id == 'fastbreak'){
+                      visualizationControl.loadVisualizationForSelectedPatients();
                                  visualizationControlPanel = new Ext.Panel({
                                     contentEl: $("container_visualization"),
                                     autoScroll: true,
@@ -224,15 +345,22 @@
                                     autoScroll: false,
                                     flex: 1
                                 });
-                                visualizationTab.removeAll();
-                                visualizationTab.add(visHeaderControlPanel);
-                                visualizationTab.add(visualizationControlPanel);
-                                centertabs.doLayout();
-                            }
-                        }
-                    }
+                                visualizationCenter.removeAll();
+                                visualizationCenter.add(visHeaderControlPanel);
+                                visualizationCenter.add(visualizationControlPanel);
 
-                });
+            }
+            else if(n.id == 'comparator'){
+                onCircvisTypeSelected('ov_gbm');
+            }
+            else if(n.id == 'ov'){
+                onCircvisTypeSelected('ov');
+            }
+            else if(n.id == 'gbm'){
+                onCircvisTypeSelected('gbm');
+            }
+    	}
+    });
 
                  new Ajax.Request("/addama/users/whoami", {
                     method: "get",
@@ -253,37 +381,64 @@
                 transplantParameters = new TransplantParameters();
                 transplantParameters.addListener(visualizationControl);
 
-                onCircvisTypeSelected(circvisCombo,circvisCombo.store.data.items[0],0);
-
                 loadPage();
 
       });
 
+     function onItemToggle(item, pressed){
+         if(item.text == 'Table View'){
+                item.setText('Circvis View');
+         }
+         else
+            item.setText('Table View');
+                Ext.example.msg('Button Toggled', 'Button "{0}" was toggled to {1}.', item.text, pressed);
+     }
 
     //function called when data load for circvis is complete
-    function onLoadDataComplete() {
+    function onLoadGBMDataComplete() {
+        $('chromovis_gbm_div').innerHTML="";
+        wedge_plot($('chromovis_gbm_div'));
+          loadMask.hide();
+        if(viewPort != null){
+	        viewPort.doLayout();
+	    }
+    }
+
+     function onLoadOVDataComplete() {
         $('chromovis_ov_div').innerHTML="";
         wedge_plot($('chromovis_ov_div'));
+           loadMask.hide();
         if(viewPort != null){
 	        viewPort.doLayout();
 	    }
     }
 
     function onLoadOVGBMDataComplete() {
-        $('chromovis_ov_div').innerHTML="";
-        wedge_plot_ov_gbm($('chromovis_ov_div'));
+        $('chromovis_ov_gbm_div').innerHTML="";
+        wedge_plot_ov_gbm($('chromovis_ov_gbm_div'));
+                    loadMask.hide();
         if(viewPort != null){
 	        viewPort.doLayout();
 	    }
     }
 
-    function onCircvisTypeSelected(combo, record, index){
-        if(record.json.value == 'ov_gbm'){
+    function onCircvisTypeSelected(circvisType){
+        if(circvisType == 'ov_gbm' && $('chromovis_ov_gbm_div').innerHTML == ""){
+            loadMask = new Ext.LoadMask(comparatorPanel.getEl(), {msg:"Loading Circvis..."});
+            loadMask.show();
             loadDataOVGBM(onLoadOVGBMDataComplete,500,0);
         }
-        else{
-            loadData(onLoadDataComplete,record.json.value,500,0);
+        else if(circvisType == 'gbm' && $('chromovis_gbm_div').innerHTML == ""){
+            loadMask = new Ext.LoadMask(gbmPanel.getEl(), {msg:"Loading Circvis..."});
+            loadMask.show();
+            loadData(onLoadGBMDataComplete,circvisType,500,0);
         }
+        else if(circvisType == 'ov' && $('chromovis_ov_div').innerHTML == ""){
+            loadMask = new Ext.LoadMask(ovPanel.getEl(), {msg:"Loading Circvis..."});
+            loadMask.show();
+            loadData(onLoadOVDataComplete, circvisType,500,0);
+        }
+
 
     }
 
@@ -301,19 +456,13 @@
 
         patienthtml = patienthtml + "</ul>";
 
-        currentPatients.html = patienthtml;
-        
-        if(currentPatients.getEl() != null)
-          Ext.fly(currentPatients.body).update(patienthtml);
-
         visualizationControl.onPatientSelection(patientItems);
 
     }
 
     function onPatientSelectorLoaded(){
-        patientSelectionTab.removeAll();
-        patientSelectionTab.add(patientSelectorControl.patientGrid);
-        centertabs.doLayout();
+        patientSelectionPanel.removeAll();
+        patientSelectionPanel.add(patientSelectorControl.patientGrid);
     }
 
 
@@ -325,6 +474,8 @@
         var endpos = chromRangeUri.substring(secondindex+1,chromRangeUri.length);
         if(currentRange.getEl() == null){
             currentRange.html =  "<ul>Current Range:<li>" + chrom + ":" + formatNumber(startpos) + "-" + formatNumber(endpos) + "</li></ul>";
+            if(viewPort != null)
+                viewPort.doLayout();
         }
         else{
           Ext.fly(currentRange.body).update( "<ul>Current Range:<li>" + chrom + ":" + formatNumber(startpos) + "-" + formatNumber(endpos) + "</li></ul>");
@@ -340,8 +491,8 @@
 
     function onChromosomeRangeLoaded(){
         chromosomeRangeLoaded=true;
-        chromSelectionTab.removeAll();
-        chromSelectionTab.add(rangeControl.radioPanel);
+        chromSelectionPanel.removeAll();
+        chromSelectionPanel.add(rangeControl.radioPanel);
     }
 
 
@@ -358,13 +509,7 @@
         layout: 'border',
         renderTo: Ext.getBody(),
         items: [    topPanel
-        ,westPanel,
-            {
-            region: 'center',
-            padding:5,
-            border:true,
-            items: centertabs
-        }]
+        ,westPanel,centerPanel]
 });
 
 
@@ -403,10 +548,12 @@
     <body>
     <div id="container_top"></div>
             <div hidden='true' id="container_north"></div>
-            <div align='center' hidden='true' id="container_rangeControl"></div>
-            <div align='center' hidden='true' id="container_visheader"></div>
+            <div align='center' class="x-hidden" id="container_rangeControl"></div>
+            <div align='center'  id="container_visheader"></div>
             <div  hidden='true' id="container_visualization"></div>
             <div id="chromovis_ov_div"></div>
+            <div id="chromovis_gbm_div"></div>
+            <div id="chromovis_ov_gbm_div"></div>
 
     </body>
 </html>
