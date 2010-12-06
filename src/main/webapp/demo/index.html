@@ -12,8 +12,9 @@
         }
         input {
         font: 8pt helvetica neue;
-
-
+        }
+        .chr_range {
+            font: 10pt;
         }
         .outlined {
             color: #666;
@@ -89,7 +90,7 @@
                     datasettype="None";
                 }
                 
-                onRangeSelection(chr,start,stop);
+                onRangeSelection(chr,start,stop,label);
                 onDatasetChange(datasettype);
             };
 
@@ -111,29 +112,28 @@
                      items:[{
                          layout:'column',
                          items:[{
-                             columnWidth: 0.8,
+                             columnWidth: 0.95,
                              layout:'form',
                              items:[{
                                  xtype:'textfield',
                                  fieldLabel:'Chr',
                                  id:'currentrange_chr',
-                                 anchor:'95%',
-                                 allowBlank:false,
+                                 width: 30,
                                  readOnly:true
                              },
                                      {
                                  xtype:'textfield',
                                  fieldLabel:'Range',
                                  id:'currentrange_range',
-                                 anchor:'95%',
-                                 allowBlank:false,
+                                 fieldClass:'chr_range',
+                                         width: 150,
                                  readOnly:true
                              },
                                      {
                                  xtype:'textfield',
                                  fieldLabel:'Gene',
                                  id:'currentrange_gene',
-                                 anchor:'95%',
+                                 width: 80,
                                  readOnly:true
                              }]
                              }]
@@ -171,9 +171,12 @@
 
                  });
                  
-                 rangeControl = new ChromosomeRangeControl("container_rangeControl","/addama/refgenome/hg18","22",0,51304566,29576000,750000);
+                 rangeControl = new ChromosomeRangeControl("container_rangeControl","/addama/refgenome/hg18","chr22",0,51304566,29576000,750000);
 
                  rangeControl.addSelectionListener(this);
+
+                    onRangeSelection('22',29576000,29576000+750000);
+
 
                  circvis_ov = new Ext.Panel({
                                     contentEl: $("chromovis_ov_div"),
@@ -260,37 +263,20 @@
 
                  chromSelectionPanel = new Ext.Panel({
                     title: 'Chromosome Range',
-                    region: 'north',
+
                      layout: 'fit',
                     items: [],
                      height: 100,
-                     collapsed: true,
-                     collapsible: true,
-                     animFloat: false,
-                           floatable: false,
-                     listeners :{
-                             collapse : function () {
-                     visualizationControl.loadVisualizationForSelectedPatients();
-                         }
-                     }
+                     width:750
+
 
                  });
 
                  patientSelectionPanel = new Ext.Panel({
                     title: 'Patients',
                      layout: 'fit',
-                     region: 'south',
                      height: 400,
-                     collapsible: true,
-                     collapsed: true,
-                     animFloat: false,
-                     listeners :{
-                             collapse : function () {
-                     visualizationControl.loadVisualizationForSelectedPatients();
-                         }
-                     },
-                     floatable: false
-
+                     width:750
                  });
 
                  visualizationCenter = new Ext.Panel({
@@ -305,17 +291,51 @@
                      autoScroll: true
                  });
 
+
+
+                 dataSelectionPanel = new Ext.Window({
+                      title: 'Data Selection',
+                        id: 'dataselection-window',
+                    autoWidth : true,
+                     autoHeight : true,
+                     modal: true,
+                     closeAction : 'hide',
+
+                     items:[chromSelectionPanel,patientSelectionPanel],
+                         listeners : {
+                              hide: function() {
+                                  visualizationControl.loadVisualizationForSelectedPatients();
+                              }
+                          }
+                 });
+
+                 showSelectionPanel = function() {
+                             dataSelectionPanel.show();
+                 };
+
+                 visPanelToolbar = new Ext.Toolbar({
+                                    items: [{
+                                        text: 'Data and Range Selection',
+                                        handler: showSelectionPanel
+                                    },{
+                                        text: 'Advanced Parameters',
+                                        handler: function() {loadVisualizationParameters();}
+                                    }
+                                    ]
+                                });
+
                  visualizationPanel = new Ext.Panel({
                        title: 'Fastbreak',
                        id: 'fastbreak-panel',
                        layout: 'border',
+                     tbar : visPanelToolbar,
                        defaults: {
                            bodyStyle: 'padding:15px',
                            animFloat: false,
                            floatable: false
 
                        },
-                       items: [chromSelectionPanel,visualizationCenter,patientSelectionPanel],
+                       items: [visualizationCenter],
                                           tools: [{
                          id: 'help',
                          handler: function(event, toolEl, panel){
@@ -323,7 +343,7 @@
                          }
 
                      }]
-                 })
+                 });
 
 
 
@@ -335,7 +355,7 @@
                      closable:false,
                      activeItem:0,
                      height: 800,
-                     margins: '2 5 5 0',
+                     margins: '0 5 5 0',
                     items:[{
                         id:'homepage-panel',
                         layout: 'fit',
@@ -353,8 +373,9 @@
                      singleExpand: true,
                      useArrows: true,
                      //flex:10,
-                      height : 250,
+                      height : 180,
                      padding: '5',
+                      margin: '5',
                      autoScroll: true,
                         loader: new Ext.tree.TreeLoader(),
                     root: new Ext.tree.AsyncTreeNode({
@@ -392,14 +413,16 @@
                                 region: 'west',
                                 collapsible: true,
                                 expanded: true,
-                                collapseMode:'mini',
+                                //collapseMode:'mini',
                                 width: 180,
                                 layout: {
                                     type: 'vbox',
-                                    padding: '5',
+                                    padding: '5px,5px,5px,5px',
                                     align: 'stretch'
                                 },
-                                autoScroll: true,
+                     defaults : {
+                         padding : '0px, 0px, 5px, 0px'
+                     },
                                 items: [currentRange,navigationPanel,geneSearchPanel]
                  });
 
@@ -408,7 +431,8 @@
     	if(n.leaf && (  n.id+'-panel') != Ext.getCmp('center-panel').layout.activeItem){  // ignore clicks on folders and currently selected node
     		Ext.getCmp('center-panel').layout.setActiveItem(n.id + '-panel');
     		if(n.id == 'fastbreak'){
-                                $("container_visheader").innerHTML = "<p align=\"right\"><a href=\"#\" onClick=loadVisualizationParameters()>Advanced Parameters</a></p><div align='center' id='legenddiv'></div>";
+                                //$("container_visheader").innerHTML = "<p align=\"right\"><a href=\"#\" onClick=loadVisualizationParameters()>Advanced Parameters</a></p><div align='center' id='legenddiv'></div>";
+                org.systemsbiology.visualization.transplant.colorkey(org.systemsbiology.visualization.transplant.chrmcolors.human,document.getElementById('legenddiv'));
   //                    visualizationControl.loadVisualizationForSelectedPatients();
 
             }
@@ -530,25 +554,20 @@
 
 
 
-    function onRangeSelection(chrom,startpos,endpos,initiator){
+    function onRangeSelection(chrom,startpos,endpos,gene){
         Ext.getCmp('currentrange_chr').setValue(chrom);
         Ext.getCmp('currentrange_range').setValue(formatNumber(startpos) + "-" + formatNumber(endpos));
-        Ext.getCmp('currentrange_gene').setValue("");
+        if (gene == null || gene == "") {
+            Ext.getCmp('currentrange_gene').setValue("");
+        }
+        else (Ext.getCmp('currentrange_gene').setValue(gene))
             if(viewPort != null)
                 viewPort.doLayout();
         
-        else{
-          Ext.fly(currentRange.body).update( "<ul>Current Range:<li>" + chrom + ":" + formatNumber(startpos) + "-" + formatNumber(endpos) + "</li></ul>");
-
-        }
 
         if(visualizationControl != null)  {
-            var chromRangeUri = "/chr"+chrom+"/" + startpos + "/" + endpos;
+            var chromRangeUri = "chr"+chrom+"/" + startpos + "/" + endpos;
             visualizationControl.onRangeSelection(chromRangeUri);
-        }
-
-        if(initiator != 'rangeControl' && rangeControl != null) {
-           rangeControl.onRangeSelectionChange(chrom,startpos,endpos-startpos);
         }
 
         selectedChromRangeUri = chromRangeUri;
@@ -563,14 +582,14 @@
                 network_query.setQuery('select chr, start, end where `gene_symbol` = \'' + gene_symbol.toUpperCase() +'\'' );
                 function handleGeneQuery(response) {
                     var table = response.getDataTable();
+                    var buffer = 20000;  //20Kbp window upstream and down
                     if(table.getNumberOfRows() == 1) {
                         var json_array = GoogleDSUtils.dataTableToArray(table);
                         var chrom = json_array[0]['chr'];
                         var startpos = json_array[0]['start'];
                         var endpos = json_array[0]['end'];
 
-                       onRangeSelection(chrom,startpos,endpos);
-                        Ext.getCmp('currentrange_gene').setValue(gene_symbol);
+                       onRangeSelection(chrom,startpos-buffer < 0 ? 0 : startpos-buffer,endpos+buffer,gene_symbol);
                     } else {
                         showError("Gene Selection", "Gene symbol not found.");
                     }
