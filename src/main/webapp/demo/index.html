@@ -12,9 +12,8 @@
         }
         input {
         font: 8pt helvetica neue;
-        }
-        .chr_range {
-            font: 10pt;
+
+
         }
         .outlined {
             color: #666;
@@ -90,7 +89,7 @@
                     datasettype="None";
                 }
                 
-                onRangeSelection(chr,start,stop,label);
+                onRangeSelection(chr,start,stop);
                 onDatasetChange(datasettype);
             };
 
@@ -112,28 +111,29 @@
                      items:[{
                          layout:'column',
                          items:[{
-                             columnWidth: 0.95,
+                             columnWidth: 0.8,
                              layout:'form',
                              items:[{
                                  xtype:'textfield',
                                  fieldLabel:'Chr',
                                  id:'currentrange_chr',
-                                 width: 30,
+                                 anchor:'95%',
+                                 allowBlank:false,
                                  readOnly:true
                              },
                                      {
                                  xtype:'textfield',
                                  fieldLabel:'Range',
                                  id:'currentrange_range',
-                                 fieldClass:'chr_range',
-                                         width: 150,
+                                 anchor:'95%',
+                                 allowBlank:false,
                                  readOnly:true
                              },
                                      {
                                  xtype:'textfield',
                                  fieldLabel:'Gene',
                                  id:'currentrange_gene',
-                                 width: 80,
+                                 anchor:'95%',
                                  readOnly:true
                              }]
                              }]
@@ -171,12 +171,9 @@
 
                  });
                  
-                 rangeControl = new ChromosomeRangeControl("container_rangeControl","/addama/refgenome/hg18","chr22",0,51304566,29576000,750000);
+                 rangeControl = new ChromosomeRangeControl("container_rangeControl","/addama/refgenome/hg18","22",0,51304566,29576000,750000);
 
                  rangeControl.addSelectionListener(this);
-
-                    onRangeSelection('22',29576000,29576000+750000);
-
 
                  circvis_ov = new Ext.Panel({
                                     contentEl: $("chromovis_ov_div"),
@@ -338,7 +335,7 @@
                      closable:false,
                      activeItem:0,
                      height: 800,
-                     margins: '0 5 5 0',
+                     margins: '2 5 5 0',
                     items:[{
                         id:'homepage-panel',
                         layout: 'fit',
@@ -356,9 +353,8 @@
                      singleExpand: true,
                      useArrows: true,
                      //flex:10,
-                      height : 180,
+                      height : 250,
                      padding: '5',
-                      margin: '5',
                      autoScroll: true,
                         loader: new Ext.tree.TreeLoader(),
                     root: new Ext.tree.AsyncTreeNode({
@@ -396,16 +392,14 @@
                                 region: 'west',
                                 collapsible: true,
                                 expanded: true,
-                                //collapseMode:'mini',
+                                collapseMode:'mini',
                                 width: 180,
                                 layout: {
                                     type: 'vbox',
-                                    padding: '5px,5px,5px,5px',
+                                    padding: '5',
                                     align: 'stretch'
                                 },
-                     defaults : {
-                         padding : '0px, 0px, 5px, 0px'
-                     },
+                                autoScroll: true,
                                 items: [currentRange,navigationPanel,geneSearchPanel]
                  });
 
@@ -415,7 +409,6 @@
     		Ext.getCmp('center-panel').layout.setActiveItem(n.id + '-panel');
     		if(n.id == 'fastbreak'){
                                 $("container_visheader").innerHTML = "<p align=\"right\"><a href=\"#\" onClick=loadVisualizationParameters()>Advanced Parameters</a></p><div align='center' id='legenddiv'></div>";
-                org.systemsbiology.visualization.transplant.colorkey(org.systemsbiology.visualization.transplant.chrmcolors.human,document.getElementById('legenddiv'));
   //                    visualizationControl.loadVisualizationForSelectedPatients();
 
             }
@@ -537,20 +530,25 @@
 
 
 
-    function onRangeSelection(chrom,startpos,endpos,gene){
+    function onRangeSelection(chrom,startpos,endpos,initiator){
         Ext.getCmp('currentrange_chr').setValue(chrom);
         Ext.getCmp('currentrange_range').setValue(formatNumber(startpos) + "-" + formatNumber(endpos));
-        if (gene == null || gene == "") {
-            Ext.getCmp('currentrange_gene').setValue("");
-        }
-        else (Ext.getCmp('currentrange_gene').setValue(gene))
+        Ext.getCmp('currentrange_gene').setValue("");
             if(viewPort != null)
                 viewPort.doLayout();
         
+        else{
+          Ext.fly(currentRange.body).update( "<ul>Current Range:<li>" + chrom + ":" + formatNumber(startpos) + "-" + formatNumber(endpos) + "</li></ul>");
+
+        }
 
         if(visualizationControl != null)  {
-            var chromRangeUri = "chr"+chrom+"/" + startpos + "/" + endpos;
+            var chromRangeUri = "/chr"+chrom+"/" + startpos + "/" + endpos;
             visualizationControl.onRangeSelection(chromRangeUri);
+        }
+
+        if(initiator != 'rangeControl' && rangeControl != null) {
+           rangeControl.onRangeSelectionChange(chrom,startpos,endpos-startpos);
         }
 
         selectedChromRangeUri = chromRangeUri;
@@ -565,14 +563,14 @@
                 network_query.setQuery('select chr, start, end where `gene_symbol` = \'' + gene_symbol.toUpperCase() +'\'' );
                 function handleGeneQuery(response) {
                     var table = response.getDataTable();
-                    var buffer = 20000;  //20Kbp window upstream and down
                     if(table.getNumberOfRows() == 1) {
                         var json_array = GoogleDSUtils.dataTableToArray(table);
                         var chrom = json_array[0]['chr'];
                         var startpos = json_array[0]['start'];
                         var endpos = json_array[0]['end'];
 
-                       onRangeSelection(chrom,startpos-buffer < 0 ? 0 : startpos-buffer,endpos+buffer,gene_symbol);
+                       onRangeSelection(chrom,startpos,endpos);
+                        Ext.getCmp('currentrange_gene').setValue(gene_symbol);
                     } else {
                         showError("Gene Selection", "Gene symbol not found.");
                     }
