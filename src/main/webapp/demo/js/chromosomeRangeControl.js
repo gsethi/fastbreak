@@ -4,7 +4,7 @@ var ChromosomeRangeControl = Class.create({
         this.referenceGenomeUri = referenceGenomeUri;
         this.selectionListeners = new Array();
         this.chromosomes = new Hash();
-        this.selectedChromosome = 'chr'+chromName;
+        this.selectedChromosome = "chr"+chromName;
         this.geneSymbol = '';
         this.startPosition = startPos;
         this.endPosition = endPos;
@@ -13,12 +13,29 @@ var ChromosomeRangeControl = Class.create({
         this.radioPanel=null;
         this.flexScrollPanel = null;
         this.rangeControlMask = null;
+        this.chromoCombo = null;
 
         this.loadChromosomes();
     },
 
     addSelectionListener: function(listener) {
         this.selectionListeners[this.selectionListeners.length] = listener;
+    },
+
+    onRangeSelectionChange: function(chromName, startPos,selectionWidth){
+        if(this.selectedChromosome == "chr"+chromName && this.startPosition == startPos && this.endPosition == selectionWidth)
+            return;
+        
+         this.selectedChromosome = "chr"+chromName;
+         this.startPosition = startPos;
+        this.endPosition = selectionWidth;
+
+        if(this.chromoCombo != null){
+            this.chromoCombo.setValue(this.selectedChromosome);
+            this.displayRangeControl(false);
+  
+        }
+
     },
 
 
@@ -58,7 +75,7 @@ var ChromosomeRangeControl = Class.create({
 
         });
 
-        var chromoCombo = new Ext.form.ComboBox({
+        control.chromoCombo = new Ext.form.ComboBox({
             store: chromosomeArray,
             typeAhead: true,
             mode: 'local',
@@ -69,13 +86,13 @@ var ChromosomeRangeControl = Class.create({
             flex: 2
         });
 
-         chromoCombo.on('select', function(n){
+         control.chromoCombo.on('select', function(n){
                control.selectedChromosome = n.value;
                control.displayRangeControl();
          });
 
         if(selected){
-            chromoCombo.setValue(control.selectedChromosome);
+            control.chromoCombo.setValue(control.selectedChromosome);
         }
 
         control.flexScrollPanel = new Ext.Panel({
@@ -95,7 +112,7 @@ var ChromosomeRangeControl = Class.create({
             },
             defaults:{margins:'0 5 0 0'},            
             autoShow: true,
-            items: [chromoCombo,control.flexScrollPanel]
+            items: [control.chromoCombo,control.flexScrollPanel]
         });
 
         if(displayFlex){
@@ -110,21 +127,26 @@ var ChromosomeRangeControl = Class.create({
 
     },
 
-    displayRangeControl: function() {
+    displayRangeControl: function(externalChange) {
         var control = this;
-        control.rangeControlMask = new Ext.LoadMask(control.flexScrollPanel.getEl(), {msg:"Loading Chromosome Range..."});
-        control.rangeControlMask.show(); 
+        if(control.flexScrollPanel.getEl() != null) {
+            control.rangeControlMask = new Ext.LoadMask(control.flexScrollPanel.getEl(), {msg:"Loading Chromosome Range..."});
+            control.rangeControlMask.show();
+        }
         Ext.Ajax.request({
              url: this.referenceGenomeUri + "/" + this.selectedChromosome,
              method:"get",
              success:function(o) {
                 var json = Ext.util.JSON.decode(o.responseText);
                 if (json && json.length) {
+                    if(externalChange){
                     control.startPosition = 0;
                     control.endPosition = json.length;
-                    control.renderFlexScroll(0,json.length,0,json.length);
+                    }
+                    control.renderFlexScroll(0,json.length,control.startPosition,control.endPosition);
                 }
-                control.rangeControlMask.hide();
+                 if(control.rangeControlMask != null)
+                    control.rangeControlMask.hide();
              }
          });
     },
@@ -132,7 +154,7 @@ var ChromosomeRangeControl = Class.create({
     publishSelection: function(start, end) {
         var control = this;
         this.selectionListeners.each(function(listener) {
-            listener.onRangeSelection(control.selectedChromosome.substring(3), start ,end);
+            listener.onRangeSelection(control.selectedChromosome.substring(3,control.selectedChromosome.length), start ,end, 'rangeControl');
         });
     },
 
@@ -163,6 +185,6 @@ var ChromosomeRangeControl = Class.create({
       //  this.selectionListeners.each(function(listener) {
       //      listener.onChromosomeRangeLoaded();
       //  });
-
+        
     }
 });
