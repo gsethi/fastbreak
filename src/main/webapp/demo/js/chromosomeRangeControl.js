@@ -4,7 +4,7 @@ var ChromosomeRangeControl = Class.create({
         this.referenceGenomeUri = referenceGenomeUri;
         this.selectionListeners = new Array();
         this.chromosomes = new Hash();
-        this.selectedChromosome = chromName;
+        this.selectedChromosome = 'chr'+chromName;
         this.geneSymbol = '';
         this.startPosition = startPos;
         this.endPosition = endPos;
@@ -130,8 +130,9 @@ var ChromosomeRangeControl = Class.create({
     },
 
     publishSelection: function(start, end) {
+        var control = this;
         this.selectionListeners.each(function(listener) {
-            listener.onRangeSelection(this.selectedChromosome, start ,end);
+            listener.onRangeSelection(control.selectedChromosome.substring(3), start ,end);
         });
     },
 
@@ -162,6 +163,6 @@ var ChromosomeRangeControl = Class.create({
       //  this.selectionListeners.each(function(listener) {
       //      listener.onChromosomeRangeLoaded();
       //  });
-        
+
     }
 });
