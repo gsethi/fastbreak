@@ -543,7 +543,7 @@ for line in sys.stdin:
 		writeWig(rname,rPos)
 
 	if reportOrientationAndDistance == 1:
-		if !paired or rname == "chrM" or mPos == 0 or mapQScore == 0 or dupeFlag or failedQC or randomIndex > 0:
+		if paired == False or rname == "chrM" or mPos == 0 or mapQScore == 0 or dupeFlag or failedQC or randomIndex > 0:
 			rpthash["numSkipped"+rgid] +=1
 			if saveSkippedInfo == 1:
 				outhash["skipped"+rgid].write('\t'.join([rname, str(mPos), str(mapQScore), str(dupeFlag), str(failedQC), str(randomIndex) + '\n']))
