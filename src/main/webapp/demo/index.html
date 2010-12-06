@@ -358,6 +358,7 @@
                      //flex:10,
                       height : 180,
                      padding: '5',
+                      margin: '5',
                      autoScroll: true,
                         loader: new Ext.tree.TreeLoader(),
                     root: new Ext.tree.AsyncTreeNode({
@@ -402,6 +403,9 @@
                                     padding: '5px,5px,5px,5px',
                                     align: 'stretch'
                                 },
+                     defaults : {
+                         padding : '0px, 0px, 5px, 0px'
+                     },
                                 items: [currentRange,navigationPanel,geneSearchPanel]
                  });
 
@@ -411,6 +415,7 @@
     		Ext.getCmp('center-panel').layout.setActiveItem(n.id + '-panel');
     		if(n.id == 'fastbreak'){
                                 $("container_visheader").innerHTML = "<p align=\"right\"><a href=\"#\" onClick=loadVisualizationParameters()>Advanced Parameters</a></p><div align='center' id='legenddiv'></div>";
+                org.systemsbiology.visualization.transplant.colorkey(org.systemsbiology.visualization.transplant.chrmcolors.human,document.getElementById('legenddiv'));
   //                    visualizationControl.loadVisualizationForSelectedPatients();
 
             }
