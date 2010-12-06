@@ -234,7 +234,7 @@ var TransplantVisualization = Class.create({
         var chr = rangeItems[0];
         var start = rangeItems[1];
         var end = rangeItems[2];
-   
+    html = '';
 
     $A(control.patients).each(function(p) {
         html+="<table><tr><td>"+p.id+"<br/>"+p.classification+"<br/>"+p.comments+"</td>";
@@ -248,7 +248,7 @@ var TransplantVisualization = Class.create({
             var query = new google.visualization.Query(transplantws+'?chr='+chr+'&start='+start+'&end='+end+'&depth=' + control.advParameters.branchdepth + '&radius=' + control.advParameters.radius + '&file='+s.pickleFile);
             query.send(control.getVisResponseHandler(s.id,s.pickleFile,transplantws,control.refgenUri,control.coverageDatasourceUri));
         }
-        html +="</tr></table>";
+        html += "</tr></table>";
         //html += "<div>" + Ext.encode(p) + "</div>";
     });
     control.container.innerHTML=html;
