@@ -211,6 +211,7 @@ def initialize():
 		rpthash["num00"+rid] = 0
 		rpthash["zeroDistance"+rid] = 0
 		rpthash["numSkipped"+rid] = 0
+		rpthash["numNotPaired"+rid] = 0
 		rpthash["numNotProperPair"+rid] = 0
 		rpthash["numPairedUnmapped"+rid] = 0
 		rpthash["numUnmappedFirst"+rid] = 0
@@ -250,7 +251,7 @@ def reportSummary():
 		cumRptFile.write("cumulativeRangedAvg %f\n"%(rpthash["cumulativeRangedAvg"+rgid]))
 		
 		if doReportMappingMetrics == 1:
-			cumRptFile.write("numNotProperPair %i \nnumPairedUnmapped %i \nnumUnmappedFirst %i \nnumQueryUnmapped %i \nnumMateUnmapped %i\n"%(rpthash["numNotProperPair"+rgid], rpthash["numPairedUnmapped"+rgid], rpthash["numUnmappedFirst"+rgid], rpthash["numQueryUnmapped"+rgid], rpthash["numMateUnmapped"+rgid]))
+			cumRptFile.write("numNotReadPaired %i \nnumNotProperPaired %i \nnumPairedUnmapped %i \nnumUnmappedFirst %i \nnumQueryUnmapped %i \nnumMateUnmapped %i\n"%(%(rpthash["numNotPaired"+rgid], rpthash["numNotProperPair"+rgid], rpthash["numPairedUnmapped"+rgid], rpthash["numUnmappedFirst"+rgid], rpthash["numQueryUnmapped"+rgid], rpthash["numMateUnmapped"+rgid]))
 
 #Cleanup
 def cleanup():
@@ -260,6 +261,10 @@ def cleanup():
 	print("Program completed: Done cleaning up:" + str(time.strftime("%c")))
 
 #list of functions to check filter flag to find information about read/strand info
+#dec 1 2^0 - depends on protocol and inferred during alignment
+def gePaired(fval):
+	return ((fval & 0x0001) > 0)
+
 #dec 2 2^1 - depends on protocol and inferred during alignment
 def getProperPair(fval):
 	return ((fval & 0x0002) > 0)
@@ -442,8 +447,10 @@ def writeBam2Fastq(rgid,qname,seq,qual):
         outhash["fastq"+rgid].write('@%s\n%s\n+\n%s\n' % (qname, seq, qual))
 
 # Calculates read totals for different strands 
-def reportMappingMetrics(rgid,properPair,queryUnmapped,mateUnmapped,isFirstR):
+def reportMappingMetrics(rgid,paired,properPair,queryUnmapped,mateUnmapped,isFirstR):
 	global rpthash
+	if not paired:
+		rpthash["numNotPaired"+rgid] += 1
 	if not properPair:
 		rpthash["numNotProperPair"+rgid] += 1
         if queryUnmapped or mateUnmapped:	
@@ -494,6 +501,7 @@ for line in sys.stdin:
 	rname = read["rname"]
 	randomIndex = string.find(rname, "random")
 	myFlag = int(read["flag"])
+	paired = getPaired(myFlag)
 	properPair = getProperPair(myFlag)
 	queryUnmapped = getQueryUnmapped(myFlag)
 	mateUnmapped = getMateUnmapped(myFlag)
@@ -522,7 +530,7 @@ for line in sys.stdin:
 
 	#report Mapping metrics
 	if doReportMappingMetrics == 1:
-		reportMappingMetrics(rgid, properPair, queryUnmapped, mateUnmapped, isFirstR)
+		reportMappingMetrics(rgid, paired, properPair, queryUnmapped, mateUnmapped, isFirstR)
 
 	#wig coverage tile
         if ((rPos - tileStart) >  tileWindow or currentTileChrom != rname) and (rname != "*" or randomIndex == -1):
@@ -535,7 +543,7 @@ for line in sys.stdin:
 		writeWig(rname,rPos)
 
 	if reportOrientationAndDistance == 1:
-		if rname == "chrM" or mPos == 0 or mapQScore == 0 or dupeFlag or failedQC or randomIndex > 0:
+		if !paired or rname == "chrM" or mPos == 0 or mapQScore == 0 or dupeFlag or failedQC or randomIndex > 0:
 			rpthash["numSkipped"+rgid] +=1
 			if saveSkippedInfo == 1:
 				outhash["skipped"+rgid].write('\t'.join([rname, str(mPos), str(mapQScore), str(dupeFlag), str(failedQC), str(randomIndex) + '\n']))
