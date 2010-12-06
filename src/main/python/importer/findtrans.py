@@ -251,7 +251,7 @@ def reportSummary():
 		cumRptFile.write("cumulativeRangedAvg %f\n"%(rpthash["cumulativeRangedAvg"+rgid]))
 		
 		if doReportMappingMetrics == 1:
-			cumRptFile.write("numNotReadPaired %i \nnumNotProperPaired %i \nnumPairedUnmapped %i \nnumUnmappedFirst %i \nnumQueryUnmapped %i \nnumMateUnmapped %i\n"%(%(rpthash["numNotPaired"+rgid], rpthash["numNotProperPair"+rgid], rpthash["numPairedUnmapped"+rgid], rpthash["numUnmappedFirst"+rgid], rpthash["numQueryUnmapped"+rgid], rpthash["numMateUnmapped"+rgid]))
+			cumRptFile.write("numNotReadPaired %i \nnumNotProperPaired %i \nnumPairedUnmapped %i \nnumUnmappedFirst %i \nnumQueryUnmapped %i \nnumMateUnmapped %i\n"%(rpthash["numNotPaired"+rgid], rpthash["numNotProperPair"+rgid], rpthash["numPairedUnmapped"+rgid], rpthash["numUnmappedFirst"+rgid], rpthash["numQueryUnmapped"+rgid], rpthash["numMateUnmapped"+rgid]))
 
 #Cleanup
 def cleanup():
@@ -262,7 +262,7 @@ def cleanup():
 
 #list of functions to check filter flag to find information about read/strand info
 #dec 1 2^0 - depends on protocol and inferred during alignment
-def gePaired(fval):
+def getPaired(fval):
 	return ((fval & 0x0001) > 0)
 
 #dec 2 2^1 - depends on protocol and inferred during alignment
