@@ -11,6 +11,8 @@ var ChromosomeRangeControl = Class.create({
         this.chromstart = chromStart;
         this.chromend = chromEnd;
         this.radioPanel=null;
+        this.flexScrollPanel = null;
+        this.rangeControlMask = null;
 
         this.loadChromosomes();
     },
@@ -44,50 +46,56 @@ var ChromosomeRangeControl = Class.create({
         var control = this;
         var displayFlex = false;
 
-        var radioButtonArray = new Array();
+        var chromosomeArray = new Array();
+         var selected = false;
         this.chromosomes.each(function(chromosome) {
-            var selected = false;
             if(control.selectedChromosome == chromosome.key){
                 selected=true;
                 displayFlex = true;
             }
-            var radioConfig = new Ext.form.Radio({
-                boxLabel: chromosome.key,
-                name: 'rb-chromosome',
-                boxMaxWidth: 20,
-                checked: selected
-            });
-            radioConfig.on('check',function(cb){
-                if(radioConfig.checked){
-                    control.selectedChromosome = cb.boxLabel;
-                    control.displayRangeControl();
-                }
-            });
             
-           radioButtonArray[radioButtonArray.length] = radioConfig;
+           chromosomeArray[chromosomeArray.length] = chromosome.key;
 
         });
 
-
-
-        control.radioPanel = new Ext.form.FormPanel({
-            height: 150,
+        var chromoCombo = new Ext.form.ComboBox({
+            store: chromosomeArray,
+            typeAhead: true,
+            mode: 'local',
+            forceSelection: true,
+            triggerAction: 'all',
             padding: '5 5 5 5',
+            width: 75,
+            flex: 2
+        });
+
+         chromoCombo.on('select', function(n){
+               control.selectedChromosome = n.value;
+               control.displayRangeControl();
+         });
+
+        if(selected){
+            chromoCombo.setValue(control.selectedChromosome);
+        }
+
+        control.flexScrollPanel = new Ext.Panel({
+            align: 'center',
+            flex: 10,
+            contentEl: this.container
+        });
+
+        control.radioPanel = new Ext.Panel({
+            height: 80,
+            anchor:'100%',
+            baseCls:'x-plain',
+            layout:'hbox',
+            layoutConfig: {
+                padding: 5,
+                align: 'middle'
+            },
+            defaults:{margins:'0 5 0 0'},            
             autoShow: true,
-            items: [{
-                xtype: 'fieldset',
-                align: 'center',
-                items:[{
-                    xtype:'radiogroup',
-                    items:radioButtonArray
-                },{
-                    align: 'center',
-                    items:[ {
-                        align: 'center',
-                        contentEl: this.container
-                    }]
-                }]
-            }]
+            items: [chromoCombo,control.flexScrollPanel]
         });
 
         if(displayFlex){
@@ -104,8 +112,9 @@ var ChromosomeRangeControl = Class.create({
 
     displayRangeControl: function() {
         var control = this;
-
-         Ext.Ajax.request({
+        control.rangeControlMask = new Ext.LoadMask(control.flexScrollPanel.getEl(), {msg:"Loading Chromosome Range..."});
+        control.rangeControlMask.show(); 
+        Ext.Ajax.request({
              url: this.referenceGenomeUri + "/" + this.selectedChromosome,
              method:"get",
              success:function(o) {
@@ -115,6 +124,7 @@ var ChromosomeRangeControl = Class.create({
                     control.endPosition = json.length;
                     control.renderFlexScroll(0,json.length,0,json.length);
                 }
+                control.rangeControlMask.hide();
              }
          });
     },
@@ -141,7 +151,7 @@ var ChromosomeRangeControl = Class.create({
         var data ={DATATYPE : "isbv.models.FlexScrollData", CONTENTS : "test"};
 
 
-        var options = {plotWidth : 700, plotHeight: 50,
+        var options = {plotWidth : 750, plotHeight: 50,
            verticalPadding : 10, horizontalPadding: 10, font :"sans", minPosition: Math.round(minPosition / 1000) ,
            maxPosition: Math.round(maxPosition / 1000), scaleMultiplier : 1000};
 

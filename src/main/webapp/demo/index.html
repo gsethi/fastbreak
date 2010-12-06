@@ -209,11 +209,16 @@
                     region: 'north',
                      layout: 'fit',
                     items: [],
-                     height: 150,
+                     height: 100,
                      collapsed: true,
                      collapsible: true,
                      animFloat: false,
-                           floatable: false
+                           floatable: false,
+                     listeners :{
+                             collapse : function () {
+                     visualizationControl.loadVisualizationForSelectedPatients();
+                         }
+                     }
 
                  });
 
@@ -371,8 +376,8 @@
                         var json = o.responseJSON;
                         if (json && json.email) {
                             email = json.email;
-                            
-                            
+
+
                         } else {
                             showError("Authentication", "User is not logged in");
                         }
@@ -499,7 +504,7 @@
     }
 
 
-            
+
     function loadPage( ){
 
      topPanel = new Ext.Panel({
