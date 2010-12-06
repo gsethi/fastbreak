@@ -191,6 +191,18 @@
                      }]
                  });
 
+                 visualizationControlPanel = new Ext.Panel({
+                     autoScroll: true,
+                     contentEl: $('container_visualization'),
+                     flex: 15
+                 });
+
+                 visHeaderControlPanel = new Ext.Panel({
+                     contentEl: $("container_visheader"),
+                     autoScroll: false,
+                     flex: 1
+                 });
+
 
                  chromSelectionPanel = new Ext.Panel({
                     title: 'Chromosome Range',
@@ -213,7 +225,12 @@
                      collapsible: true,
                      collapsed: true,
                      animFloat: false,
-                           floatable: false
+                     listeners :{
+                             collapse : function () {
+                     visualizationControl.loadVisualizationForSelectedPatients();
+                         }
+                     },
+                     floatable: false
 
                  });
 
@@ -225,7 +242,7 @@
                          padding: '5',
                          align: 'stretch'
                      },
-                     items: [],
+                     items: [visHeaderControlPanel,visualizationControlPanel],
                      autoScroll: true
                  });
 
@@ -329,25 +346,11 @@
 
                  navigationPanel.on('click', function(n){
     	var sn = this.selModel.selNode || {}; // selNode is null on initial selection
-    	if(n.leaf && n.id != sn.id){  // ignore clicks on folders and currently selected node
+    	if(n.leaf && (  n.id+'-panel') != Ext.getCmp('center-panel').layout.activeItem){  // ignore clicks on folders and currently selected node
     		Ext.getCmp('center-panel').layout.setActiveItem(n.id + '-panel');
     		if(n.id == 'fastbreak'){
-                      visualizationControl.loadVisualizationForSelectedPatients();
-                                 visualizationControlPanel = new Ext.Panel({
-                                    contentEl: $("container_visualization"),
-                                    autoScroll: true,
-                                    flex: 15
-                                 });
                                 $("container_visheader").innerHTML = "<p align=\"right\"><a href=\"#\" onClick=loadVisualizationParameters()>Advanced Parameters</a></p><div align='center' id='legenddiv'></div>";
-                                org.systemsbiology.visualization.transplant.colorkey(org.systemsbiology.visualization.transplant.chrmcolors.human,document.getElementById('legenddiv'));
-                                visHeaderControlPanel = new Ext.Panel({
-                                    contentEl: $("container_visheader"),
-                                    autoScroll: false,
-                                    flex: 1
-                                });
-                                visualizationCenter.removeAll();
-                                visualizationCenter.add(visHeaderControlPanel);
-                                visualizationCenter.add(visualizationControlPanel);
+  //                    visualizationControl.loadVisualizationForSelectedPatients();
 
             }
             else if(n.id == 'comparator'){
@@ -550,7 +553,7 @@
             <div hidden='true' id="container_north"></div>
             <div align='center' class="x-hidden" id="container_rangeControl"></div>
             <div align='center'  id="container_visheader"></div>
-            <div  hidden='true' id="container_visualization"></div>
+            <div id="container_visualization" class="x-hide-display"></div>
             <div id="chromovis_ov_div"></div>
             <div id="chromovis_gbm_div"></div>
             <div id="chromovis_ov_gbm_div"></div>
