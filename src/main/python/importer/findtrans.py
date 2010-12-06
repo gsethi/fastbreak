@@ -169,7 +169,7 @@ def initialize():
 		outhash["oddreadbed" + rid] = open(resultsRelativePath + "/" + plr+"oddreads.bed", 'w')		
 		outhash["oddreadbed" + rid].write('\t'.join(["Chromosome","Start","End","Feature","Translocations\n"]))
 		outhash["oddreadlist" + rid] = open(resultsRelativePath + "/" + plr+"oddreads.list", 'w')
-		outhash["oddreadlist" + rid].write('\t'.join(["FromChr","FromPos","ToChr","ToPos","MapQ","Distance","StrandQ","StrandM\n"]))
+		outhash["oddreadlist" + rid].write('\t'.join(["FromChr","FromPos","ToChr","ToPos","MapQ","Distance","StrandQ","StrandM","QName\n"]))
 		outhash["wigsame" + rid] = open(resultsRelativePath + "/" + plr + ".same.wig", 'w')		
 		outhash["wigsame" + rid].write('variableStep\tchrom=chrM\tspan=%i\n' % tileWindow)
 		outhash["wigdiff" + rid] = open(resultsRelativePath + "/" + plr + ".diff.wig", 'w')
