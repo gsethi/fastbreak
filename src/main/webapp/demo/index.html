@@ -89,7 +89,7 @@
                     datasettype="None";
                 }
                 
-                onRangeSelection("chr"+chr+"/"+start+"/"+stop);
+                onRangeSelection(chr,start,stop);
                 onDatasetChange(datasettype);
             };
 
@@ -102,22 +102,76 @@
 
                  });
 
-                 currentRange =  new Ext.Panel({
+                 currentRange =  new Ext.FormPanel({
                      title: 'Current Selections',
-                     flex: 2,
+                     labelAlign: 'top',
+                     frame: true,
+                     height: 220,
                      padding: '5',
-                     autoScroll: true
-                 });
+                     items:[{
+                         layout:'column',
+                         items:[{
+                             columnWidth: 0.8,
+                             layout:'form',
+                             items:[{
+                                 xtype:'textfield',
+                                 fieldLabel:'Chr',
+                                 id:'currentrange_chr',
+                                 anchor:'95%',
+                                 allowBlank:false,
+                                 readOnly:true
+                             },
+                                     {
+                                 xtype:'textfield',
+                                 fieldLabel:'Range',
+                                 id:'currentrange_range',
+                                 anchor:'95%',
+                                 allowBlank:false,
+                                 readOnly:true
+                             },
+                                     {
+                                 xtype:'textfield',
+                                 fieldLabel:'Gene',
+                                 id:'currentrange_gene',
+                                 anchor:'95%',
+                                 readOnly:true
+                             }]
+                             }]
+                     }]
+                     });
 
-                 geneSearchPanel = new Ext.Panel({
-                     title: 'Gene Search',
-                     flex: 5,
+                 geneSearchPanel = new Ext.FormPanel({
+                     labelAlign: 'top',
+                     title: 'Gene Select',
+                     height : 120,
+                     frame: true,
                      padding: '5',
-                     autoScroll:true
+                     //defaultType : 'textfield',
+                     items:[{
+                            layout:'column',
+                            items:[{
+                                columnWidth: 0.8,
+                                layout:'form',
+                                items:[{
+                                    xtype:'textfield',
+                                    fieldLabel: 'Gene Symbol',
+                                    name:'gene_symbol',
+                                    id:'gene_symbol',
+                                    anchor:'95%',
+                                    allowBlank:false
+                                }]
+                            }]
+                     }],
+                     buttons: [{
+                         text:'Select',
+                         listeners:{
+                             click: function(){ onGeneSelection(Ext.getCmp('gene_symbol').getValue())}
+                         }
+                     }]
 
                  });
                  
-                 rangeControl = new ChromosomeRangeControl("container_rangeControl","/addama/refgenome/hg18","chr22",0,51304566,29576000,750000);
+                 rangeControl = new ChromosomeRangeControl("container_rangeControl","/addama/refgenome/hg18","22",0,51304566,29576000,750000);
 
                  rangeControl.addSelectionListener(this);
 
@@ -298,7 +352,8 @@
                      lines: false,
                      singleExpand: true,
                      useArrows: true,
-                     flex:10,
+                     //flex:10,
+                      height : 250,
                      padding: '5',
                      autoScroll: true,
                         loader: new Ext.tree.TreeLoader(),
@@ -339,7 +394,6 @@
                                 expanded: true,
                                 collapseMode:'mini',
                                 width: 180,
-                                split: true,
                                 layout: {
                                     type: 'vbox',
                                     padding: '5',
@@ -474,28 +528,54 @@
     }
 
 
-    function onRangeSelection(chromRangeUri){
-        var firstindex = chromRangeUri.indexOf("/");
-        var secondindex = chromRangeUri.lastIndexOf("/");
-        var chrom = chromRangeUri.substring(0,firstindex);
-        var startpos = chromRangeUri.substring(firstindex+1,secondindex);
-        var endpos = chromRangeUri.substring(secondindex+1,chromRangeUri.length);
-        if(currentRange.getEl() == null){
-            currentRange.html =  "<ul>Current Range:<li>" + chrom + ":" + formatNumber(startpos) + "-" + formatNumber(endpos) + "</li></ul>";
+
+
+    function onRangeSelection(chrom,startpos,endpos){
+        Ext.getCmp('currentrange_chr').setValue(chrom);
+        Ext.getCmp('currentrange_range').setValue(formatNumber(startpos) + "-" + formatNumber(endpos));
+        Ext.getCmp('currentrange_gene').setValue("");
             if(viewPort != null)
                 viewPort.doLayout();
-        }
+        
         else{
           Ext.fly(currentRange.body).update( "<ul>Current Range:<li>" + chrom + ":" + formatNumber(startpos) + "-" + formatNumber(endpos) + "</li></ul>");
 
         }
 
-        if(visualizationControl != null)
+        if(visualizationControl != null)  {
+            var chromRangeUri = "/chr"+chrom+"/" + startpos + "/" + endpos;
             visualizationControl.onRangeSelection(chromRangeUri);
+        }
 
         selectedChromRangeUri = chromRangeUri;
 
     }
+
+            function onGeneSelection(gene_symbol){
+                if (gene_symbol.length < 1 || gene_symbol.length > 10) { return;}
+
+
+                var network_query = new google.visualization.Query('/addama/systemsbiology.org/datasources/tcgajamboree/fastbreak/genes/query');
+                network_query.setQuery('select chr, start, end where `gene_symbol` = \'' + gene_symbol.toUpperCase() +'\'' );
+                function handleGeneQuery(response) {
+                    var table = response.getDataTable();
+                    if(table.getNumberOfRows() == 1) {
+                        var json_array = GoogleDSUtils.dataTableToArray(table);
+                        var chrom = json_array[0]['chr'];
+                        var startpos = json_array[0]['start'];
+                        var endpos = json_array[0]['end'];
+
+                       onRangeSelection(chrom,startpos,endpos);
+                        Ext.getCmp('currentrange_gene').setValue(gene_symbol);
+                    } else {
+                        showError("Gene Selection", "Gene symbol not found.");
+                    }
+                }
+
+
+                network_query.send(handleGeneQuery);
+
+            }
 
     function onChromosomeRangeLoaded(){
         chromosomeRangeLoaded=true;

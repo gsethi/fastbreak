@@ -130,9 +130,8 @@ var ChromosomeRangeControl = Class.create({
     },
 
     publishSelection: function(start, end) {
-        var chromRangeUri = this.selectedChromosome + "/" + start + "/" + end;
         this.selectionListeners.each(function(listener) {
-            listener.onRangeSelection(chromRangeUri);
+            listener.onRangeSelection(this.selectedChromosome, start ,end);
         });
     },
 
