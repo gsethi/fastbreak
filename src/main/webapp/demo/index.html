@@ -368,7 +368,43 @@
                      autoScroll: true
                  });
 
+                 geneSearchPanel_dataSelection = new Ext.FormPanel({
+                     iconCls: 'gene_select',
+                     title: 'Gene Select',
+                     height : 75,
+                     frame: true,
+                     padding: '5',
+                     //defaultType : 'textfield',
+                     items:[{
+                            layout:'column',
+                            items:[{
+                                columnWidth: 0.35,
+                                layout:'form',
+                                labelWidth: '50',
+                                labelPad: '5',
+                                items:[{
+                                    xtype:'textfield',
+                                    fieldLabel: 'Gene Symbol',
+                                    name:'gene_symbol_dataSelection',
+                                    id:'gene_symbol_dataSelection',
+                                    anchor: '95%'
+                                }]
+                            },{
+                                columnWidth: 0.1,
+                                    xtype: 'button',
+                                    text: 'Select',
+                                    listeners:{
+                                        click: function(){
+                                            var symbol = Ext.getCmp('gene_symbol_dataSelection').getValue();
+                                            onGeneSelection(symbol);
+                                        Ext.getCmp('gene_symbol_dataSelection').setValue("");}
+                                    },
+                                    anchor: '95%'
 
+                                }]
+                            }]
+
+                 });
 
                  dataSelectionPanel = new Ext.Window({
                       title: 'Data Selection',
@@ -378,7 +414,7 @@
                      modal: true,
                      closeAction : 'hide',
 
-                     items:[chromSelectionPanel,patientSelectionPanel],
+                     items:[chromSelectionPanel, geneSearchPanel_dataSelection,patientSelectionPanel],
                          listeners : {
                               hide: function() {
                                   var currentRange = rangeControl.getRangeSelection();

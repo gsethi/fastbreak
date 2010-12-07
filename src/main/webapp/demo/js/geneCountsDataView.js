@@ -235,6 +235,14 @@
             });
         };
 
+          var sm = new Ext.grid.CellSelectionModel({
+            listeners: {
+            'selectionchange': function(sm, selection){
+                       
+            }
+            }
+           });
+
         return new Ext.grid.GridPanel({
         border: true,
         store: ovgbmStore,
@@ -246,7 +254,7 @@
              stripeRows: true,
              height: 600,
              width: 700,
-            sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
+            sm: sm,
         loadMask: true,
         plugins: [filters]
     });
