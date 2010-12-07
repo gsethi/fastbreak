@@ -118,6 +118,9 @@
                 else {
                     datasettype="None";
                 }
+                 if(chr.indexOf("-CHR") > -1){
+                    chr=chr.substring(4,chr.length);
+                }
                 
                 onRangeSelection(chr,start,stop,label);
                 onDatasetChange(datasettype);
