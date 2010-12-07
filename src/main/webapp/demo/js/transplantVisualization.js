@@ -7,6 +7,7 @@ var TransplantParameters = Class.create({
         this.includeCTX=false;
         this.itxMinScore = "0";
         this.ctxMinScore = "80";
+        this.options = {};
         this.options.div_width = 550;
         this.options.div_height = 350;
         this.win = null;
