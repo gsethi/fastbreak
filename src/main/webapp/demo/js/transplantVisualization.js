@@ -7,6 +7,8 @@ var TransplantParameters = Class.create({
         this.includeCTX=false;
         this.itxMinScore = "0";
         this.ctxMinScore = "80";
+        this.options.div_width = 550;
+        this.options.div_height = 350;
         this.win = null;
         this.listeners = [];
 
@@ -241,24 +243,36 @@ var TransplantVisualization = Class.create({
         var start = rangeItems[1];
         var end = rangeItems[2];
     html = '';
-
+    control.query_array = [];
+    control.response_array = [];
+    
     $A(control.patients).each(function(p) {
         html+="<table><tr><td>"+p.id+"<br/>"+p.classification+"<br/>"+p.comments+"</td>";
         p.samples=p.samples.sort(sortpatientorsample);
         for(var i=0;i<p.samples.length; i++)
         {
             var s = p.samples[i];
-            html+="<td class='outlined'>"+s.id+" "+s.classification+"<br/><div id='" + s.id +"div'></div></td>";
+            html+="<td class=\'outlined\'>"+s.id+" "+s.classification+"<br/><div id=\'" + s.id +"div\' style=\"" +
+                    "width: " + control.options.div_width + "; height: " + control.options.div_height" + ;\"></div></td>";
             var filters = JSON.stringify(control.getfilters());
             //var query = new google.visualization.Query(transplantws+'?key='+apiKey+'&filters='+filters+'&chr='+document.getElementById('chr').value+'&start='+document.getElementById('start').value+'&end='+document.getElementById('end').value+'&depth='+document.getElementById('depth').value+'&radius='+document.getElementById('radius').value+'&file='+s.pickleFile);
+
             var query = new google.visualization.Query(transplantws+'?chr='+chr+'&start='+start+'&end='+end+'&depth=' + control.advParameters.branchdepth + '&radius=' + control.advParameters.radius + '&file='+s.pickleFile);
-            query.send(control.getVisResponseHandler(s.id,s.pickleFile,transplantws,control.refgenUri,control.coverageDatasourceUri));
+            query_array.push(query.send(control.getVisResponseHandler(s.id,s.pickleFile,transplantws,control.refgenUri,control.coverageDatasourceUri)));
         }
         html += "</tr></table>";
         //html += "<div>" + Ext.encode(p) + "</div>";
     });
     control.container.innerHTML=html;
+       this.distributeQueries(query_array);
    // org.systemsbiology.visualization.transplant.colorkey(org.systemsbiology.visualization.transplant.chrmcolors.human,document.getElementById('legenddiv'));
+},
+
+distributeQueries: function(){
+    for (var i = 0;i <4; i++) {
+        var query = this.query_array.pop();
+        query.apply();
+    }
 },
 
 getVisResponseHandler: function(id,file,transplantws,genedatasource,trackds)
@@ -270,6 +284,11 @@ getVisResponseHandler: function(id,file,transplantws,genedatasource,trackds)
 visResponseHandler: function(response,id,file,transplantws,genedatasource,trackds)
 {
     var control = this;
+        control.response_array.push(id);
+        if(control.response_array.length > 3) {
+            control.response_array = [];
+            control.distributeQueries();
+        }
         if (response.isError()) {
             alert("Error in query: " + response.getMessage() + " " + response.getDetailedMessage());
             return;
@@ -293,6 +312,8 @@ visResponseHandler: function(response,id,file,transplantws,genedatasource,trackd
             sample_id:id,
             widthfield:control.advParameters.widthfield,
             //filters:filters,
+            width: control.options.div_width,
+            height: control.options.div_height,
             chr:chr,
             depth:control.advParameters.branchdepth,
             start:start,
