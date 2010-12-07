@@ -57,6 +57,7 @@
             <script type="text/javascript" src="./js/transplantVisualization.js"></script>
     <script type="text/javascript" src="./js/transplant.js"></script>
         <script type="text/javascript" src="./js/patientSelectorControl.js"></script>
+        <script type="text/javascript" src="./js/geneCountsDataView.js"></script>
              <script type="text/javascript">
                 Ext.BLANK_IMAGE_URL = '/addama/ui/ext-js-3.3.0/resources/images/default/s.gif';
             </script>
@@ -81,6 +82,7 @@
             var westPanel = null;
             var viewPort = null;
             var loadMask = null;
+            var tablevis_ov_gbm = null;
             var workspaceUri = "/addama/repositories/workspaces/informatics@systemsbiology.org/ov_gbm_dataset";
 
             var tick_listener = function(chr,start,stop,label){
@@ -185,43 +187,65 @@
 
 
                  circvis_ov = new Ext.Panel({
+                                    title: 'Circvis',
                                     contentEl: $("chromovis_ov_div"),
                                     autoScroll: true,
                                     anchor: '100%'
                                  });
 
-                                  circvis_gbm = new Ext.Panel({
+                 circvis_gbm = new Ext.Panel({
                                     contentEl: $("chromovis_gbm_div"),
                                     autoScroll: true,
                                     anchor: '100%'
                                  });
 
                                   circvis_ov_gbm = new Ext.Panel({
+                                    title: 'Circvis',
                                     contentEl: $("chromovis_ov_gbm_div"),
                                     autoScroll: true,
                                     anchor: '100%'
                                  });
 
+                                  tablevis_ov = new Ext.Panel({
+                                     title: 'Data Table',
+                                      items: [],
+                                      layout: 'fit',
+                                    anchor: '100%'
+                                 });
 
-                 var comparatorButton = new Ext.Button({
-                      id: 'comparatorButton',
-                      text: 'Table View',
-                      handler: onItemToggle
+                                  tablevis_gbm = new Ext.Panel({
+                                      title: 'Data Table',
+                                      items: [],
+                                      layout: 'fit',
+                                    anchor: '100%'
+                                 });
 
+                                  tablevis_ov_gbm = new Ext.Panel({
+                                    title: 'Data Table',
+                                      items: [],
+                                      layout: 'fit',
+                                    anchor: '100%'
+                                 });
+
+
+                 comparatorTabPanel = new Ext.TabPanel({
+                     padding: '5 5 5 5',
+                     items: [circvis_ov_gbm,tablevis_ov_gbm],
+                     autoScroll: true,
+                     activeTab: 0
                  });
 
-                 comparatorPanel = new Ext.form.FormPanel({
+                 comparatorPanel = new Ext.Panel({
                      title: 'Cancer Comparator',
                      id: 'comparator-panel',
-                     padding: '5 5 5 5',
-                     items: [comparatorButton,circvis_ov_gbm],
-                     autoScroll: true,
+                     items: [comparatorTabPanel],
                      tools: [{
                          id: 'help',
                          handler: function(event, toolEl, panel){
                              //
                          }
-                     }]
+                     }],
+                     layout: 'fit'
                  });
 
                   ovPanel = new Ext.Panel({
@@ -272,6 +296,7 @@
                     items: [],
                      height: 100,
                      width:800
+
                  });
 
                  patientSelectionPanel = new Ext.Panel({
@@ -481,20 +506,14 @@
 
       });
 
-     function onItemToggle(item, pressed){
-         if(item.text == 'Table View'){
-                item.setText('Circvis View');
-         }
-         else
-            item.setText('Table View');
-                Ext.example.msg('Button Toggled', 'Button "{0}" was toggled to {1}.', item.text, pressed);
-     }
 
     //function called when data load for circvis is complete
     function onLoadGBMDataComplete() {
         $('chromovis_gbm_div').innerHTML="";
         wedge_plot($('chromovis_gbm_div'));
-          loadMask.hide();
+        createDataTable($('tablevis_gbm_div'), args['datatable']);
+
+        loadMask.hide();
         if(viewPort != null){
 	        viewPort.doLayout();
 	    }
@@ -503,7 +522,9 @@
      function onLoadOVDataComplete() {
         $('chromovis_ov_div').innerHTML="";
         wedge_plot($('chromovis_ov_div'));
-           loadMask.hide();
+        createDataTable($('tablevis_ov_div'), args['datatable']);
+
+         loadMask.hide();
         if(viewPort != null){
 	        viewPort.doLayout();
 	    }
@@ -512,7 +533,11 @@
     function onLoadOVGBMDataComplete() {
         $('chromovis_ov_gbm_div').innerHTML="";
         wedge_plot_ov_gbm($('chromovis_ov_gbm_div'));
-                    loadMask.hide();
+        var ovgbmDataTable = createOVGBMDataTable(args['datatable']);
+        tablevis_ov_gbm.removeAll();
+        tablevis_ov_gbm.add(ovgbmDataTable);
+        
+        loadMask.hide();
         if(viewPort != null){
 	        viewPort.doLayout();
 	    }
@@ -538,6 +563,7 @@
 
     }
 
+            
     function onDatasetChange(datasettype){
 
         //TODO: should potentially sort by this datatype in patient selector....
