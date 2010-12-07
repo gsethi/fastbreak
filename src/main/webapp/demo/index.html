@@ -27,45 +27,66 @@
        .data {
             background-image:url(images/control_equalizer.png) !important
         }
-    .advParameters {
+        .advParameters {
             background-image:url(images/table_gear.png) !important
+        }
+        .home {
+             background-image:url(images/house.png) !important
+        }
+        .circvis {
+               background-image:url(images/color_wheel.png) !important
+        }
+        .fastbreak {
+               background-image:url(images/link_break.png) !important
+        }
+        .gene_select {
+               background-image:url(images/zoom.png) !important
+        }
+        .navigation {
+               background-image:url(images/world.png) !important
+        }
+       .table {
+               background-image:url(images/table.png) !important
+        }
+        .current_selections {
+               background-image:url(images/chart_line.png) !important
         }
     </style>
         <link rel="stylesheet" type="text/css" href="/addama/ui/ext-js-3.3.0/resources/css/ext-all.css">
         <script type="text/javascript" language="javascript" src="/addama/ui/prototype.js"></script>
         <script type="text/javascript" src="http://www.google.com/jsapi"></script>
         <script type="text/javascript">
- google.load("prototype", "1.6.1.0");
- google.load('visualization','1', {packages:['table']});
-</script>
-<script type="text/javascript" src="/addama/ui/protovis-1.0/protovis-r3.3.1.js"></script>
-<script type="text/javascript" src="/addama/ui/protovis-1.0/visdata.js"></script>
-<script type="text/javascript" src="/addama/ui/protovis-1.0/google-ds-utils.js"></script>
-<script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/utilities.js"></script>
+            google.load("prototype", "1.6.1.0");
+            google.load('visualization','1', {packages:['table']});
+        </script>
+        <script type="text/javascript" src="/addama/ui/protovis-1.0/protovis-r3.3.1.js"></script>
+        <script type="text/javascript" src="/addama/ui/protovis-1.0/visdata.js"></script>
+        <script type="text/javascript" src="/addama/ui/protovis-1.0/google-ds-utils.js"></script>
+        <script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/utilities.js"></script>
 
-<script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/data_retrieval.js"></script>
-<script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/circvis.js"></script>
+        <script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/data_retrieval.js"></script>
+        <script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/circvis.js"></script>
 
         <script type="text/javascript" src="/addama/ui/ext-js-3.3.0/adapter/ext/ext-base.js"></script>
         <script type="text/javascript" src="/addama/ui/ext-js-3.3.0/ext-all.js"></script>
-         <script type="text/javascript" src="/addama/ui/ext-js-3.3.0/examples/shared/examples.js"></script>
+        <script type="text/javascript" src="/addama/ui/ext-js-3.3.0/examples/shared/examples.js"></script>
         <script type="text/javascript" src="/addama/ui/ext-js-3.3.0/examples/ux/ux-all.js"></script>
         <script type="text/javascript" src="/js/topbar.js"></script>
         <script type="text/javascript" src="/addama/ui/refgenome/refgenome.js"></script>
-       <script type="text/javascript" language="javascript" src="/addama/ui/flexscroll/flexscroll.js"></script>
-         <script type="text/javascript" src="./js/chromosomeRangeControl.js"></script>
-            <script type="text/javascript" src="./js/transplantVisualization.js"></script>
-    <script type="text/javascript" src="./js/transplant.js"></script>
+        <script type="text/javascript" language="javascript" src="/addama/ui/flexscroll/flexscroll.js"></script>
+        <script type="text/javascript" src="./js/chromosomeRangeControl.js"></script>
+        <script type="text/javascript" src="./js/transplantVisualization.js"></script>
+        <script type="text/javascript" src="./js/transplant.js"></script>
         <script type="text/javascript" src="./js/patientSelectorControl.js"></script>
         <script type="text/javascript" src="./js/geneCountsDataView.js"></script>
-             <script type="text/javascript">
-                Ext.BLANK_IMAGE_URL = '/addama/ui/ext-js-3.3.0/resources/images/default/s.gif';
-            </script>
-           <script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/wedge_plot.js"></script>
-        
         <script type="text/javascript">
-            var centertabs = null;
-            var email = "";
+            Ext.BLANK_IMAGE_URL = '/addama/ui/ext-js-3.3.0/resources/images/default/s.gif';
+        </script>
+        <script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/wedge_plot.js"></script>
+
+        <script type="text/javascript">
+        var centertabs = null;
+        var email = "";
             var topBarPanel = null;
             var topMenuPanel = null;
             var currentRange = null;
@@ -114,6 +135,7 @@
                  currentRange =  new Ext.FormPanel({
                      title: 'Current Selections',
                      labelAlign: 'top',
+                     iconCls:'current_selections',
                      frame: true,
                      height: 220,
                      padding: '5',
@@ -150,6 +172,7 @@
 
                  geneSearchPanel = new Ext.FormPanel({
                      labelAlign: 'top',
+                     iconCls: 'gene_select',
                      title: 'Gene Select',
                      height : 120,
                      frame: true,
@@ -209,6 +232,7 @@
 
                                   tablevis_ov = new Ext.Panel({
                                      title: 'Data Table',
+                                      iconCls: 'table',
                                       items: [],
                                       layout: 'fit',
                                     anchor: '100%'
@@ -216,6 +240,7 @@
 
                                   tablevis_gbm = new Ext.Panel({
                                       title: 'Data Table',
+                                      iconCls: 'table',
                                       items: [],
                                       layout: 'fit',
                                     anchor: '100%'
@@ -223,6 +248,7 @@
 
                                   tablevis_ov_gbm = new Ext.Panel({
                                     title: 'Data Table',
+                                      iconCls: 'table',
                                       items: [],
                                       layout: 'fit',
                                     anchor: '100%'
@@ -252,6 +278,7 @@
 
                  comparatorPanel = new Ext.Panel({
                      title: 'Cancer Comparator',
+                     iconCls: 'circvis',
                      id: 'comparator-panel',
                      items: [comparatorTabPanel],
                      tools: [{
@@ -265,6 +292,7 @@
 
                   ovPanel = new Ext.Panel({
                      title: 'OV Gene Disruption',
+                      iconCls: 'circvis',
                      id: 'ov-panel',
                      items: [ovTabPanel],
                      tools: [{
@@ -279,6 +307,7 @@
 
                   gbmPanel = new Ext.Panel({
                      title: 'GBM Gene Disruption',
+                      iconCls: 'circvis',
                      id: 'gbm-panel',
                      items: [gbmTabPanel],
                      tools: [{
@@ -367,6 +396,7 @@
 
                  visualizationPanel = new Ext.Panel({
                        title: 'Fastbreak',
+                     iconCls:'fastbreak',
                        id: 'fastbreak-panel',
                        layout: 'border',
                      tbar : visPanelToolbar,
@@ -399,6 +429,7 @@
                      margins: '0 5 5 0',
                     items:[{
                         id:'homepage-panel',
+                        iconCls:'home',
                         layout: 'fit',
                         html:'This is the homepage!',
                         title: 'Home'
@@ -409,6 +440,7 @@
 
                   navigationPanel =  new Ext.tree.TreePanel({
                      title: 'Navigation',
+                     iconCls: 'navigation',
                      rootVisible: false,
                      lines: false,
                      singleExpand: true,
@@ -423,10 +455,12 @@
                         expanded: true,
                         children: [{
                             text: 'Home Page',
+                            iconCls: 'home',
                             leaf: true,
                             id: 'homepage'
                          }, {
                             text: 'Cancer Comparator',
+                            iconCls:'circvis',
                             leaf: true,
                             id: 'comparator'
                         },{
@@ -435,15 +469,18 @@
                             id: 'genedisruption',
                             children: [{
                                 text: 'OV',
+                                iconCls:'circvis',
                                 leaf: true,
                                 id: 'ov'
                             },{
                                 text: 'GBM',
+                                iconCls:'circvis',
                                 leaf: true,
                                 id: 'gbm'
                             }]
                         },{
                             text: 'Fastbreak',
+                            iconCls: 'fastbreak',
                             leaf: true,
                             id: 'fastbreak'
                         }]

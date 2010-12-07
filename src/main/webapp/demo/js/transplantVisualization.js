@@ -308,7 +308,7 @@ getRecenterListener: function(vis)
     var control = this;
 	return function (loc) {
 
-    google.visualization.events.trigger(control,'rangeSelect',{chr:loc.chr.substring(3),start:loc.start,end:loc.end,gene:null,cancel_bubble: true});
+    google.visualization.events.trigger(control,'rangeSelect',{chr:loc.chr.substring(3),start:loc.start,end:loc.end,gene:loc.gene,cancel_bubble: true});
 	//	log("recenter event");
 		control.locationhistory.push(loc);
         control.onRangeSelection(loc.chr + '/' + loc.start + '/' + loc.end);
@@ -327,8 +327,8 @@ getSelectionHandler: function(vis)
     var control = this;
 	return function () {
 		//log("selection event");
-        google.visualization.events.trigger(control,'rangeSelect',{chr:loc.chr,start:loc.start,end:loc.end,gene:null,cancel_bubble: true});
-		var loc = vis.recenteronrow(vis.getSelection());
+        var loc = vis.recenteronrow(vis.getSelection());
+        google.visualization.events.trigger(control,'rangeSelect',{chr:loc.chr.substring(3),start:loc.start,end:loc.end,gene:null,cancel_bubble: true});
 		control.locationhistory.push(loc);
         control.onRangeSelection(loc.chr + '/' + loc.start + '/' + loc.end);
 		for(var i in control.transplants)
