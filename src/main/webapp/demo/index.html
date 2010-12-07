@@ -669,7 +669,7 @@
         if(visualizationControl != null && !cancel_bubble)  {
             var chromRangeUri = "chr"+chrom+"/" + startpos + "/" + endpos;
             visualizationControl.onRangeSelection(chromRangeUri);
-            rangeControl.onRangeSelectionChange(chrom,startpos,endpos);
+            rangeControl.onRangeSelectionChange(chrom,startpos,endpos-startpos);
         }
 
         selectedChromRangeUri = chromRangeUri;
