@@ -22,13 +22,13 @@ var ChromosomeRangeControl = Class.create({
         this.selectionListeners[this.selectionListeners.length] = listener;
     },
 
-    onRangeSelectionChange: function(chromName, startPos,length){
-        if(this.selectedChromosome == "chr"+chromName && this.startPosition == startPos && this.endPosition == length)
+    onRangeSelectionChange: function(chromName, startPos,endPosition){
+        if(this.selectedChromosome == "chr"+chromName && this.startPosition == startPos && this.endPosition == endPosition)
             return;
         
          this.selectedChromosome = "chr"+chromName;
          this.startPosition = startPos;
-        this.endPosition = length;
+        this.endPosition = endPosition;
 
         if(this.chromoCombo != null){
             this.chromoCombo.setValue(this.selectedChromosome);
@@ -173,7 +173,7 @@ var ChromosomeRangeControl = Class.create({
         var flexbar = new isbv.FlexScroll( Ext.getDom(this.container), listener);
 
         var data ={DATATYPE : "isbv.models.FlexScrollData", CONTENTS : "test"};
-
+        var length = endPos - startPos;
 
         var options = {plotWidth : 700, plotHeight: 50,
            verticalPadding : 10, horizontalPadding: 10, font :"sans", minPosition: Math.round(minPosition / 1000) ,
@@ -181,7 +181,7 @@ var ChromosomeRangeControl = Class.create({
 
         flexbar.draw(data,options);
         if(minPosition != startPos && maxPosition != endPos){
-            flexbar.setPosition(Math.round(startPos / 1000),Math.round(endPos / 1000));
+            flexbar.setPosition(Math.round(startPos / 1000),Math.round(length / 1000));
         }
        
     }
