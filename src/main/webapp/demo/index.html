@@ -17,6 +17,7 @@
             font: 10pt;
         }
         .outlined {
+            font: 12pt bold serif;
             color: #666;
             border-color: #F5F5F5;
             border-width: 2px 2px 2px 2px;
@@ -154,6 +155,7 @@
                                  fieldLabel:'Chr',
                                  id:'currentrange_chr',
                                  width: 30,
+                                 disabled:true,
                                  readOnly:true
                              },
                                      {
@@ -162,6 +164,7 @@
                                  id:'currentrange_range',
                                  fieldClass:'chr_range',
                                          width: 150,
+                                         disabled:true,
                                  readOnly:true
                              },
                                      {
@@ -169,6 +172,7 @@
                                  fieldLabel:'Gene',
                                  id:'currentrange_gene',
                                  width: 80,
+                                         disabled:true,
                                  readOnly:true
                              }]
                              }]
@@ -200,7 +204,8 @@
                      buttons: [{
                          text:'Select',
                          listeners:{
-                             click: function(){ onGeneSelection(Ext.getCmp('gene_symbol').getValue())}
+                             click: function(){ onGeneSelection(Ext.getCmp('gene_symbol').getValue());
+                             Ext.getCmp('gene_symbol').setValue("");}
                          }
                      }]
 
@@ -681,10 +686,10 @@
             function onGeneSelection(gene_symbol){
                 if (gene_symbol.length < 1 || gene_symbol.length > 10) { return;}
 
-
                 var network_query = new google.visualization.Query('/addama/systemsbiology.org/datasources/tcgajamboree/fastbreak/genes/query');
                 network_query.setQuery('select chr, start, end where `gene_symbol` = \'' + gene_symbol.toUpperCase() +'\'' );
                 function handleGeneQuery(response) {
+                    if (response.isError()) {showError("Gene Selection", "Gene symbol not retrieved.");return;}
                     var table = response.getDataTable();
                     var buffer = 20000;  //20Kbp window upstream and down
                     if(table.getNumberOfRows() == 1) {
