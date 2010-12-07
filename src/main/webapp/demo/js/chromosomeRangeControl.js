@@ -140,7 +140,9 @@ var ChromosomeRangeControl = Class.create({
                     control.startPosition = 0;
                     control.endPosition = json.length;
                     }
-                    control.renderFlexScroll(0,json.length,control.startPosition,control.endPosition);
+                    var start = control.startPosition  < json.length ? control.startPosition : json.length - 20000;
+                    var end = control.endPosition < json.length ? control.endPosition : json.length;
+                    control.renderFlexScroll(0,json.length,start,end);
                 }
                  if(control.rangeControlMask != null)
                     control.rangeControlMask.hide();
@@ -155,6 +157,9 @@ var ChromosomeRangeControl = Class.create({
         });
     },
 
+    getRangeSelection: function() {
+           return {chr:this.selectedChromosome.substring(3),start: this.startPosition ,end: this.endPosition};
+    },
 
     renderFlexScroll: function(minPosition,maxPosition,startPos,endPos){
         var control = this;
@@ -162,7 +167,7 @@ var ChromosomeRangeControl = Class.create({
         var listener = function(x,dx){
             control.startPosition = x;
             control.endPosition =  parseInt(x) + parseInt(dx);
-            control.publishSelection(control.startPosition, control.endPosition);
+           // control.publishSelection(control.startPosition, control.endPosition);
         };
 
         var flexbar = new isbv.FlexScroll( Ext.getDom(this.container), listener);
@@ -170,7 +175,7 @@ var ChromosomeRangeControl = Class.create({
         var data ={DATATYPE : "isbv.models.FlexScrollData", CONTENTS : "test"};
 
 
-        var options = {plotWidth : 750, plotHeight: 50,
+        var options = {plotWidth : 700, plotHeight: 50,
            verticalPadding : 10, horizontalPadding: 10, font :"sans", minPosition: Math.round(minPosition / 1000) ,
            maxPosition: Math.round(maxPosition / 1000), scaleMultiplier : 1000};
 
