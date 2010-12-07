@@ -211,7 +211,7 @@
 
                  });
                  
-                 rangeControl = new ChromosomeRangeControl("container_rangeControl","/addama/refgenome/hg18","22",0,51304566,29576000,750000);
+                 rangeControl = new ChromosomeRangeControl("container_rangeControl","/addama/refgenome/hg18","22",0,51304566,29576000,29576000+750000);
 
                  rangeControl.addSelectionListener(this);
 
@@ -418,7 +418,7 @@
                          listeners : {
                               hide: function() {
                                   var currentRange = rangeControl.getRangeSelection();
-                                  onRangeSelection(currentRange.chr,currentRange.start,currentRange.end+currentRange.start);
+                                  onRangeSelection(currentRange.chr,currentRange.start,currentRange.end);
                                   visualizationControl.loadVisualizationForSelectedPatients();
                               }
                           }
@@ -707,7 +707,7 @@
         if(visualizationControl != null && !cancel_bubble)  {
             var chromRangeUri = "chr"+chrom+"/" + startpos + "/" + endpos;
             visualizationControl.onRangeSelection(chromRangeUri);
-            rangeControl.onRangeSelectionChange(chrom,startpos,endpos-startpos);
+            rangeControl.onRangeSelectionChange(chrom,startpos,endpos);
         }
 
         selectedChromRangeUri = chromRangeUri;
