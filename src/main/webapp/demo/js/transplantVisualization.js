@@ -203,7 +203,7 @@ var TransplantVisualization = Class.create({
 
     loadVisualizationForSelectedPatients: function () {
         var control = this;
-        if(control.patients.length == 0 || control.chromosomeRange == '')
+        if(control.patients.length == 0 || control.chromosomeRange == '' || control.chromosomeRange == undefined)
         {
             control.container.innerHTML="<p><b>A chromosome range and set of patients must be selected to view visualizations.</b></p>";
             return;
@@ -253,13 +253,13 @@ var TransplantVisualization = Class.create({
         for(var i=0;i<p.samples.length; i++)
         {
             var s = p.samples[i];
-            html+="<td class=\'outlined\'>"+s.id+" "+s.classification+"<br/><div id=\'" + s.id +"div\' style=\"" +
+            html+="<td class=\'outlined\'>"+s.classification+"<br/><div id=\'" + s.id +"div\' style=\"" +
                     "width: " + control.options.div_width + "; height: " + control.options.div_height +";\"></div></td>";
             var filters = JSON.stringify(control.getfilters());
             //var query = new google.visualization.Query(transplantws+'?key='+apiKey+'&filters='+filters+'&chr='+document.getElementById('chr').value+'&start='+document.getElementById('start').value+'&end='+document.getElementById('end').value+'&depth='+document.getElementById('depth').value+'&radius='+document.getElementById('radius').value+'&file='+s.pickleFile);
 
             var query = new google.visualization.Query(transplantws+'?chr='+chr+'&start='+start+'&end='+end+'&depth=' + control.advParameters.branchdepth + '&radius=' + control.advParameters.radius + '&file='+s.pickleFile);
-            control.query_array.push(query.send(control.getVisResponseHandler(s.id,s.pickleFile,transplantws,control.refgenUri,control.coverageDatasourceUri)));
+            control.query_array.push({'query':query,'sample':s,'transplantws':transplantws});
         }
         html += "</tr></table>";
         //html += "<div>" + Ext.encode(p) + "</div>";
@@ -270,9 +270,15 @@ var TransplantVisualization = Class.create({
 },
 
 distributeQueries: function(){
-    for (var i = 0;i <4; i++) {
-        var query = this.query_array.pop();
-        query.apply();
+    for (var i = 0;i <1; i++) {
+        if (this.query_array.length < 1) { return;}
+        var query_obj = this.query_array.shift();
+        var query = query_obj.query;
+        var s = query_obj.sample;
+        var transplantws = query_obj.transplantws;
+        $(s.id+"div").innerHTML = "Loading...";
+        query.send(this.getVisResponseHandler(s.id,s.pickleFile,transplantws,this.refgenUri,this.coverageDatasourceUri));
+        
     }
 },
 
@@ -286,7 +292,7 @@ visResponseHandler: function(response,id,file,transplantws,genedatasource,trackd
 {
     var control = this;
         control.response_array.push(id);
-        if(control.response_array.length > 3) {
+        if(control.response_array.length >= 1) {
             control.response_array = [];
             control.distributeQueries();
         }
