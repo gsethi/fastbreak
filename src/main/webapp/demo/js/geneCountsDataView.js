@@ -105,7 +105,7 @@
                 dataIndex: 'linkValue',
                 header: 'Link Value',
                 filterable: true,
-                width: 80
+                width: 150
             }];
 
             return new Ext.grid.ColumnModel({
@@ -223,7 +223,7 @@
                 dataIndex: 'linkValue',
                 header: 'Link Value',
                 filterable: true,
-                width: 80
+                width: 150
             }];
 
             return new Ext.grid.ColumnModel({
