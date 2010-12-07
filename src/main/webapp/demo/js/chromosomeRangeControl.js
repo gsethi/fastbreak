@@ -154,7 +154,7 @@ var ChromosomeRangeControl = Class.create({
     publishSelection: function(start, end) {
         var control = this;
         this.selectionListeners.each(function(listener) {
-            listener.onRangeSelection(control.selectedChromosome.substring(3,control.selectedChromosome.length), start ,end, 'rangeControl');
+            listener.onRangeSelection(control.selectedChromosome.substring(3,control.selectedChromosome.length), start ,end);
         });
     },
 
@@ -166,7 +166,7 @@ var ChromosomeRangeControl = Class.create({
             control.startPosition = x;
             control.endPosition =  parseInt(x) + parseInt(dx);
             control.publishSelection(control.startPosition, control.endPosition);
-        }
+        };
 
         var flexbar = new isbv.FlexScroll( Ext.getDom(this.container), listener);
 
@@ -181,10 +181,6 @@ var ChromosomeRangeControl = Class.create({
         if(minPosition != startPos && maxPosition != endPos){
             flexbar.setPosition(Math.round(startPos / 1000),Math.round(endPos / 1000));
         }
-
-      //  this.selectionListeners.each(function(listener) {
-      //      listener.onChromosomeRangeLoaded();
-      //  });
-        
+       
     }
 });

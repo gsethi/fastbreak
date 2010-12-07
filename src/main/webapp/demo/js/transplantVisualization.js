@@ -164,7 +164,9 @@ var TransplantVisualization = Class.create({
     onPatientSelection: function(patientArray){
         var control = this;
         control.patients = patientArray;
+
         control.patientchanged = true;
+
       //  if(patientArray.length > 0 && control.chromosomeRange != '')
       //  {
       //      control.loadVisualizationForSelectedPatients();
@@ -206,6 +208,10 @@ var TransplantVisualization = Class.create({
         if(!control.rangechanged && !control.patientchanged && !control.parameterschanged){
             return;
         }
+
+        control.rangechanged = false;
+        control.patientchanged = false;
+        control.parameterschanged = false;
 
         //reloading the visualization, reset the array of visualizations
         control.transplants=[];
@@ -301,11 +307,10 @@ getRecenterListener: function(vis)
 {
     var control = this;
 	return function (loc) {
+
+    google.visualization.events.trigger(control,'rangeSelect',{chr:loc.chr,start:loc.start,end:loc.end,gene:null,cancel_bubble: true});
 	//	log("recenter event");
 		control.locationhistory.push(loc);
-	//	document.getElementById('chr').value = loc.chr;
-	//	document.getElementById('start').value = loc.start;
-	//	document.getElementById('end').value = loc.end;
         control.onRangeSelection(loc.chr + '/' + loc.start + '/' + loc.end);
 		for(var i in control.transplants)
 		{
@@ -313,6 +318,7 @@ getRecenterListener: function(vis)
 				control.transplants[i].recenteronlocation(loc.chr,loc.start,loc.end);
 		}
 	}
+
 
 },
 
@@ -321,10 +327,9 @@ getSelectionHandler: function(vis)
     var control = this;
 	return function () {
 		//log("selection event");
+        google.visualization.events.trigger(control,'rangeSelect',{chr:loc.chr,start:loc.start,end:loc.end,gene:null,cancel_bubble: true});
 		var loc = vis.recenteronrow(vis.getSelection());
 		control.locationhistory.push(loc);
-	//	document.getElementById('start').value = loc.start;
-	//	document.getElementById('end').value = loc.end;
         control.onRangeSelection(loc.chr + '/' + loc.start + '/' + loc.end);
 		for(var i in control.transplants)
 		{
@@ -332,7 +337,6 @@ getSelectionHandler: function(vis)
 				control.transplants[i].recenteronlocation(loc.chr,loc.start,loc.end);
 		}
 	}
-
 },
 
 getfilters: function(){
