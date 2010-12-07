@@ -194,6 +194,7 @@
                                  });
 
                  circvis_gbm = new Ext.Panel({
+                                    title: 'Circvis',
                                     contentEl: $("chromovis_gbm_div"),
                                     autoScroll: true,
                                     anchor: '100%'
@@ -235,6 +236,20 @@
                      activeTab: 0
                  });
 
+                  ovTabPanel = new Ext.TabPanel({
+                     padding: '5 5 5 5',
+                     items: [circvis_ov,tablevis_ov],
+                     autoScroll: true,
+                     activeTab: 0
+                 });
+
+                  gbmTabPanel = new Ext.TabPanel({
+                     padding: '5 5 5 5',
+                     items: [circvis_gbm,tablevis_gbm],
+                     autoScroll: true,
+                     activeTab: 0
+                 });
+
                  comparatorPanel = new Ext.Panel({
                      title: 'Cancer Comparator',
                      id: 'comparator-panel',
@@ -251,31 +266,29 @@
                   ovPanel = new Ext.Panel({
                      title: 'OV Gene Disruption',
                      id: 'ov-panel',
-                     padding: '5 5 5 5',
-                     items: [circvis_ov],
-                     autoScroll: true,
+                     items: [ovTabPanel],
                      tools: [{
                          id: 'help',
                          handler: function(event, toolEl, panel){
                              //
                          }
                          
-                     }]
+                     }],
+                      layout: 'fit'
                  });
 
                   gbmPanel = new Ext.Panel({
                      title: 'GBM Gene Disruption',
                      id: 'gbm-panel',
-                     padding: '5 5 5 5',
-                     items: [circvis_gbm],
-                     autoScroll: true,
-                                           tools: [{
+                     items: [gbmTabPanel],
+                     tools: [{
                          id: 'help',
                          handler: function(event, toolEl, panel){
                              //
                          }
 
-                     }]
+                     }],
+                      layout: 'fit'
                  });
 
                  visualizationControlPanel = new Ext.Panel({
@@ -511,7 +524,10 @@
     function onLoadGBMDataComplete() {
         $('chromovis_gbm_div').innerHTML="";
         wedge_plot($('chromovis_gbm_div'));
-        createDataTable($('tablevis_gbm_div'), args['datatable']);
+
+        var gbmDataTable = createDataTable(args['datatable']);
+        tablevis_gbm.removeAll();
+        tablevis_gbm.add(gbmDataTable);
 
         loadMask.hide();
         if(viewPort != null){
@@ -522,9 +538,12 @@
      function onLoadOVDataComplete() {
         $('chromovis_ov_div').innerHTML="";
         wedge_plot($('chromovis_ov_div'));
-        createDataTable($('tablevis_ov_div'), args['datatable']);
 
-         loadMask.hide();
+        var ovDataTable = createDataTable(args['datatable']);
+        tablevis_ov.removeAll();
+        tablevis_ov.add(ovDataTable);
+
+        loadMask.hide();
         if(viewPort != null){
 	        viewPort.doLayout();
 	    }
@@ -533,6 +552,7 @@
     function onLoadOVGBMDataComplete() {
         $('chromovis_ov_gbm_div').innerHTML="";
         wedge_plot_ov_gbm($('chromovis_ov_gbm_div'));
+
         var ovgbmDataTable = createOVGBMDataTable(args['datatable']);
         tablevis_ov_gbm.removeAll();
         tablevis_ov_gbm.add(ovgbmDataTable);
