@@ -253,7 +253,7 @@ var TransplantVisualization = Class.create({
         {
             var s = p.samples[i];
             html+="<td class=\'outlined\'>"+s.id+" "+s.classification+"<br/><div id=\'" + s.id +"div\' style=\"" +
-                    "width: " + control.options.div_width + "; height: " + control.options.div_height" + ;\"></div></td>";
+                    "width: " + control.options.div_width + "; height: " + control.options.div_height +";\"></div></td>";
             var filters = JSON.stringify(control.getfilters());
             //var query = new google.visualization.Query(transplantws+'?key='+apiKey+'&filters='+filters+'&chr='+document.getElementById('chr').value+'&start='+document.getElementById('start').value+'&end='+document.getElementById('end').value+'&depth='+document.getElementById('depth').value+'&radius='+document.getElementById('radius').value+'&file='+s.pickleFile);
 
