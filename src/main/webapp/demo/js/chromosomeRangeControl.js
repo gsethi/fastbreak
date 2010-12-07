@@ -22,13 +22,13 @@ var ChromosomeRangeControl = Class.create({
         this.selectionListeners[this.selectionListeners.length] = listener;
     },
 
-    onRangeSelectionChange: function(chromName, startPos,selectionWidth){
-        if(this.selectedChromosome == "chr"+chromName && this.startPosition == startPos && this.endPosition == selectionWidth)
+    onRangeSelectionChange: function(chromName, startPos,endPos){
+        if(this.selectedChromosome == "chr"+chromName && this.startPosition == startPos && this.endPosition == endPos)
             return;
         
          this.selectedChromosome = "chr"+chromName;
          this.startPosition = startPos;
-        this.endPosition = selectionWidth;
+        this.endPosition = endPos;
 
         if(this.chromoCombo != null){
             this.chromoCombo.setValue(this.selectedChromosome);
@@ -121,9 +121,6 @@ var ChromosomeRangeControl = Class.create({
              this.selectionListeners.each(function(listener) {
             listener.onChromosomeRangeLoaded();
         });
-
-
-
 
     },
 
