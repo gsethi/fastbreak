@@ -155,7 +155,7 @@
                                  fieldLabel:'Chr',
                                  id:'currentrange_chr',
                                  width: 30,
-                                 disabled:true,
+
                                  readOnly:true
                              },
                                      {
@@ -164,7 +164,7 @@
                                  id:'currentrange_range',
                                  fieldClass:'chr_range',
                                          width: 150,
-                                         disabled:true,
+
                                  readOnly:true
                              },
                                      {
@@ -172,7 +172,7 @@
                                  fieldLabel:'Gene',
                                  id:'currentrange_gene',
                                  width: 80,
-                                         disabled:true,
+
                                  readOnly:true
                              }]
                              }]
@@ -382,7 +382,7 @@
                          listeners : {
                               hide: function() {
                                   var currentRange = rangeControl.getRangeSelection();
-                                  onRangeSelection(currentRange.chr,currentRange.start,currentRange.end);
+                                  onRangeSelection(currentRange.chr,currentRange.start,currentRange.end+currentRange.start);
                                   visualizationControl.loadVisualizationForSelectedPatients();
                               }
                           }
@@ -657,11 +657,6 @@
 
 
     function onRangeSelection(chrom,startpos,endpos,gene,cancel_bubble){
-        if (Ext.getCmp('currentrange_chr').getValue() == chrom &&  //don't update the same range.
-             Ext.getCmp('currentrange_range').getValue() == formatNumber(startpos) + "-" + formatNumber(endpos)) {
-            return;
-        }
-
 
         Ext.getCmp('currentrange_chr').setValue(chrom);
         Ext.getCmp('currentrange_range').setValue(formatNumber(startpos) + "-" + formatNumber(endpos));
