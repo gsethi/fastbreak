@@ -64,7 +64,7 @@
         <script type="text/javascript" src="/addama/ui/protovis-1.0/google-ds-utils.js"></script>
         <script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/utilities.js"></script>
 
-        <script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/data_retrieval.js"></script>
+        <script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/data_retrieval_transplantui.js"></script>
         <script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/circvis.js"></script>
 
         <script type="text/javascript" src="/addama/ui/ext-js-3.3.0/adapter/ext/ext-base.js"></script>
@@ -82,7 +82,7 @@
         <script type="text/javascript">
             Ext.BLANK_IMAGE_URL = '/addama/ui/ext-js-3.3.0/resources/images/default/s.gif';
         </script>
-        <script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/wedge_plot.js"></script>
+        <script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/wedge_plot_transplantui.js"></script>
 
         <script type="text/javascript">
         var centertabs = null;
@@ -188,8 +188,7 @@
                                     fieldLabel: 'Gene Symbol',
                                     name:'gene_symbol',
                                     id:'gene_symbol',
-                                    anchor:'95%',
-                                    allowBlank:false
+                                    anchor:'95%'
                                 }]
                             }]
                      }],
@@ -329,7 +328,7 @@
                  visHeaderControlPanel = new Ext.Panel({
                      contentEl: $("container_visheader"),
                      autoScroll: false,
-                     flex: 1
+                     autoHeight: true
                  });
 
 
@@ -509,7 +508,7 @@
     	if(n.leaf && (  n.id+'-panel') != Ext.getCmp('center-panel').layout.activeItem){  // ignore clicks on folders and currently selected node
     		Ext.getCmp('center-panel').layout.setActiveItem(n.id + '-panel');
     		if(n.id == 'fastbreak'){
-                                $("container_visheader").innerHTML = "<p align=\"right\"></p><div align='center' id='legenddiv'></div>";
+                                $("container_visheader").innerHTML = "<div align='center' id='legenddiv'></div><br/>";
                 org.systemsbiology.visualization.transplant.colorkey(org.systemsbiology.visualization.transplant.chrmcolors.human,document.getElementById('legenddiv'));
   //                    visualizationControl.loadVisualizationForSelectedPatients();
 
@@ -560,7 +559,7 @@
     //function called when data load for circvis is complete
     function onLoadGBMDataComplete() {
         $('chromovis_gbm_div').innerHTML="";
-        wedge_plot($('chromovis_gbm_div'));
+        wedge_plot($('chromovis_gbm_div'),circvis_gbm.getWidth() * 0.9,circvis_gbm.getWidth() * 0.9);
 
         var gbmDataTable = createDataTable(args['datatable']);
         tablevis_gbm.removeAll();
@@ -574,7 +573,7 @@
 
      function onLoadOVDataComplete() {
         $('chromovis_ov_div').innerHTML="";
-        wedge_plot($('chromovis_ov_div'));
+        wedge_plot($('chromovis_ov_div'),circvis_ov.getWidth() * 0.9,circvis_ov.getWidth() * 0.9);
 
         var ovDataTable = createDataTable(args['datatable']);
         tablevis_ov.removeAll();
@@ -588,7 +587,7 @@
 
     function onLoadOVGBMDataComplete() {
         $('chromovis_ov_gbm_div').innerHTML="";
-        wedge_plot_ov_gbm($('chromovis_ov_gbm_div'));
+        wedge_plot_ov_gbm($('chromovis_ov_gbm_div'),circvis_ov_gbm.getWidth() * 0.9,circvis_ov_gbm.getWidth() * 0.9);
 
         var ovgbmDataTable = createOVGBMDataTable(args['datatable']);
         tablevis_ov_gbm.removeAll();
@@ -645,8 +644,6 @@
     }
 
 
-
-
     function onRangeSelection(chrom,startpos,endpos,gene,cancel_bubble){
         Ext.getCmp('currentrange_chr').setValue(chrom);
         Ext.getCmp('currentrange_range').setValue(formatNumber(startpos) + "-" + formatNumber(endpos));
@@ -661,6 +658,7 @@
         if(visualizationControl != null && !cancel_bubble)  {
             var chromRangeUri = "chr"+chrom+"/" + startpos + "/" + endpos;
             visualizationControl.onRangeSelection(chromRangeUri);
+            rangeControl.onRangeSelectionChange(chrom,startpos,endpos);
         }
 
         selectedChromRangeUri = chromRangeUri;
