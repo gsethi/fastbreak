@@ -22,8 +22,14 @@
             border-width: 2px 2px 2px 2px;
             border-style: solid;
             border-spacing: 0px;
-
             }
+            /*icons*/
+       .data {
+            background-image:url(images/control_equalizer.png) !important
+        }
+    .advParameters {
+            background-image:url(images/table_gear.png) !important
+        }
     </style>
         <link rel="stylesheet" type="text/css" href="/addama/ui/ext-js-3.3.0/resources/css/ext-all.css">
         <script type="text/javascript" language="javascript" src="/addama/ui/prototype.js"></script>
@@ -171,7 +177,7 @@
 
                  });
                  
-                 rangeControl = new ChromosomeRangeControl("container_rangeControl","/addama/refgenome/hg18","chr22",0,51304566,29576000,750000);
+                 rangeControl = new ChromosomeRangeControl("container_rangeControl","/addama/refgenome/hg18","22",0,51304566,29576000,750000);
 
                  rangeControl.addSelectionListener(this);
 
@@ -262,21 +268,16 @@
 
 
                  chromSelectionPanel = new Ext.Panel({
-                    title: 'Chromosome Range',
-
                      layout: 'fit',
                     items: [],
                      height: 100,
-                     width:750
-
-
+                     width:800
                  });
 
                  patientSelectionPanel = new Ext.Panel({
-                    title: 'Patients',
                      layout: 'fit',
                      height: 400,
-                     width:750
+                     width:800
                  });
 
                  visualizationCenter = new Ext.Panel({
@@ -316,9 +317,11 @@
                  visPanelToolbar = new Ext.Toolbar({
                                     items: [{
                                         text: 'Data and Range Selection',
+                                        iconCls: 'data',
                                         handler: showSelectionPanel
                                     },{
                                         text: 'Advanced Parameters',
+                                        iconCls: 'advParameters',
                                         handler: function() {loadVisualizationParameters();}
                                     }
                                     ]
@@ -417,11 +420,11 @@
                                 width: 180,
                                 layout: {
                                     type: 'vbox',
-                                    padding: '5px,5px,5px,5px',
+                                    padding: '5,5,5,5',
                                     align: 'stretch'
                                 },
                      defaults : {
-                         padding : '0px, 0px, 5px, 0px'
+                         padding : '0, 0, 5, 0'
                      },
                                 items: [currentRange,navigationPanel,geneSearchPanel]
                  });
@@ -431,7 +434,7 @@
     	if(n.leaf && (  n.id+'-panel') != Ext.getCmp('center-panel').layout.activeItem){  // ignore clicks on folders and currently selected node
     		Ext.getCmp('center-panel').layout.setActiveItem(n.id + '-panel');
     		if(n.id == 'fastbreak'){
-                                //$("container_visheader").innerHTML = "<p align=\"right\"><a href=\"#\" onClick=loadVisualizationParameters()>Advanced Parameters</a></p><div align='center' id='legenddiv'></div>";
+                                $("container_visheader").innerHTML = "<p align=\"right\"></p><div align='center' id='legenddiv'></div>";
                 org.systemsbiology.visualization.transplant.colorkey(org.systemsbiology.visualization.transplant.chrmcolors.human,document.getElementById('legenddiv'));
   //                    visualizationControl.loadVisualizationForSelectedPatients();
 
@@ -466,6 +469,13 @@
                 visualizationControl = new TransplantVisualization("container_visualization","/addama/refgenome/hg18",workspaceUri +"/track.tsv",selectedChromRangeUri);
                 transplantParameters = new TransplantParameters();
                 transplantParameters.addListener(visualizationControl);
+
+
+                 function onTransplantVisRangeSelected(obj) {
+                     onRangeSelection(obj.chr,obj.start,obj.end,obj.gene,obj.cancel_bubble);
+                 }
+
+                 google.visualization.events.addListener(visualizationControl, 'rangeSelect', onTransplantVisRangeSelected );
 
                 loadPage();
 
@@ -554,7 +564,7 @@
 
 
 
-    function onRangeSelection(chrom,startpos,endpos,gene){
+    function onRangeSelection(chrom,startpos,endpos,gene,cancel_bubble){
         Ext.getCmp('currentrange_chr').setValue(chrom);
         Ext.getCmp('currentrange_range').setValue(formatNumber(startpos) + "-" + formatNumber(endpos));
         if (gene == null || gene == "") {
@@ -565,7 +575,7 @@
                 viewPort.doLayout();
         
 
-        if(visualizationControl != null)  {
+        if(visualizationControl != null && !cancel_bubble)  {
             var chromRangeUri = "chr"+chrom+"/" + startpos + "/" + endpos;
             visualizationControl.onRangeSelection(chromRangeUri);
         }
@@ -589,15 +599,12 @@
                         var startpos = json_array[0]['start'];
                         var endpos = json_array[0]['end'];
 
-                       onRangeSelection(chrom,startpos-buffer < 0 ? 0 : startpos-buffer,endpos+buffer,gene_symbol);
+                        onRangeSelection(chrom,startpos-buffer < 0 ? 0 : startpos-buffer,endpos+buffer,gene_symbol);
                     } else {
                         showError("Gene Selection", "Gene symbol not found.");
                     }
                 }
-
-
                 network_query.send(handleGeneQuery);
-
             }
 
     function onChromosomeRangeLoaded(){
