@@ -64,33 +64,6 @@ var PatientSelectorControl = Class.create({
             groupField: 'patientclassification'
         });
 
-        //initialize the store now that we have the json
-        var patientstore = new Ext.data.JsonStore({
-               // store configs
-               autoDestroy: true,
-               data: rootJson,
-               remoteSort: false,
-               sortInfo: {
-                   field: 'patientid',
-                   direction: 'ASC'
-               },
-               storeId: 'patientStore',
-               // reader configs
-               idProperty: 'patientid',
-               root: 'data',
-               fields: [{
-                   name: 'patientid'
-               }, {
-                   name: 'patientclassification'
-               },  {
-                   name: 'status'
-               },  {
-                   name: 'resistance'
-               }, {
-                   name: 'patient'
-               }]
-           });
-
 
 
 
@@ -116,11 +89,7 @@ var filters = new Ext.ux.grid.GridFilters({
         }]
     });
 
-
-// use a factory method to reduce code while demonstrating
-        // that the GridFilter plugin may be configured with or without
-        // the filter types (the filters may be specified on the column model
-        var sm = new Ext.grid.CheckboxSelectionModel({
+      var sm = new Ext.grid.CheckboxSelectionModel({
             listeners: {
             'rowselect': function(sm, rowIndex,record){
                 selectedItems = sm.getSelections();
@@ -137,10 +106,11 @@ var filters = new Ext.ux.grid.GridFilters({
                     control.selectedPatients[control.selectedPatients.length]=item.json.patient;
                 });
                 control.selpatientsCallback(control.selectedPatients);
-                
+
             }
         }
         });
+
         var createColModel = function (finish, start) {
 
             var columns = [
@@ -188,8 +158,8 @@ var filters = new Ext.ux.grid.GridFilters({
         border: true,
         store: groupingstore,
         colModel: createColModel(5),
+             sm:sm,
              columnLines: true,
-             sm: sm,
              frame: true,
              iconCls:'icon-grid',
              stripeRows: true,
@@ -201,10 +171,14 @@ var filters = new Ext.ux.grid.GridFilters({
             forceFit: true,
             groupTextTpl: '{text} ({[values.rs.length]} {[values.rs.length > 1 ? "Items" : "Item"]})'
         }),
+        listeners: {
+            'viewready': function(grid){
+                grid.getSelectionModel().selectRange(0,5);
+
+            }
+        },
         plugins: [filters]
     });
-
-
 
         control.loadedCallback();
 
