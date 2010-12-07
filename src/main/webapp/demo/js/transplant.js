@@ -212,8 +212,10 @@ org.systemsbiology.visualization.transplant.prototype.log = function(msg){}
 org.systemsbiology.visualization.transplant.prototype.drawChr = function(vis,depth,oriantation, root,stumpchr,stumpstart,stumpend,rowid,end,scale)
 {
 	vis.log("drawChr called with "+vis+depth+oriantation+ root+stumpchr+stumpstart+stumpend+rowid+end);
-	rowid= typeof(rowid)==undefined ? "root" : rowid;
-	var onclickstring = "isbSWFvisualizations['"+vis.SWFid+"'].selected="+rowid+"; google.visualization.events.trigger(isbSWFvisualizations['"+vis.SWFid+"'], 'select', {})";
+	rowid = (rowid=="") ? "root" : rowid;
+	var onclickstring = "isbSWFvisualizations['"+vis.SWFid+"'].selected=\'"+rowid+"\';"+
+            " google.visualization.events.trigger(isbSWFvisualizations['"+vis.SWFid+"'], 'select', {chr:\'"+
+                stumpchr+"\',start:"+stumpstart+",end:"+stumpend+",gene:null,cancel_bubble:true});";
 	var region = stumpchr+":"+stumpstart+"-"+stumpend;
 	var arc = depth == 0 || vis.grided === true ? 0 : -1 * oriantation;
 	return vis.drawPath(rowid,root,end,vis.colors[stumpchr],onclickstring,region,arc);
@@ -284,7 +286,7 @@ org.systemsbiology.visualization.transplant.prototype.decorateChr = function(vis
 			//var c = (s.x+e.x)/2;
 			var l=depth==0?dec.label:"";
 
-			var oc = "isbSWFvisualizations['"+vis.SWFid+"'].internalrecenteronlocation('"+stumpchr+"',"+(dec.start-vis.radius)+","+(dec.end+vis.radius)+");";
+			var oc = "isbSWFvisualizations['"+vis.SWFid+"'].internalrecenteronlocation('"+stumpchr+"',"+(dec.start-vis.radius)+","+(dec.end+vis.radius)+",\'" + dec.label+"\');";
 			
 			var mo =dec.mouseover;
 			var rx = (Math.abs((ex-sx)/2));
@@ -899,11 +901,11 @@ org.systemsbiology.visualization.transplant.prototype.recenteronrow = function (
 	
 }
 
-org.systemsbiology.visualization.transplant.prototype.internalrecenteronlocation = function (chr,start,end)
+org.systemsbiology.visualization.transplant.prototype.internalrecenteronlocation = function (chr,start,end,gene)
 {
 	
 
-	google.visualization.events.trigger(this, 'recenter', {chr:chr,start:start,end:end})
+	google.visualization.events.trigger(this, 'recenter', {chr:chr,start:start,end:end,gene:gene})
 	this.recenteronlocation(chr,start,end);
 
 }

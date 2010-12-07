@@ -223,12 +223,12 @@ org.systemsbiology.visualization.transplant.prototype.drawChr = function(vis,dep
 	var region = stumpchr+":"+stumpstart+"-"+stumpend;
 	var arc = depth == 0 || vis.grided === true ? 0 : -1 * oriantation;
 	var path = vis.drawPath(rowid,root,end,vis.colors[stumpchr],onclickstring,region,arc);
-	
+
 	//if(arc == 0 && depth != 0)
 	//	path.setAttributeNS( null, "transform","rotate(-90 " + root.x + " " + root.y +")" );
 	return path;
 	//vis.svg.appendChild(path);
-	
+
 			/*
 	if(depth==0)
 		this.label(root,stumpchr,"start",onclickstring)
@@ -454,7 +454,7 @@ org.systemsbiology.visualization.transplant.prototype.traverse = function(depth,
 					contig.drawnNTimes=0;
 					drawme = true;
 				}
-				
+
 				if(contig.drawnNTimes<=1)
 				{
 					contig.drawnNTimes++;
@@ -474,16 +474,16 @@ org.systemsbiology.visualization.transplant.prototype.traverse = function(depth,
 						
 					//this.label(sproutpoint,":"+sprout,"start")
 					//log("there are " + contig.inpoints.length + "inpoints 0: "+contig.inpoints[0]+" pos: "+ contig.inpoints[0].pos);
-					
-					
-	
+
+
+
 					//log("by is " + by + " ty is " + ty);
 
-					
-					//drawing 
+
+					//drawing
 					//log("orderd vals " + contig[depth].start + " " + firstin + " " + lastin + " " + contig[depth].end);
 					//group.appendChild(this.traverse(depth,1,{x:branchx,y:ty},chr2,lastin,contig.end,row,flatF,curveF));
-					var branchgroup = document.createElementNS(this.svgNS, "svg:g"); 
+					var branchgroup = document.createElementNS(this.svgNS, "svg:g");
 					var top = this.traverse(depth,1,{x:branchx,y:ty},chr2,lastin,contig.end,row,flatF,curveF);
 					if (top)
 					{
@@ -507,12 +507,12 @@ org.systemsbiology.visualization.transplant.prototype.traverse = function(depth,
 					}
 					branchgroup.setAttributeNS( null, "transform","translate("+branchx+" "+by+") scale("+ this.nestfactor +") translate(-"+branchx+" -"+by+")");
 					group.appendChild(branchgroup);
-					
+
 					//group.appendChild(this.traverse(depth,-1,{x:branchx,y:by},chr2,contig.start,firstin,row,flatF,curveF));
 					//this.traverse(depth,1,{x:branchx,y:y},chr2,pos2,pos2+this.radius,row,flatF,curveF);
 					//this.traverse(depth,-1,{x:branchx,y:y},chr2,pos2-this.radius,pos2,row,flatF,curveF);
-					
-					
+
+
 					//this.contigsByRow[row]=contig;
 				}
 				else
@@ -714,7 +714,7 @@ org.systemsbiology.visualization.transplant.prototype.draw = function(data, opti
 				if(min>pos2)
 					min = pos2;
 			}*/
-		
+
 		}	
 	}
 	
