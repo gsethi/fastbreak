@@ -371,6 +371,8 @@
                      items:[chromSelectionPanel,patientSelectionPanel],
                          listeners : {
                               hide: function() {
+                                  var currentRange = rangeControl.getRangeSelection();
+                                  onRangeSelection(currentRange.chr,currentRange.start,currentRange.end);
                                   visualizationControl.loadVisualizationForSelectedPatients();
                               }
                           }
@@ -645,6 +647,12 @@
 
 
     function onRangeSelection(chrom,startpos,endpos,gene,cancel_bubble){
+        if (Ext.getCmp('currentrange_chr').getValue() == chrom &&  //don't update the same range.
+             Ext.getCmp('currentrange_range').getValue() == formatNumber(startpos) + "-" + formatNumber(endpos)) {
+            return;
+        }
+
+
         Ext.getCmp('currentrange_chr').setValue(chrom);
         Ext.getCmp('currentrange_range').setValue(formatNumber(startpos) + "-" + formatNumber(endpos));
         if (gene == null || gene == "") {
