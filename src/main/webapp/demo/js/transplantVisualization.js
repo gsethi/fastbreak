@@ -308,7 +308,7 @@ getRecenterListener: function(vis)
     var control = this;
 	return function (loc) {
 
-    google.visualization.events.trigger(control,'rangeSelect',{chr:loc.chr,start:loc.start,end:loc.end,gene:null,cancel_bubble: true});
+    google.visualization.events.trigger(control,'rangeSelect',{chr:loc.chr.substring(3),start:loc.start,end:loc.end,gene:null,cancel_bubble: true});
 	//	log("recenter event");
 		control.locationhistory.push(loc);
         control.onRangeSelection(loc.chr + '/' + loc.start + '/' + loc.end);
