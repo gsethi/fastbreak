@@ -143,7 +143,7 @@
                      labelAlign: 'top',
                      iconCls:'current_selections',
                      frame: true,
-                     height: 220,
+                     height: 175,
                      padding: '5',
                      items:[{
                          layout:'column',
@@ -151,7 +151,7 @@
                              columnWidth: 0.95,
                              layout:'form',
                              items:[{
-                                 xtype:'textfield',
+                                 xtype:'label',
                                  fieldLabel:'Chr',
                                  id:'currentrange_chr',
                                  width: 30,
@@ -159,7 +159,7 @@
                                  readOnly:true
                              },
                                      {
-                                 xtype:'textfield',
+                                 xtype:'label',
                                  fieldLabel:'Range',
                                  id:'currentrange_range',
                                  fieldClass:'chr_range',
@@ -168,7 +168,7 @@
                                  readOnly:true
                              },
                                      {
-                                 xtype:'textfield',
+                                 xtype:'label',
                                  fieldLabel:'Gene',
                                  id:'currentrange_gene',
                                  width: 80,
@@ -548,7 +548,7 @@
                      defaults : {
                          padding : '0, 0, 5, 0'
                      },
-                                items: [currentRange,navigationPanel,geneSearchPanel]
+                                items: [navigationPanel,currentRange,geneSearchPanel]
                  });
 
                  navigationPanel.on('click', function(n){
@@ -694,12 +694,12 @@
 
     function onRangeSelection(chrom,startpos,endpos,gene,cancel_bubble){
 
-        Ext.getCmp('currentrange_chr').setValue(chrom);
-        Ext.getCmp('currentrange_range').setValue(formatNumber(startpos) + "-" + formatNumber(endpos));
+        Ext.getCmp('currentrange_chr').setText(chrom);
+        Ext.getCmp('currentrange_range').setText(formatNumber(startpos) + "-" + formatNumber(endpos));
         if (gene == null || gene == "") {
-            Ext.getCmp('currentrange_gene').setValue("");
+            Ext.getCmp('currentrange_gene').setText("");
         }
-        else (Ext.getCmp('currentrange_gene').setValue(gene))
+        else (Ext.getCmp('currentrange_gene').setText(gene))
             if(viewPort != null)
                 viewPort.doLayout();
         
