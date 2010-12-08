@@ -215,9 +215,6 @@
 
                  rangeControl.addSelectionListener(this);
 
-                    onRangeSelection('22',29576000,29576000+750000);
-
-
                  circvis_ov = new Ext.Panel({
                                     title: 'Circvis',
                                     contentEl: $("chromovis_ov_div"),
@@ -554,26 +551,26 @@
                  });
 
                  navigationPanel.on('click', function(n){
-    	var sn = this.selModel.selNode || {}; // selNode is null on initial selection
-    	if(n.leaf && (  n.id+'-panel') != Ext.getCmp('center-panel').layout.activeItem){  // ignore clicks on folders and currently selected node
-    		Ext.getCmp('center-panel').layout.setActiveItem(n.id + '-panel');
-    		if(n.id == 'fastbreak'){
-                                $("container_visheader").innerHTML = "<div align='center' id='legenddiv'></div><br/>";
-                org.systemsbiology.visualization.transplant.colorkey(org.systemsbiology.visualization.transplant.chrmcolors.human,document.getElementById('legenddiv'));
-  //                    visualizationControl.loadVisualizationForSelectedPatients();
+                     var sn = this.selModel.selNode || {}; // selNode is null on initial selection
+                     if(n.leaf && (  n.id+'-panel') != Ext.getCmp('center-panel').layout.activeItem){  // ignore clicks on folders and currently selected node
+                         Ext.getCmp('center-panel').layout.setActiveItem(n.id + '-panel');
+                         if(n.id == 'fastbreak'){
+                             $("container_visheader").innerHTML = "<div align='center' id='legenddiv'></div><br/>";
+                             org.systemsbiology.visualization.transplant.colorkey(org.systemsbiology.visualization.transplant.chrmcolors.human,document.getElementById('legenddiv'));
+                             visualizationControl.loadVisualizationForSelectedPatients();
 
-            }
-            else if(n.id == 'comparator'){
-                onCircvisTypeSelected('ov_gbm');
-            }
-            else if(n.id == 'ov'){
-                onCircvisTypeSelected('ov');
-            }
-            else if(n.id == 'gbm'){
-                onCircvisTypeSelected('gbm');
-            }
-    	}
-    });
+                         }
+                         else if(n.id == 'comparator'){
+                             onCircvisTypeSelected('ov_gbm');
+                         }
+                         else if(n.id == 'ov'){
+                             onCircvisTypeSelected('ov');
+                         }
+                         else if(n.id == 'gbm'){
+                             onCircvisTypeSelected('gbm');
+                         }
+                     }
+                 });
 
                  new Ajax.Request("/addama/users/whoami", {
                     method: "get",
@@ -589,12 +586,14 @@
                     }
                 });
 
-                patientSelectorControl = new PatientSelectorControl(workspaceUri,onPatientSelectorLoaded,onPatientSelectionChange);
                 visualizationControl = new TransplantVisualization("container_visualization","/addama/refgenome/hg18",workspaceUri +"/track.tsv",selectedChromRangeUri);
                 transplantParameters = new TransplantParameters();
                 transplantParameters.addListener(visualizationControl);
 
+                patientSelectorControl = new PatientSelectorControl(workspaceUri,onPatientSelectorLoaded,onPatientSelectionChange);
+                    onRangeSelection('22',29576000,29576000+750000);
 
+                 
                  function onTransplantVisRangeSelected(obj) {
                      onRangeSelection(obj.chr,obj.start,obj.end,obj.gene,obj.cancel_bubble);
                  }

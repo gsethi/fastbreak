@@ -92,24 +92,21 @@ var filters = new Ext.ux.grid.GridFilters({
       var sm = new Ext.grid.CheckboxSelectionModel({
             listeners: {
             'rowselect': function(sm, rowIndex,record){
-                selectedItems = sm.getSelections();
-                control.selectedPatients = new Array();
-                $A(selectedItems).each(function(item){
-                    control.selectedPatients[control.selectedPatients.length]=item.json.patient;
-                });
-                control.selpatientsCallback(control.selectedPatients);
+                    updatePatientList(sm.getSelections());
             },
-            'rowdeselect': function(sm,rowIndex,record){
-                selectedItems = sm.getSelections();
-                control.selectedPatients = new Array();
-                $A(selectedItems).each(function(item){
-                    control.selectedPatients[control.selectedPatients.length]=item.json.patient;
-                });
-                control.selpatientsCallback(control.selectedPatients);
-
-            }
+                'rowdeselect': function(sm, rowIndex, record) {
+                    updatePatientList(sm.getSelections());
+                }
         }
         });
+        var updatePatientList = function (selections) {
+            var selectedItems = selections;
+            control.selectedPatients = new Array();
+            $A(selectedItems).each(function(item) {
+                control.selectedPatients[control.selectedPatients.length] = item.json.patient;
+            });
+            control.selpatientsCallback(control.selectedPatients);
+        };
 
         var createColModel = function (finish, start) {
 
@@ -174,7 +171,9 @@ var filters = new Ext.ux.grid.GridFilters({
         listeners: {
             'viewready': function(grid){
                 grid.getSelectionModel().selectRange(0,5);
-
+            },
+            'added': function(grid){
+                    updatePatientList(groupingstore.getRange(0,5));
             }
         },
         plugins: [filters]
