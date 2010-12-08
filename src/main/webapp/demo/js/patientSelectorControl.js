@@ -171,7 +171,6 @@ var PatientSelectorControl = Class.create({
             listeners: {
                 'viewready': function(grid){
                     grid.getSelectionModel().selectRange(0,5);
-                    updatePatientList(grid.getSelectionModel().getSelections());
                 }
             },
             plugins: [filters]
