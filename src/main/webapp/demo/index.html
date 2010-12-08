@@ -417,6 +417,7 @@
                      forceLayout : true,
                      closeAction : 'hide',
                      renderTo : Ext.getBody(),
+                     hideMode: 'offsets',
 
                      items:[chromSelectionPanel, geneSearchPanel_dataSelection,patientSelectionPanel],
                          listeners : {
@@ -697,6 +698,8 @@
     function onPatientSelectorLoaded(){
         patientSelectionPanel.removeAll();
         patientSelectionPanel.add(patientSelectorControl.patientGrid);
+        dataSelectionPanel.show();
+        dataSelectionPanel.hide();
     }
 
 
@@ -753,8 +756,7 @@
         chromosomeRangeLoaded=true;
         chromSelectionPanel.removeAll();
         chromSelectionPanel.add(rangeControl.radioPanel);
-        dataSelectionPanel.show();
-        dataSelectionPanel.hide();
+
     }
 
 
