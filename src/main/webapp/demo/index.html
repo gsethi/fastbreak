@@ -56,6 +56,8 @@
         <link rel="stylesheet" type="text/css" href="/addama/ui/ext-js-3.3.0/examples/ux/gridfilters/css/GridFilters.css">
          <link rel="stylesheet" type="text/css" href="/addama/ui/ext-js-3.3.0/examples/ux/gridfilters/css/RangeMenu.css">
         <link rel="stylesheet" type="text/css" href="/addama/ui/ext-js-3.3.0/resources/css/ext-all.css">
+
+        <link rel="stylesheet" type="text/css" href="/addama/ui/ext-js-3.3.0/resources/css/xtheme-slate.css" />
         <script type="text/javascript" language="javascript" src="/addama/ui/prototype.js"></script>
         <script type="text/javascript" src="http://www.google.com/jsapi"></script>
         <script type="text/javascript">
@@ -98,11 +100,12 @@
             var dataSetChangeListeners = new Array();
             var patientSelector = null;
             var visualizationControl = null;
+            var dataSelectionPanel = null;
             var transplantParameters;
             var selectedChromRangeUri;
             var chromosomeRangeLoaded = false;
             var workspacesLoaded=false;
-            var rangeControl=null;
+            var rarangeControl=null;
             var westPanel = null;
             var viewPort = null;
             var loadMask = null;
@@ -409,6 +412,7 @@
                     autoWidth : true,
                      autoHeight : true,
                      modal: true,
+                     hidden : true,
                      closeAction : 'hide',
 
                      items:[chromSelectionPanel, geneSearchPanel_dataSelection,patientSelectionPanel],
@@ -694,7 +698,10 @@
 
 
     function onRangeSelection(chrom,startpos,endpos,gene,cancel_bubble){
-
+         if (Ext.getCmp('currentrange_chr').text == chrom &&  //don't update the same range.
+             Ext.getCmp('currentrange_range').text == formatNumber(startpos) + "-" + formatNumber(endpos)) {
+            return;
+        }
         Ext.getCmp('currentrange_chr').setText(chrom);
         Ext.getCmp('currentrange_range').setText(formatNumber(startpos) + "-" + formatNumber(endpos));
         if (gene == null || gene == "") {
@@ -703,7 +710,7 @@
         else (Ext.getCmp('currentrange_gene').setText(gene))
             if(viewPort != null)
                 viewPort.doLayout();
-        
+
 
         if(visualizationControl != null && !cancel_bubble)  {
             var chromRangeUri = "chr"+chrom+"/" + startpos + "/" + endpos;
@@ -745,48 +752,47 @@
     }
 
 
+        function loadPage(){
 
-    function loadPage( ){
+            topPanel = new Ext.Panel({
+                region: 'north',
+                height: 26,
+                items:[topBarPanel]
+            });
 
-     topPanel = new Ext.Panel({
-        region: 'north',
-         height: 26,
-         items:[topBarPanel]
-     });
+            viewPort = new Ext.Viewport({
+                layout: 'border',
+                renderTo: Ext.getBody(),
+                items: [    topPanel
+                    ,westPanel,centerPanel]
+                
+            });
+        }
+        
+        function showError(title, msg) {
+            Ext.MessageBox.show({
+                title: title,
+                msg: msg,
+                buttons: Ext.MessageBox.OK,
+                icon: Ext.MessageBox.ERROR
+            });
+        }
 
-    viewPort = new Ext.Viewport({
-        layout: 'border',
-        renderTo: Ext.getBody(),
-        items: [    topPanel
-        ,westPanel,centerPanel]
-});
-
-
-}
-            function showError(title, msg) {
-                Ext.MessageBox.show({
-                   title: title,
-                   msg: msg,
-                   buttons: Ext.MessageBox.OK,
-                   icon: Ext.MessageBox.ERROR
-               });
-            }
-
-            function formatNumber(number) {
+        function formatNumber(number) {
             number = '' + number;
             if (number.length > 3) {
-            var mod = number.length % 3;
-            var output = (mod > 0 ? (number.substring(0,mod)) : '');
-            for (i=0 ; i < Math.floor(number.length / 3); i++) {
-            if ((mod == 0) && (i == 0))
-            output += number.substring(mod+ 3 * i, mod + 3 * i + 3);
-            else
-            output+= ',' + number.substring(mod + 3 * i, mod + 3 * i + 3);
-            }
-            return (output);
+                var mod = number.length % 3;
+                var output = (mod > 0 ? (number.substring(0,mod)) : '');
+                for (i=0 ; i < Math.floor(number.length / 3); i++) {
+                    if ((mod == 0) && (i == 0))
+                        output += number.substring(mod+ 3 * i, mod + 3 * i + 3);
+                    else
+                        output+= ',' + number.substring(mod + 3 * i, mod + 3 * i + 3);
+                }
+                return (output);
             }
             else return number;
-            }
+        }
 
         function loadVisualizationParameters(){
             transplantParameters.show();
