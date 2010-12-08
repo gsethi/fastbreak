@@ -413,7 +413,10 @@
                      autoHeight : true,
                      modal: true,
                      hidden : true,
+                     initHidden : true,
+                     forceLayout : true,
                      closeAction : 'hide',
+                     renderTo : Ext.getBody(),
 
                      items:[chromSelectionPanel, geneSearchPanel_dataSelection,patientSelectionPanel],
                          listeners : {
@@ -595,7 +598,7 @@
                 transplantParameters.addListener(visualizationControl);
 
                 patientSelectorControl = new PatientSelectorControl(workspaceUri,onPatientSelectorLoaded,onPatientSelectionChange);
-                    onRangeSelection('22',29576000,29576000+750000);
+                    onRangeSelection('22',29576000,29576000+750000,'',false,true); //override check for first time.
 
                  
                  function onTransplantVisRangeSelected(obj) {
@@ -697,11 +700,12 @@
     }
 
 
-    function onRangeSelection(chrom,startpos,endpos,gene,cancel_bubble){
+    function onRangeSelection(chrom,startpos,endpos,gene,cancel_bubble,override_check){
          if (Ext.getCmp('currentrange_chr').text == chrom &&  //don't update the same range.
-             Ext.getCmp('currentrange_range').text == formatNumber(startpos) + "-" + formatNumber(endpos)) {
+             Ext.getCmp('currentrange_range').text == formatNumber(startpos) + "-" + formatNumber(endpos) && !override_check) {
             return;
         }
+        
         Ext.getCmp('currentrange_chr').setText(chrom);
         Ext.getCmp('currentrange_range').setText(formatNumber(startpos) + "-" + formatNumber(endpos));
         if (gene == null || gene == "") {
@@ -749,6 +753,8 @@
         chromosomeRangeLoaded=true;
         chromSelectionPanel.removeAll();
         chromSelectionPanel.add(rangeControl.radioPanel);
+        dataSelectionPanel.show();
+        dataSelectionPanel.hide();
     }
 
 
