@@ -108,6 +108,18 @@
                 }
             });
         };
+         var sm = new Ext.grid.RowSelectionModel({
+                listeners: {
+                    'rowselect': function(sm,rowIndex,record){
+                        var chrom = record.json.chr;
+                        var startpos = record.json.start;
+                        var endpos = record.json.end;
+                        var gene_symbol = record.json.gene;
+                        var buffer=50000;
+                        onRangeSelection(chrom,startpos-buffer < 0 ? 0 : startpos-buffer,endpos+buffer,gene_symbol);
+                    }
+                }
+           });
 
         return new Ext.grid.GridPanel({
         border: true,
@@ -120,7 +132,7 @@
              stripeRows: true,
              height: 600,
              width: 700,
-            sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
+            sm: sm,
         loadMask: true,
         plugins: [filters]
     });
@@ -139,8 +151,9 @@
         var totalDataArray = {'root': dataArray};
 
         var ovgbmStore = new Ext.data.JsonStore({
-                      remoteSort: true,
-            autoDestroy: true,
+                      autoDestroy: true,
+                      data: totalDataArray,
+                      remoteSort: false,
                       sortInfo: {
                           field: 'genecount',
                           direction: 'DESC'
@@ -164,21 +177,15 @@
                       },{
                           type: 'float',
                           name: 'genecount'
-                      }],
-                proxy: new Ext.ux.data.PagingMemoryProxy(totalDataArray, {
-                    customFilter: function(el){
-                        var d = el.data;
-                        var c = el.data;
-                    }
-                })
+                      }]
+
 
                   });
 
          var filters = new Ext.ux.grid.GridFilters({
         // encode and local configuration options defined previously for easier reuse
         encode: false, // json encode the filter query
-        local: false,   // defaults to false (remote filtering)
-        autoReload: true,
+        local: true,   // defaults to false (remote filtering)
         filters: [{
                           type: 'float',
                           dataIndex: 'start'
@@ -241,7 +248,7 @@
                         var startpos = record.json.start;
                         var endpos = record.json.end;
                         var gene_symbol = record.json.gene;
-                        var buffer=20000;
+                        var buffer=50000;
                         onRangeSelection(chrom,startpos-buffer < 0 ? 0 : startpos-buffer,endpos+buffer,gene_symbol);
                     }
                 }
@@ -261,17 +268,9 @@
             sm: sm,
         loadMask: true,
             plugins: [filters],
-            bbar: new Ext.PagingToolbar({
-                       pageSize: 50,
-                       store: ovgbmStore,
-                       displayInfo: true,
-                       displayMsg: 'Displaying items {0} - {1} of {2}',
-                       emptyMsg: "No items to display",
-                       plugins: [filters]
-                   }),
             listeners: {
                 'render': function(grid){
-                     grid.store.load({params:{start:0, limit:50}});
+                     //grid.store.load({params:{start:0, limit:50}});
                 }
             }
     });
