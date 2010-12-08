@@ -166,9 +166,24 @@ var TransplantVisualization = Class.create({
 
     onPatientSelection: function(patientArray){
         var control = this;
-        control.patients = patientArray;
+        function objectsAreSame(x, y) {
+            var objectsAreSame = false;
+            var match = 0;
+            for (i in x) {
+                for (j in y) {
+                    if (i['id'] == j['id']) {
+                        match++;
+                    }
+                }
+            }
+            if (x.length == match && y.length == match) {objecstAreSame = true;}
+            return objectsAreSame;
+        }
+          if (!objectsAreSame(patientArray,control.patients)){
+                control.patients = patientArray;
 
-        control.patientchanged = true;
+                control.patientchanged = true;
+          }
 
       //  if(patientArray.length > 0 && control.chromosomeRange != '')
       //  {
@@ -178,8 +193,10 @@ var TransplantVisualization = Class.create({
 
     onRangeSelection: function(chromRangeUri){
         var control = this;
-        control.chromosomeRange = chromRangeUri;
-        control.rangechanged = true;
+        if (chromRangeUri != control.chromosomeRange) {
+            control.chromosomeRange = chromRangeUri;
+            control.rangechanged = true;    
+        }
 
        // if(control.patients.length > 0 && control.chromosomeRange != '')
       //  {
