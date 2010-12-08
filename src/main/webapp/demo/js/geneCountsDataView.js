@@ -134,7 +134,11 @@
              width: 700,
             sm: sm,
         loadMask: true,
-        plugins: [filters]
+        plugins: [filters],
+            view: new Ext.ux.grid.BufferView({
+                        // render rows as they come into viewable area.
+                        scrollDelay: false
+                    })
     });
 
 
@@ -268,11 +272,11 @@
             sm: sm,
         loadMask: true,
             plugins: [filters],
-            listeners: {
-                'render': function(grid){
-                     //grid.store.load({params:{start:0, limit:50}});
-                }
-            }
+            view: new Ext.ux.grid.BufferView({
+                        // render rows as they come into viewable area.
+                        scrollDelay: false
+                    })
+            
     });
 
     }
