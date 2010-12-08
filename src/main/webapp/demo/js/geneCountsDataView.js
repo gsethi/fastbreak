@@ -1,10 +1,15 @@
-    function createOVGBMDataTable(tableData){
-            var dataArray =tableData.map(function(c){ return {cancertype1: c.chr1.indexOf('GBM') > -1 ? 'GBM' : 'OV',
-            genecount1:c.value1, gene1: c.options1.split('=')[1], genecount2: c.value2, gene2: c.options2.split('=')[1],
-            cancertype2: c.chr2.indexOf('GBM') > -1 ? 'GBM' : 'OV',
-            linkValue: c.linkValue};})
+    function createOVGBMDataTable(ovtabledata,gbmtabledata){
+            var ovdataArray =ovtabledata.map(function(c){ return {cancertype: 'OV',
+            chr:c.chr, gene: c.options.split('=')[1], start: c.start, end: c.end,
+            genecount: c.genecount, patientcount: c.value};})
 
-        var totalDataArray = {'root': dataArray};
+            for(var i=0; i < gbmtabledata.length; i++){
+                ovdataArray = ovdataArray.concat({cancertype: 'GBM',
+                    chr:gbmtabledata[i].chr, gene: gbmtabledata[i].options.split('=')[1], start: gbmtabledata[i].start, end: gbmtabledata[i].end,
+                     genecount: gbmtabledata[i].genecount, patientcount: gbmtabledata[i].value});
+            }
+        
+        var totalDataArray = {'root': ovdataArray};
 
         var ovgbmStore = new Ext.data.JsonStore({
                       // store configs
@@ -12,29 +17,30 @@
                       data: totalDataArray,
                       remoteSort: false,
                       sortInfo: {
-                          field: 'linkValue',
+                          field: 'genecount',
                           direction: 'DESC'
                       },
                       storeId: 'ovgbmstore',
                       // reader configs
                       root: 'root',
                       fields: [{
-                          name: 'cancertype1'
+                          name: 'cancertype'
+                      }, {
+                          name: 'chr'
+                      },  {
+                          name: 'gene'
+                      },  {
+                          type: 'float',
+                          name: 'start'
                       }, {
                           type: 'float',
-                          name: 'genecount1'
-                      },  {
-                          name: 'gene1'
-                      },  {
-                          type: 'float',
-                          name: 'genecount2'
-                      }, {
-                          name: 'gene2'
-                      },{
-                          name: 'cancertype2'
+                          name: 'end'
                       },{
                           type: 'float',
-                          name: 'linkValue'
+                          name: 'genecount'
+                      },{
+                          type: 'float',
+                          name: 'patientcount'
                       }]
                   });
 
@@ -43,70 +49,56 @@
         encode: false, // json encode the filter query
         local: true,   // defaults to false (remote filtering)
         filters: [{
-            type: 'string',
-            dataIndex: 'gene1'
-        }, {
-            type: 'string',
-            dataIndex: 'gene2'
-        },  {
+                          type: 'float',
+                          dataIndex: 'start'
+                      },  {
+                          type: 'string',
+                          dataIndex: 'chr'
+                      },  {
+                          type: 'float',
+                          dataIndex: 'end'
+                      }, {
+                          type: 'string',
+                          dataIndex: 'gene'
+                      },{
+                          type: 'float',
+                          dataIndex: 'patientcount'
+                      },{
+                          type: 'float',
+                          dataIndex: 'genecount'
+                      },{
             type: 'list',
-            dataIndex: 'cancertype1',
+            dataIndex: 'cancertype',
             options: ['OV','GBM']
-        },{
-            type: 'list',
-            dataIndex: 'cancertype2',
-            options: ['OV','GBM']
-        }, {
-            type: 'float',
-            dataIndex: 'genecount1'
-        }, {
-            type: 'float',
-            dataIndex: 'genecount2'
-        }, {
-            type: 'float',
-            dataIndex: 'linkValue'
         }]
     });
 
         var createColModel = function (finish, start) {
 
-            var columns = [
-                {
-                dataIndex: 'cancertype1',
-                header: 'Cancer 1',
-                filterable: true,
-                width: 60
-            },  {
-                dataIndex: 'gene1',
-                header: 'Gene 1',
-                filterable: true,
-                width: 80
-            }, {
-                dataIndex: 'genecount1',
-                header: 'Gene Count 1',
-                filterable: true,
-                width: 80
-            }, {
-                dataIndex: 'cancertype2',
-                header: 'Cancer 2',
-                filterable: true,
-                width: 60
-            }, {
-                dataIndex: 'gene2',
-                header: 'Gene 2',
-                filterable: true,
-                width: 80
-            },  {
-                dataIndex: 'genecount2',
-                header: 'Gene Count 2',
-                filterable: true,
-                width: 80
-            },  {
-                dataIndex: 'linkValue',
-                header: 'Link Value',
-                filterable: true,
-                width: 150
-            }];
+            var columns = [{
+                header: 'Cancer Type',
+                dataIndex: 'cancertype'
+            },
+                        {
+                          header: 'Gene',
+                          dataIndex: 'gene',
+                          width: 150
+                      },  {
+                          header: 'Chr',
+                          dataIndex: 'chr'
+                      },  {
+                          header: 'Start',
+                          dataIndex: 'start'
+                      }, {
+                          header: 'End',
+                          dataIndex: 'end'
+                      },{
+                          header: '# Patients',
+                          dataIndex: 'patientcount'
+                      },{
+                          header: '# Disruptions',
+                          dataIndex: 'genecount'
+                      }];
 
             return new Ext.grid.ColumnModel({
                 columns: columns.slice(start || 0, finish),

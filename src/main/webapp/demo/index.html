@@ -638,7 +638,7 @@
         $('chromovis_ov_gbm_div').innerHTML="";
         wedge_plot_ov_gbm($('chromovis_ov_gbm_div'),circvis_ov_gbm.getWidth() * 0.9,circvis_ov_gbm.getWidth() * 0.9);
 
-        var ovgbmDataTable = createOVGBMDataTable(args['datatable']);
+        var ovgbmDataTable = createOVGBMDataTable(args['ov_gene_count'],args['gbm_gene_count']);
         tablevis_ov_gbm.removeAll();
         tablevis_ov_gbm.add(ovgbmDataTable);
         
