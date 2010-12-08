@@ -610,7 +610,7 @@
         $('chromovis_gbm_div').innerHTML="";
         wedge_plot($('chromovis_gbm_div'),circvis_gbm.getWidth() * 0.9,circvis_gbm.getWidth() * 0.9);
 
-        var gbmDataTable = createDataTable(args['datatable']);
+        var gbmDataTable = createDataTable(args['discrit_gene_count']);
         tablevis_gbm.removeAll();
         tablevis_gbm.add(gbmDataTable);
 
@@ -624,7 +624,7 @@
         $('chromovis_ov_div').innerHTML="";
         wedge_plot($('chromovis_ov_div'),circvis_ov.getWidth() * 0.9,circvis_ov.getWidth() * 0.9);
 
-        var ovDataTable = createDataTable(args['datatable']);
+        var ovDataTable = createDataTable(args['discrit_gene_count']);
         tablevis_ov.removeAll();
         tablevis_ov.add(ovDataTable);
 
