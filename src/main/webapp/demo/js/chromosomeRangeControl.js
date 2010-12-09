@@ -53,7 +53,6 @@ var ChromosomeRangeControl = Class.create({
                         control.chromosomes.set(item.name, item.uri);
                     }
                 }
-
                 control.displayChromosomes();
             }
         });
