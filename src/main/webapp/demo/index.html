@@ -95,6 +95,7 @@
         <script type="text/javascript">
         var centertabs = null;
         var email = "";
+            var helpWindowReference = null;
             var topBarPanel = null;
             var topMenuPanel = null;
             var currentRange = null;
@@ -151,6 +152,17 @@
                      frame: true,
                      height: 175,
                      padding: '5',
+                     tools: [{
+                         id: 'help',
+                         handler: function(event, toolEl, panel){
+                             openHelpWindow('Current Selections','This panel displays the currently selected chromosomal range to be displayed in '+
+                             'the Fastbreak view.<p>  If a gene symbol has been selected specifically, the symbol is displayed.  The selection can '+
+                                     'be modified using multiple methods including:<ul><li> the Gene Select panel below.'+
+                                     '<li>clicking on a feature in any Circvis Plot' +
+                                     '<li>any Data Table row selection<li>the \"Range and Patient Selection\" dialog in the Fastbreak view' +
+                                     '<li>clicking on a feature in the Fastbreak view</li></ul><p>See the example on the Home Page for more information.');
+                         }
+                     }],
                      items:[{
                          layout:'column',
                          items:[{
@@ -192,7 +204,13 @@
                      height : 120,
                      frame: true,
                      padding: '5',
-                     //defaultType : 'textfield',
+                     tools: [{
+                         id: 'help',
+                         handler: function(event, toolEl, panel){
+                             openHelpWindow('Gene Search','Enter a valid Gene Symbol into the text box.<br/><br/>  The matched human gene will be ' +
+                                     'selected as the current chromosomal range for analysis (with a 20Kbp interval added to both ends.)');
+                         }
+                     }],
                      items:[{
                             layout:'column',
                             items:[{
@@ -288,6 +306,11 @@
                      activeTab: 0
                  });
 
+                 var circvisHelpString = 'The tabs at the top provide navigation between the Circvis plot and the underlying '+
+                                     'Data Table.  <p>Circvis allows you to explore the network edges, as well as providing a graphical interface to ' +
+                             'gene selection.  <p>The Data Table provides both sorting and filtering on any data column.  Row selection (clicking on a row) ' +
+                                     'selects the given gene for fastbreak display.';
+
                  comparatorPanel = new Ext.Panel({
                      title: 'Cancer Comparator',
                      iconCls: 'circvis',
@@ -296,7 +319,7 @@
                      tools: [{
                          id: 'help',
                          handler: function(event, toolEl, panel){
-                             //
+                             openHelpWindow('Cancer Comparator',circvisHelpString);
                          }
                      }],
                      layout: 'fit'
@@ -310,7 +333,7 @@
                      tools: [{
                          id: 'help',
                          handler: function(event, toolEl, panel){
-                             //
+                             openHelpWindow('OV Gene Disruption',circvisHelpString);
                          }
                          
                      }],
@@ -325,7 +348,7 @@
                      tools: [{
                          id: 'help',
                          handler: function(event, toolEl, panel){
-                             //
+                             openHelpWindow('OV Gene Disruption',circvisHelpString);
                          }
 
                      }],
@@ -467,7 +490,10 @@
                                           tools: [{
                          id: 'help',
                          handler: function(event, toolEl, panel){
-                             //
+                             openHelpWindow('Fastbreak UI','Range and Patient selections can be modified by bringing up a dialog window using the '+
+                                     '\"Range and Patient Selection\" button.<p>  \"Advanced Parameters\" can be used to modify the types of Structural '+
+                                     'Variations displayed in the visualization.<p>  Clicking on any gene or chromosome length within the UI will cause the ' +
+                                     'display to recenter at the selected location.');
                          }
 
                      }]
@@ -501,6 +527,13 @@
                      rootVisible: false,
                      lines: false,
                      singleExpand: true,
+                      tools: [{
+                         id: 'help',
+                         handler: function(event, toolEl, panel){
+                             openHelpWindow('Navigation','The Navigation Panel provides the main navigation function of this applications.' +
+                                     '<p>Clicking on an item will open the desired view in the main panel.');
+                         }
+                     }],
                      useArrows: true,
                      //flex:10,
                       height : 180,
@@ -658,6 +691,7 @@
 
     function onCircvisTypeSelected(circvisType){
         if(circvisType == 'ov_gbm' && $('chromovis_ov_gbm_div').innerHTML == ""){
+
             loadMask = new Ext.LoadMask(comparatorPanel.getEl(), {msg:"Loading Circvis..."});
             loadMask.show();
             loadDataOVGBM(onLoadOVGBMDataComplete,500,0);
@@ -809,6 +843,18 @@
 
         function loadVisualizationParameters(){
             transplantParameters.show();
+        }
+
+        function openHelpWindow(subject,text) {
+            if (helpWindowReference == null || helpWindowReference.closed) {
+                helpWindowReference = window.open('','help-popup','width=400,height=300,resizable=1,scrollbars=1,status=0,'+
+                'titlebar=0,toolbar=0,location=0,directories=0,menubar=0,copyhistory=0');
+            }
+                helpWindowReference.document.title='Help - ' + subject;
+                helpWindowReference.document.body.innerHTML = '<b>' + subject +'</b><p><div style=width:250>' + text + '</div>';
+                helpWindowReference.focus();
+
+
         }
 
         </script>
