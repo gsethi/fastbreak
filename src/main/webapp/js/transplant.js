@@ -970,6 +970,7 @@ org.systemsbiology.visualization.transplant.prototype.doquery = function (chr,st
 	
 	// create a closure so the function handeler is executed in the proper context
 	var vis = this;
+
 	query.send(function (response) { vis.doredraw(response, chr, start, end); });
 }
 

@@ -569,8 +569,7 @@
                              $("container_visheader").innerHTML = "<div align='center' id='legenddiv'></div><br/>";
                              org.systemsbiology.visualization.transplant.colorkey(org.systemsbiology.visualization.transplant.chrmcolors.human,document.getElementById('legenddiv'));
                              visualizationControl.loadVisualizationForSelectedPatients();
-
-                         }
+                          }
                          else if(n.id == 'comparator'){
                              onCircvisTypeSelected('ov_gbm');
                          }
@@ -608,9 +607,7 @@
                  function onTransplantVisRangeSelected(obj) {
                      onRangeSelection(obj.chr,obj.start,obj.end,obj.gene,obj.cancel_bubble);
                  }
-
                  google.visualization.events.addListener(visualizationControl, 'rangeSelect', onTransplantVisRangeSelected );
-
                 loadPage();
 
       });
@@ -619,7 +616,7 @@
     //function called when data load for circvis is complete
     function onLoadGBMDataComplete() {
         $('chromovis_gbm_div').innerHTML="";
-        wedge_plot($('chromovis_gbm_div'),circvis_gbm.getWidth() * 0.9,circvis_gbm.getWidth() * 0.9);
+        wedge_plot($('chromovis_gbm_div'),circvis_gbm.getHeight() * 0.95,circvis_gbm.getHeight() * 0.95);
 
         var gbmDataTable = createDataTable(args['discrit_gene_count']);
         tablevis_gbm.removeAll();
@@ -633,7 +630,7 @@
 
      function onLoadOVDataComplete() {
         $('chromovis_ov_div').innerHTML="";
-        wedge_plot($('chromovis_ov_div'),circvis_ov.getWidth() * 0.9,circvis_ov.getWidth() * 0.9);
+        wedge_plot($('chromovis_ov_div'),circvis_ov.getHeight() * 0.95,circvis_ov.getHeight() * 0.95);
 
         var ovDataTable = createDataTable(args['discrit_gene_count']);
         tablevis_ov.removeAll();
@@ -647,7 +644,7 @@
 
     function onLoadOVGBMDataComplete() {
         $('chromovis_ov_gbm_div').innerHTML="";
-        wedge_plot_ov_gbm($('chromovis_ov_gbm_div'),circvis_ov_gbm.getWidth() * 0.9,circvis_ov_gbm.getWidth() * 0.9);
+        wedge_plot_ov_gbm($('chromovis_ov_gbm_div'),circvis_ov_gbm.getHeight() * 0.95,circvis_ov_gbm.getHeight() * 0.95);
 
         var ovgbmDataTable = createOVGBMDataTable(args['ov_gene_count'],args['gbm_gene_count']);
         tablevis_ov_gbm.removeAll();
@@ -687,12 +684,12 @@
     }
 
     function onPatientSelectionChange(patientItems){
-        var patienthtml="<ul>Selected Patients";
-           $A(patientItems).each(function(item){
-               patienthtml = patienthtml + "<li>" + item.id + "</li>";
-           });
-
-        patienthtml = patienthtml + "</ul>";
+//        var patienthtml="<ul>Selected Patients";
+//           $A(patientItems).each(function(item){
+//               patienthtml = patienthtml + "<li>" + item.id + "</li>";
+//           });
+//
+//        patienthtml = patienthtml + "</ul>";
 
         visualizationControl.onPatientSelection(patientItems);
 
@@ -701,8 +698,13 @@
     function onPatientSelectorLoaded(){
         patientSelectionPanel.removeAll();
         patientSelectionPanel.add(patientSelectorControl.patientGrid);
-        dataSelectionPanel.show();
-        dataSelectionPanel.hide();
+
+                             dataSelectionPanel.x = -1300,
+                             dataSelectionPanel.y = -1200;
+                                    dataSelectionPanel.toBack();
+                                     dataSelectionPanel.show();
+                                     dataSelectionPanel.hide();
+                            dataSelectionPanel.toFront(false);
     }
 
 
