@@ -116,7 +116,7 @@ def getBreakFilter(patterns,minBreak):
 							returnBreakDic[chr][pos] = 1
 			breakf.close()
 
-    print "%i tiles have at least one break"%(breakCount)
+
     return returnBreakDic,breakCount
 
 def getFilesAndDoCorAndAvgWooo(fn, pattern,breakFilter,breakCount):
@@ -127,7 +127,7 @@ def getFilesAndDoCorAndAvgWooo(fn, pattern,breakFilter,breakCount):
         fo.write(getLine(filen,breakFilter,breakCount))
     fo.close()
 
-    print fn
+
     fo = open(fn)
     averageCorelations.doAvg(fo)
     fo.close()
@@ -135,7 +135,7 @@ def getFilesAndDoCorAndAvgWooo(fn, pattern,breakFilter,breakCount):
 if __name__ == "__main__":
 
     coverageCutoffs = [1,10,100,100]
-    breakCutoffs =[0,1,2,4]
+    breakCutoffs =[1]
     for minBreaks in breakCutoffs:
         pattern1 = "*.bam.breakdancer.out.binned"
         pattern2 = "*oddreads.listcalled"
