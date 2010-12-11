@@ -90,7 +90,7 @@ def getBreakFilter(patterns,minBreak):
     breakCount = 0
     for pattern in patterns:
         for filen in glob.glob(pattern):
-			print "Loading "+filen
+
 			breakf = open(filen)
 			
 			
