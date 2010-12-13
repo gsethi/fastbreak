@@ -243,6 +243,9 @@
                                     title: 'Circvis',
                                     contentEl: $("chromovis_ov_div"),
                                     autoScroll: true,
+                                    listeners: {
+                                            resize: function() {wedge_plot($('chromovis_ov_div'),circvis_ov.getHeight() * 0.95,circvis_ov.getHeight() * 0.95);}
+                                    },
                                     anchor: '100%'
                                  });
 
@@ -250,6 +253,9 @@
                                     title: 'Circvis',
                                     contentEl: $("chromovis_gbm_div"),
                                     autoScroll: true,
+                                    listeners: {
+                                            resize: function() {wedge_plot($('chromovis_gbm_div'),circvis_gbm.getHeight() * 0.95,circvis_gbm.getHeight() * 0.95);}
+                                    },
                                     anchor: '100%'
                                  });
 
@@ -257,6 +263,9 @@
                                     title: 'Circvis',
                                     contentEl: $("chromovis_ov_gbm_div"),
                                     autoScroll: true,
+                                    listeners: {
+                                            resize: function() {wedge_plot($('chromovis_ov_gbm_div'),circvis_ov_gbm.getHeight() * 0.95,circvis_ov_gbm.getHeight() * 0.95);}
+                                    },
                                     anchor: '100%'
                                  });
 
