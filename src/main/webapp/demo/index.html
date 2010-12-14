@@ -117,7 +117,8 @@
             var circle_ov_gbm, circle_ov, circle_gbm;
             var workspaceUri = "/addama/repositories/workspaces/informatics@systemsbiology.org/ov_gbm_dataset";
 
-            var tick_listener = function(chr,start,stop,label){
+            var tick_listener = function(node){
+                var chr = node.chr;
                 if(chr.indexOf("OV") > -1){
                     chr=chr.substring(2,chr.length);
                     datasettype="OV";
@@ -130,10 +131,11 @@
                     datasettype="None";
                 }
                  if(chr.indexOf("-CHR") > -1){
-                    chr=chr.substring(4,chr.length);
+                    chr=chr.substring(chr.indexOf("-CHR")+4,chr.length);
                 }
+
                 
-                onRangeSelection(chr,start,stop,label);
+                onRangeSelection(chr,node.start,node.end,node.value);
                 onDatasetChange(datasettype);
             };
 
