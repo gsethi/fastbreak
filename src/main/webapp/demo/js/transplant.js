@@ -48,7 +48,7 @@ org.systemsbiology.visualization.transplant.prototype.drawPath=function(id, star
 		return rv;
 	}
 	
-	var width = 2;
+	var width = 3;
 	var smooth = arc == 0? Math.round((end.x-start.x)/2) : Math.round((end.x-start.x)/100);
 	
 	var path = document.createElementNS(this.svgNS, "svg:path");
@@ -362,7 +362,7 @@ org.systemsbiology.visualization.transplant.prototype.traverse = function(depth,
 		return group;
 	//var group = document.createElementNS(this.svgNS, "svg:g");
 	//draw root line in vis coordinates
-	var scalefactor = this.xscale
+	var scalefactor = this.xscale;//*Math.pow(parseInt(this.nestfactor),parseInt(depth));
 	var scale = function(x){
 		//alert("scale " + [root.x,this.xscale,x,stumpstart].join(", "));
 		return Math.round(root.x+scalefactor*(x-stumpstart));
@@ -414,7 +414,7 @@ org.systemsbiology.visualization.transplant.prototype.traverse = function(depth,
 				
 				this.log("depth "+depth+" sprouting "+[stumpchr,sprout,"to",chr2,pos2,"via row",row].join(" "));
 				var sproutx=scale(sprout);
-				var branchx=sproutx+30;
+				var branchx=sproutx+this.sproutshift;
 				var sproutpoint = {x:sproutx, y:root.y};
 				var contig = this.contigsByRow[row];
 				var lastin = contig.inpoints[0].pos;
@@ -457,6 +457,7 @@ org.systemsbiology.visualization.transplant.prototype.traverse = function(depth,
 					{
 						if(this.grided)
 							top.setAttributeNS( null, "transform","rotate(-90 " + branchx + " " + ty +")" );
+						
 						branchgroup.appendChild(top);
 					}
 					
@@ -471,9 +472,14 @@ org.systemsbiology.visualization.transplant.prototype.traverse = function(depth,
 					{
 						if(this.grided)
 							bot.setAttributeNS( null, "transform","rotate(90 " + branchx + " " + by +")" );
+						else
+							bot.setAttributeNS( null, "transform","rotate(-180 " + branchx + " " + by +") translate(" + branchx + " " + by +") scale(1, -1) translate(-" + branchx + " -" + by +")" );
+						
 						branchgroup.appendChild(bot);
 					}
-					branchgroup.setAttributeNS( null, "transform","translate("+branchx+" "+by+") scale("+ this.nestfactor +") translate(-"+branchx+" -"+by+")");
+
+					branchgroup.setAttributeNS( null, "transform","translate("+branchx+" "+by+") scale("+ Math.pow(this.nestfactor, depth) +") translate(-"+branchx+" -"+by+")");
+					//branchgroup.setAttributeNS( null, "transform","translate("+branchx+" "+by+") scale("+ this.nestfactor +") translate(-"+branchx+" -"+by+")");
 					group.appendChild(branchgroup);
 				}
 				else
@@ -519,9 +525,9 @@ org.systemsbiology.visualization.transplant.prototype.draw = function(data, opti
 	this.height = parseInt(options.height) || 350;
 	this.containerElement.style.width=this.width;
 	this.containerElement.style.height=this.height;
-	this.chrshift=20;
+	//this.chrshift=10;
 	this.bottompad = 5*this.padby;
-	this.origin = {x:this.padby,y:this.height-this.bottompad};
+	this.origin = {x:this.padby+10,y:this.height-this.bottompad};
 	this.colors = options.colors || org.systemsbiology.visualization.transplant.chrmcolors.human;
 	this.geneds = options.geneds;
 	this.drawdone = false;
@@ -529,11 +535,13 @@ org.systemsbiology.visualization.transplant.prototype.draw = function(data, opti
 	this.arcscale = 4; 
 	this.filters = options.filters || null;//options.minscore || 99;
 	this.grided = options.grided || false;
-	this.nestfactor = options.nestfactor || .5;
+	this.nestfactor = options.nestfactor || .6;
 	this.widthfield = options.widthfield ? parseInt(options.widthfield) : false;
 	this.trackds = options.trackds;
 	this.sample_id = options.sample_id;
     this.refgenomeUri = options.refgenomeUri;
+    this.sproutshift=0;
+    this.allowSelfStumpAdjust=true;
 
 	var chrClause = function(c, s, e)
 	{ 
@@ -551,8 +559,7 @@ org.systemsbiology.visualization.transplant.prototype.draw = function(data, opti
 	
 	
 	//this.incols=["edge_id" "source_chr", "target_chr", "source_pos", "target_pos", "size", "num_reads","type"]
-	var max = this.stumpend+.5*(this.stumpend-this.stumpstart);
-	var min = this.stumpstart;
+	
 	
 	
 	//set up svg
@@ -572,9 +579,9 @@ org.systemsbiology.visualization.transplant.prototype.draw = function(data, opti
 	this.log("indexing rows");
 	for (var row = 0; row < data.getNumberOfRows(); row++) {
 		this.log("indexing row "+row);
-		var includeme = false;
-		
-		if(this.filters == null || this.filters.length==0)
+		var includeme = true;
+		//handles on server now
+		/*if(this.filters == null || this.filters.length==0)
 		{
 			includeme = true;
 		}
@@ -589,7 +596,7 @@ org.systemsbiology.visualization.transplant.prototype.draw = function(data, opti
 					includeme = true;
 				}
 			}
-		}
+		}*/
 		if(includeme==true)
 		{
 			this.log("including")
@@ -686,7 +693,14 @@ org.systemsbiology.visualization.transplant.prototype.draw = function(data, opti
 	this.chrn = i;
 	
     this.handleChromosomeRangeItems();
-
+    if(this.allowSelfStumpAdjust)
+    {
+		this.stumpend = this.chrs[this.stumpchr].contigs[0].end;
+		this.stumpstart = this.chrs[this.stumpchr].contigs[0].start;
+	}
+	var max = this.stumpend+.5*(this.stumpend-this.stumpstart);
+	var min = this.stumpstart;
+	
 	this.log("calculating scale factor using: " + [this.width, this.padby, max, min].join(" "));
 	this.xscale = (this.width-2*this.padby)/(max-min) || 1;
 
