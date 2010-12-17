@@ -255,7 +255,7 @@ def scoreCallsNoSubtract(outfn,oneFN,genelistfn,coveredregions,scoreCutoff):
 	
 	binedout.close()
 	
-	genelistoutf=outfn+".pergene.tsv"
+	genelistoutf=outfn+".minScore."+str(scoreCutoff)+".pergene.tsv"
 	genelistout = open(genelistoutf,"w")
 	genelistout.write("gene_symbol\tchr\tstart\tend\t"+"\t".join(types)+"\n")
 	for chr in genes:
