@@ -61,7 +61,7 @@ def getCountSmall(Li,scoreCutoff):
 def getCountEdge(Li,scoreCutoff):
 	count = 0
 	for vs in Li:
-		if vs["type"].find("other")!=-1 and I`nt(vs["score"]) >= scoreCutoff:
+		if vs["type"].find("other")!=-1 and int(vs["score"]) >= scoreCutoff:
 			count+=1
 	return count
 	
