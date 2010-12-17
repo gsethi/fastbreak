@@ -42,22 +42,31 @@ if __name__ == "__main__":
     #formatMatrix("Fastbreak_tumor_cutoff_3_by_gene_MIdist.txt",gl)
     #formatList("Fastbreak_tumor_cutoff_3_by_gene_Counts.txt",gl)
     
-    formatMatrix("Fastbreak_tumor_cutoff_GBM_3_by_gene_MIdist.distmatrix.txt",gl)
-    formatList("Fastbreak_tumor_cutoff_GBM_3_by_gene_Counts.txt",gl)
+    formatList("Fastbreak_blood_cutoff_GBM_3_by_gene_Counts.txt",gl)
+    formatList("Fastbreak_blood_cutoff_GBM_3_discrit_by_gene_Counts.txt",gl)
+    formatList("Fastbreak_blood_cutoff_OV_3_by_gene_Counts.txt",gl)
+    formatList("Fastbreak_blood_cutoff_OV_3_discrit_by_gene_Counts.txt",gl)
     
-    formatMatrix("Fastbreak_tumor_cutoff_OV_3_by_gene_MIdist.distmatrix.txt",gl)
-    formatList("Fastbreak_tumor_cutoff_OV_3_by_gene_Counts.txt",gl)
     
     
-#    formatMatrix("Fastbreak_tumor_cutoff_3_by_gene_Euclid.txt",gl)
-
-    formatMatrix("Fastbreak_tumor_cutoff_GBM_3_by_gene_Euclid.distmatrix.txt",gl)
-
-    formatMatrix("Fastbreak_tumor_cutoff_OV_3_by_gene_Euclid.distmatrix.txt",gl)
-    
-#    formatMatrix("Fastbreak_tumor_cutoff_3_by_gene_mutualInfo.txt",gl)
-
-    formatMatrix("Fastbreak_tumor_cutoff_GBM_3_by_gene_mutualInfo.distmatrix.txt",gl)
+#     formatMatrix("Fastbreak_tumor_cutoff_GBM_3_by_gene_MIdist.distmatrix.txt",gl)
+#     formatList("Fastbreak_tumor_cutoff_GBM_3_by_gene_Counts.txt",gl)
+#     formatList("Fastbreak_tumor_cutoff_GBM_3_discrit_by_gene_Counts.txt",gl)
+#     
+#     formatMatrix("Fastbreak_tumor_cutoff_OV_3_by_gene_MIdist.distmatrix.txt",gl)
+#     formatList("Fastbreak_tumor_cutoff_OV_3_by_gene_Counts.txt",gl)
+#     formatList("Fastbreak_tumor_cutoff_OV_3_discrit_by_gene_Counts.txt",gl)
+#     
+#     
+# 
+# 
+#     formatMatrix("Fastbreak_tumor_cutoff_GBM_3_by_gene_Euclid.distmatrix.txt",gl)
+# 
+#     formatMatrix("Fastbreak_tumor_cutoff_OV_3_by_gene_Euclid.distmatrix.txt",gl)
+#     
+# 
+# 
+#     formatMatrix("Fastbreak_tumor_cutoff_GBM_3_by_gene_mutualInfo.distmatrix.txt",gl)
 
     formatMatrix("Fastbreak_tumor_cutoff_OV_3_by_gene_mutualInfo.distmatrix.txt",gl)
 
