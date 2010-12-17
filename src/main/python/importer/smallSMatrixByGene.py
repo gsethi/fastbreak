@@ -104,8 +104,9 @@ def scoreFilesByTile(inFilePattern,scorecolid,filenamebase):
 			
 	
 	
-def scoreFiles(inFilePattern,scorecolid,filenamebase):
-	outf = open(filenamebase+".matrix.tsv","w")
+def scoreFiles(inFilePattern,scorecolid1,scorecolid2,filenamebase):
+	outf1 = open(filenamebase+".col."+str(scorecolid1)+".matrix.tsv","w")
+	outf2 = open(filenamebase+".col."+str(scorecolid2)+".matrix.tsv","w")
 	
 	files = glob.glob(inFilePattern)
 	print "%i files matching %s\n"%(len(files),inFilePattern)
@@ -118,13 +119,15 @@ def scoreFiles(inFilePattern,scorecolid,filenamebase):
 		fileobjs.append(open(inf,"r"))
 	
 	
-	outf.write("\t".join(cols)+"\n")
+	outf1.write("\t".join(cols)+"\n")
+	outf2.write("\t".join(cols)+"\n")
 	
 	loop = True
 	while loop==True:
 		
 		firstpass=True
-		outvs = []
+		outvs1 = []
+		outvs2 = []
 		linevs = []
 		for file in fileobjs:
 			try:
@@ -136,28 +139,32 @@ def scoreFiles(inFilePattern,scorecolid,filenamebase):
 				if linevs[0] == "gene_symbol":
 					continue
 				if firstpass==True:
-					outvs.append(linevs[0])
+					outvs1.append(linevs[0])
+					outvs2.append(linevs[0])
 					firstpass = False
-				outvs.append(linevs[scorecolid])
+				outvs1.append(linevs[scorecolid1])
+				outvs2.append(linevs[scorecolid2])
 
 				
 		if loop==True and len(linevs) > 1:
-			outf.write("\t".join(outvs)+"\n")
+			outf1.write("\t".join(outvs1)+"\n")
+			outf2.write("\t".join(outvs2)+"\n")
 			
-	outf.close()
+	outf1.close()
+	outf2.close()
 	for file in fileobjs:
 		file.close()
 
 def score():
+	for scoreCutoff in [0,25,50,75,90,94,96,98,99]:
+		print "Combining per gene fastbreak files"
+		scoreFiles("./*.minScore."+str(scoreCutoff)+".listcalled.pergene.tsv",4,5,"fastbreak.per.gene.score.minscore."+str(scoreCutoff))
 	
-	print "Combining per gene fastbreak files"
-	scoreFiles("./*.listcalled.pergene.tsv",4,"fastbreak.per.gene.score")
+	#print "Combining per gene breakdancer files"
+	#scoreFiles("./*.breakdancer.out.t.per.gene",4,"breakdancer.per.gene.score")
 	
-	print "Combining per gene breakdancer files"
-	scoreFiles("./*.breakdancer.out.t.per.gene",4,"breakdancer.per.gene.score")
-	
-	print "Combining per tile fastbreak files"
-	scoreFilesByTile("./*.listcalled.bined.tsv",2,"fastbreak.per.tile.score")
+	#print "Combining per tile fastbreak files"
+	#scoreFilesByTile("./*.listcalled.bined.tsv",2,"fastbreak.per.tile.score")
 	
 	
 	
