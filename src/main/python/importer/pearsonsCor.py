@@ -144,12 +144,12 @@ if __name__ == "__main__":
 
 
         fn = "breakdancerCoverageCorelations_breakMin_%i.txt"%(minBreaks)
-
+		print fn
         getFilesAndDoCorAndAvgWooo(fn, pattern1,breakFilter,breakCount)
 
 
         fn = "fastbreakCoverageCorelations_breakMin_%i.txt"%(minBreaks)
-
+		print fn
         getFilesAndDoCorAndAvgWooo(fn, pattern2,breakFilter,breakCount)
 
 

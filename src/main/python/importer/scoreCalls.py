@@ -49,19 +49,19 @@ def loadCalledFile(fname,type):
 	fo.close()
 
 		
-def getCountSmall(Li):
+def getCountSmall(Li,scoreCutoff):
 	count = 0
 	for vs in Li:
-		if vs["type"].find("small")!=-1:
+		if vs["type"].find("small")!=-1 and int(vs["score"]) >= scoreCutoff:
 			count+=1
 	return count
 		
 	
 	
-def getCountEdge(Li):
+def getCountEdge(Li,scoreCutoff):
 	count = 0
 	for vs in Li:
-		if vs["type"].find("other")!=-1 and vs["ori"] in ["00","11"]:
+		if vs["type"].find("other")!=-1 and I`nt(vs["score"]) >= scoreCutoff:
 			count+=1
 	return count
 	
@@ -191,7 +191,7 @@ def scoreBreakDancer(outfn,infn,genelistfn,coveredregions,minscore=0):
 			genelistout.write("\t".join([gene["name"],chr,str(gene["start"]),str(gene["end"]),vals])+"\n")
 	genelistout.close()
 
-def scoreCallsNoSubtract(outfn,oneFN,genelistfn,coveredregions):
+def scoreCallsNoSubtract(outfn,oneFN,genelistfn,coveredregions,scoreCutoff):
 	global includeAllGenes
 	global globaldict
 	globaldict = {}
@@ -236,9 +236,9 @@ def scoreCallsNoSubtract(outfn,oneFN,genelistfn,coveredregions):
 				
 				if "t" in globaldict[chr][pos]:
 					 
-					 tsmallcount = getCountSmall(globaldict[chr][pos]["t"])
+					 tsmallcount = getCountSmall(globaldict[chr][pos]["t"],scoreCutoff)
 					 #print "small count is %i"%( tsmallcount)
-					 tothercount = getCountEdge(globaldict[chr][pos]["t"])
+					 tothercount = getCountEdge(globaldict[chr][pos]["t"],scoreCutoff)
 					 if chr in genes:
 						for j, gene in enumerate(genes[chr]):
 							if int(pos) > (int(gene["start"])-int(padby)) and int(pos) < (int(gene["end"])+int(padby)):
@@ -307,14 +307,15 @@ if __name__ == "__main__":
 		print "Found %i tiles covered over cutoff and %i tiles covered but below cutoff"%(passedCount,fitleredcount)
 					
 		firstpass = False
-	for infile in glob.glob(os.path.join(os.getcwd(),'TCGA*.breakdancer.out')):
-		print "Processing " + infile
-		scoreBreakDancer(infile,infile,sys.argv[1],coveredregions)
+# 	for infile in glob.glob(os.path.join(os.getcwd(),'TCGA*.breakdancer.out')):
+# 		print "Processing " + infile
+# 		scoreBreakDancer(infile,infile,sys.argv[1],coveredregions)
 		
-	for infile in glob.glob(os.path.join(os.getcwd(),'TCGA*called')):
-		print "Processing " + infile
-		scoreCallsNoSubtract(infile,infile,sys.argv[1],coveredregions)
-	
+	for scoreCutoff in [0,25,50,75,90,94,96,98,99]:
+		for infile in glob.glob(os.path.join(os.getcwd(),'TCGA*called')):
+			print "Processing " + infile
+			scoreCallsNoSubtract(infile,infile,sys.argv[1],coveredregions,scoreCutoff)
+		
 				
 			
 	
