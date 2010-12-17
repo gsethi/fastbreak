@@ -939,7 +939,7 @@ org.systemsbiology.visualization.transplant.prototype.recenteronlocation = funct
 org.systemsbiology.visualization.transplant.prototype.doquery = function (chr,start,end)
 {
 	this.showloading();
-	var querystring = this.dataservice+'&chr='+chr+'&start='+start+'&end='+end+'&depth='+this.depth+'&radius='+this.radius;
+	var querystring = this.dataservice+'?filters='+this.filters+'&chr='+chr+'&start='+start+'&end='+end+'&depth='+this.depth+'&radius='+this.radius;
 	this.log("loading: " + querystring);
 	var query = new google.visualization.Query(querystring);
 	
