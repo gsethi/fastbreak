@@ -158,7 +158,7 @@ def scoreFiles(inFilePattern,scorecolid1,scorecolid2,filenamebase):
 def score():
 	for scoreCutoff in [0,25,50,75,90,94,96,98,99]:
 		print "Combining per gene fastbreak files"
-		scoreFiles("./*.minScore."+str(scoreCutoff)+".listcalled.pergene.tsv",4,5,"fastbreak.per.gene.score.minscore."+str(scoreCutoff))
+		scoreFiles("./*listcalled.minScore."+str(scoreCutoff)+".pergene.tsv",4,5,"fastbreak.per.gene.score.minscore."+str(scoreCutoff))
 	
 	#print "Combining per gene breakdancer files"
 	#scoreFiles("./*.breakdancer.out.t.per.gene",4,"breakdancer.per.gene.score")
