@@ -1,128 +1,172 @@
 var TransplantParameters = Class.create({
-    initialize: function(){
+    initialize: function() {
         this.widthfield = "5";
         this.radius = "400000";
-        this.branchdepth="3";
-        this.includeITX=true;
-        this.includeCTX=false;
-        this.itxMinScore = "0";
-        this.ctxMinScore = "80";
+        this.branchdepth = "3";
+        this.includeSmall = true;
+        this.includeOther = true;
+        this.smallMinScore = "98";
+        this.otherMinScore = "98";
         this.win = null;
         this.listeners = [];
 
     },
 
-    addListener: function(listener){
-             this.listeners[this.listeners.length] = listener;
+    addListener: function(listener) {
+        this.listeners[this.listeners.length] = listener;
     },
 
-    publishParameterSelection: function(parameters){
-        this.listeners.each(function(listener){
+    publishParameterSelection: function(parameters) {
+        this.listeners.each(function(listener) {
             listener.onParameterSelection(parameters);
         })
     },
 
-    show: function(){
+    show: function() {
         var control = this;
-        var breakpointdata = [["5","Number of Reads"],["7","Score"],["false","No decoration"]];
+        var breakpointdata = [
+            ["5","Number of Reads"],
+            ["7","Score"],
+            ["false","No decoration"]
+        ];
         var comboBreakPointData = new Ext.form.ComboBox({
-             fieldLabel: 'Use Data Field',
-                    xtype: 'combo',
-                    store: breakpointdata,
-                    forceSelection: true,
-                    triggerAction: 'all',
-//                    listeners:{
-//                        'afterrender': function(item){
-//
-//                        }
-//                    }
-                    selectOnFocus: true,
-                    ref: '../breakwidth',
-                    autoSelect: true
+            fieldLabel: 'Use Data Field',
+            xtype: 'combo',
+            store: breakpointdata,
+            forceSelection: true,
+            triggerAction: 'all',
+            listeners:{
+                render: function(item){
+                    item.setValue(control.widthfield);
+                }
+            },
+            selectOnFocus: true,
+            ref: '../breakwidth',
+            autoSelect: true
         });
 
         var parameterForm = new Ext.FormPanel({
-            labelWidth: 75,
             frame: true,
             bodyStyle: 'padding:5px 5px 0',
-            width: 400,
-
-            items: [{
-                xtype: 'fieldset',
-                title: 'Break Point Width',
-                autoHeight: true,
-                items:[comboBreakPointData]
-            },{
-                xtype: 'fieldset',
-                title: 'Tree Parameters',
-                autoHeight: true,
-                itemId: 'treeParameters',
-                items:[{
-                    xtype: 'textfield',
-                    fieldLabel: 'Maximum Branch Depth',
-                    ref: '../branchDepth',
-                    value: 3
-                },{
-                    xtype: 'textfield',
-                    fieldLabel: 'Search Radius',
-                    ref: '../searchradius',
-                    value: 400000
-                },{
-                    layout: 'column',
-                    itemId: 'columnValues',
-                    items:[{
-                        columnWidth: .5,
-                        layout: 'form',
-                        items:[{
-                            xtype: 'checkbox',
-                            fieldLabel: 'Include ITX',
-                            ref: '../../../includeitx',
-                            anchor: '95%',
-                            checked: true
-                        },{
-                            xtype: 'checkbox',
-                        fieldLabel: 'Include CTX',
-                        ref: '../../../includectx',
-                        anchor: '95%',
-                        checked: false
-
-                    }]
-                },{columnWidth: .5,
-                    layout: 'form',
-                        itemId:'minScores',
-                    items:[{
-                        xtype: 'textfield',
-                        fieldLabel: 'Minimum Score',
-                        ref: '../../../itxminscore',
-                        anchor: '95%',
-                        value: '0'
-                    },{
-                        xtype: 'textfield',
-                        fieldLabel: 'Minimum Score',
-                        ref: '../../../ctxminscore',
-                        anchor: '95%',
-                        value: '80'
-                    }]
-                }]
-                }]
-            }],
-            buttons:[{
-                text: 'Submit',
-                handler: function(){
-                    if(parameterForm.getForm().isValid())
-                    {
-                         control.branchdepth = parameterForm.branchDepth.getValue();
-                         control.ctxMinScore = parameterForm.ctxminscore.getValue();
-                         control.includeCTX = parameterForm.includectx.getValue();
-                        control.includeITX = parameterForm.includeitx.getValue();
-                        control.itxMinScore = parameterForm.itxminscore.getValue();
-                        control.radius = parameterForm.searchradius.getValue();
-                        control.widthfield = parameterForm.breakwidth.getValue();
-                        control.publishParameterSelection(control);
-                         control.win.close();
+            width: 500,
+            items: [
+                {
+                    xtype: 'fieldset',
+                    title: 'Break Point Width',
+                    autoHeight: true,
+                    items:[comboBreakPointData]
+                },
+                {
+                    xtype: 'fieldset',
+                    title: 'Tree Parameters',
+                    autoHeight: true,
+                    itemId: 'treeParameters',
+                    items:[
+                        {
+                            layout: 'column',
+                            padding: '5 5 5 5',
+                            items:[
+                                {
+                                    columnWidth: .5,
+                                    layout: 'form',
+                                    items:[
+                                        {
+                                            xtype: 'textfield',
+                                            fieldLabel: 'Maximum Branch Depth',
+                                            ref: '../../../branchDepth',
+                                            value: 3,
+                                            anchor: '95%'
+                                        }
+                                    ]
+                                },
+                                {
+                                    columnWidth: .5,
+                                    layout: 'form',
+                                    items:[
+                                        {
+                                            xtype: 'textfield',
+                                            fieldLabel: 'Search Radius',
+                                            ref: '../../../searchradius',
+                                            value: 400000,
+                                            anchor: '95%'
+                                        }
+                                    ]
+                                }
+                            ]}
+                    ]},
+                {
+                    xtype: 'fieldset',
+                    title: 'Include Breakpoints Found By',
+                    items:[
+                        {
+                            layout: 'column',
+                            padding: '5 5 5 5',
+                            itemId: 'columnValues',
+                            items:[
+                                {
+                                    columnWidth: .5,
+                                    layout: 'form',
+                                    items:[
+                                        {
+                                            xtype: 'checkbox',
+                                            fieldLabel: 'Distance',
+                                            ref: '../../../includesmall',
+                                            anchor: '95%',
+                                            checked: true
+                                        },
+                                        {
+                                            xtype: 'checkbox',
+                                            fieldLabel: 'Orientation or Chromosome',
+                                            ref: '../../../includeother',
+                                            anchor: '95%',
+                                            checked: true
+                                        }
+                                    ]
+                                },
+                                {columnWidth: .5,
+                                    layout: 'form',
+                                    itemId:'minScores',
+                                    items:[
+                                        {
+                                            xtype: 'textfield',
+                                            fieldLabel: 'Minimum Score',
+                                            ref: '../../../smallminscore',
+                                            anchor: '95%',
+                                            value: '98'
+                                        },
+                                        {
+                                            xtype: 'textfield',
+                                            fieldLabel: 'Minimum Score',
+                                            ref: '../../../otherminscore',
+                                            anchor: '95%',
+                                            value: '98'
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            buttons:[
+                {
+                    text: 'Submit',
+                    handler: function() {
+                        if (parameterForm.getForm().isValid())
+                        {
+                            control.branchdepth = parameterForm.branchDepth.getValue();
+                            control.otherMinScore = parameterForm.otherminscore.getValue();
+                            control.includeOther = parameterForm.includeother.getValue();
+                            control.includeSmall = parameterForm.includesmall.getValue();
+                            control.smallMinScore = parameterForm.smallminscore.getValue();
+                            control.radius = parameterForm.searchradius.getValue();
+                            control.widthfield = parameterForm.breakwidth.getValue();
+                            control.publishParameterSelection(control);
+                            control.win.close();
+                        }
                     }
                 }
-            }]
+            ]
 
         });
 
@@ -141,11 +185,8 @@ var TransplantParameters = Class.create({
 });
 
 
-
-
-
 var TransplantVisualization = Class.create({
-    initialize: function(container, refgenUri, coverageDatasourceUri,chromRangeUri){
+    initialize: function(container, refgenUri, coverageDatasourceUri, chromRangeUri) {
         this.container = $(container);
         this.refgenUri = refgenUri;
         this.coverageDatasourceUri = coverageDatasourceUri;
@@ -155,17 +196,18 @@ var TransplantVisualization = Class.create({
         this.parameterschanged = false;
         this.patientchanged = false;
         this.rangechanged = false;
-        this.transplants=[];
-        this.locationhistory=[];
+        this.transplants = [];
+        this.locationhistory = [];
         this.options = {};
         this.options.div_width = 550;
         this.options.div_height = 350;
-       
+
 
     },
 
-    onPatientSelection: function(patientArray){
+    onPatientSelection: function(patientArray) {
         var control = this;
+
         function objectsAreSame(x, y) {
             var objectsAreSame = false;
             var match = 0;
@@ -176,35 +218,38 @@ var TransplantVisualization = Class.create({
                     }
                 }
             }
-            if (x.length == match && y.length == match) {objecstAreSame = true;}
+            if (x.length == match && y.length == match) {
+                objecstAreSame = true;
+            }
             return objectsAreSame;
         }
-          if (!objectsAreSame(patientArray,control.patients)){
-                control.patients = patientArray;
 
-                control.patientchanged = true;
-          }
+        if (!objectsAreSame(patientArray, control.patients)) {
+            control.patients = patientArray;
 
-      //  if(patientArray.length > 0 && control.chromosomeRange != '')
-      //  {
-      //      control.loadVisualizationForSelectedPatients();
-      //  }
+            control.patientchanged = true;
+        }
+
+        //  if(patientArray.length > 0 && control.chromosomeRange != '')
+        //  {
+        //      control.loadVisualizationForSelectedPatients();
+        //  }
     },
 
-    onRangeSelection: function(chromRangeUri){
+    onRangeSelection: function(chromRangeUri) {
         var control = this;
         if (chromRangeUri != control.chromosomeRange) {
             control.chromosomeRange = chromRangeUri;
-            control.rangechanged = true;    
+            control.rangechanged = true;
         }
 
-       // if(control.patients.length > 0 && control.chromosomeRange != '')
-      //  {
-       //     control.loadVisualizationForSelectedPatients();
-      //  }
+        // if(control.patients.length > 0 && control.chromosomeRange != '')
+        //  {
+        //     control.loadVisualizationForSelectedPatients();
+        //  }
     },
 
-    onParameterSelection: function(parameters){
+    onParameterSelection: function(parameters) {
         var control = this;
         control.advParameters = parameters;
         control.parameterschanged = true;
@@ -212,7 +257,7 @@ var TransplantVisualization = Class.create({
     },
 
 
-    onGeneSelection: function(geneSymbol){
+    onGeneSelection: function(geneSymbol) {
         //do nothing for now....will be triggered with range selection
 
     },
@@ -220,12 +265,12 @@ var TransplantVisualization = Class.create({
 
     loadVisualizationForSelectedPatients: function () {
         var control = this;
-        if(control.patients.length == 0 || control.chromosomeRange == '' || control.chromosomeRange == undefined)
+        if (control.patients.length == 0 || control.chromosomeRange == '' || control.chromosomeRange == undefined)
         {
-            control.container.innerHTML="<p><b>A chromosome range and set of patients must be selected to view visualizations.</b></p>";
+            control.container.innerHTML = "<p><b>A chromosome range and set of patients must be selected to view visualizations.</b></p>";
             return;
         }
-        if(!control.rangechanged && !control.patientchanged && !control.parameterschanged){
+        if (!control.rangechanged && !control.patientchanged && !control.parameterschanged) {
             return;
         }
 
@@ -234,84 +279,88 @@ var TransplantVisualization = Class.create({
         control.parameterschanged = false;
 
         //reloading the visualization, reset the array of visualizations
-        control.transplants=[];
-    
-    var compAN = function (a,b)
-    {
-           a= a.toLowerCase();
-           b= b.toLowerCase();
-         if (a < b) //sort string ascending
-              return -1
-        if (a > b)
-             return 1
-         return 0 //default return value (no sorting)
-     }
+        control.transplants = [];
 
-    var sortpatientorsample = function(a,b)
-    {
-        compAN(a.classification,b.classification);
-       }
-    control.patients = control.patients.sort(sortpatientorsample);
+        var compAN = function (a, b)
+        {
+            a = a.toLowerCase();
+            b = b.toLowerCase();
+            if (a < b) //sort string ascending
+                return -1
+            if (a > b)
+                return 1
+            return 0 //default return value (no sorting)
+        }
 
-    var html = "";
-    var transplantws = "/addama/tools/breakpoint";
+        var sortpatientorsample = function(a, b)
+        {
+            compAN(a.classification, b.classification);
+        }
+        control.patients = control.patients.sort(sortpatientorsample);
+
+        var html = "";
+        var transplantws = "/addama/tools/breakpoint";
 
         var rangeItems = control.chromosomeRange.split("/");
         var chr = rangeItems[0];
         var start = rangeItems[1];
         var end = rangeItems[2];
-    html = '';
-    control.query_array = [];
-    control.response_array = [];
-    
-    $A(control.patients).each(function(p) {
-        html+="<table><tr><td>"+p.id+"<br/>"+p.classification+"<br/>"+p.comments+"</td>";
-        p.samples=p.samples.sort(sortpatientorsample);
-        for(var i=0;i<p.samples.length; i++)
-        {
-            var s = p.samples[i];
-            html+="<td class=\'outlined\'>"+s.classification+"<br/><div id=\'" + s.id +"div\' style=\"" +
-                    "width: " + control.options.div_width + "; height: " + control.options.div_height +";\"></div></td>";
-            var filters = JSON.stringify(control.getfilters());
-            //var query = new google.visualization.Query(transplantws+'?key='+apiKey+'&filters='+filters+'&chr='+document.getElementById('chr').value+'&start='+document.getElementById('start').value+'&end='+document.getElementById('end').value+'&depth='+document.getElementById('depth').value+'&radius='+document.getElementById('radius').value+'&file='+s.pickleFile);
+        html = '';
+        control.query_array = [];
+        control.response_array = [];
 
-            var query = new google.visualization.Query(transplantws+'?chr='+chr+'&start='+start+'&end='+end+'&depth=' + control.advParameters.branchdepth + '&radius=' + control.advParameters.radius + '&file='+s.pickleFile);
-//            control.query_array.push({'query':query,'sample':s,'transplantws':transplantws});
-            query.send(control.getVisResponseHandler(s.id,s.pickleFile,transplantws,control.refgenUri,control.coverageDatasourceUri));
-            
+        $A(control.patients).each(function(p) {
+            html += "<table><tr><td>" + p.id + "<br/>" + p.classification + "<br/>" + p.comments + "</td>";
+            p.samples = p.samples.sort(sortpatientorsample);
+            for (var i = 0; i < p.samples.length; i++)
+            {
+                var s = p.samples[i];
+                html += "<td class=\'outlined\'>" + s.classification + "<br/><div id=\'" + s.id + "div\' style=\"" +
+                        "width: " + control.options.div_width + "; height: " + control.options.div_height + ";\"></div></td>";
+                var filters = control.getfilters().toJSON();
+                //var query = new google.visualization.Query(transplantws+'?key='+apiKey+'&filters='+filters+'&chr='+document.getElementById('chr').value+'&start='+document.getElementById('start').value+'&end='+document.getElementById('end').value+'&depth='+document.getElementById('depth').value+'&radius='+document.getElementById('radius').value+'&file='+s.pickleFile);
+
+                var query = new google.visualization.Query(transplantws + '?filters=' + filters + '&chr=' + chr + '&start=' + start + '&end=' + end + '&depth=' + control.advParameters.branchdepth + '&radius=' + control.advParameters.radius + '&file=' + s.pickleFile);
+                //            control.query_array.push({'query':query,'sample':s,'transplantws':transplantws});
+                query.send(control.getVisResponseHandler(s.id, s.pickleFile, transplantws, control.refgenUri, control.coverageDatasourceUri));
+
+            }
+            html += "</tr></table>";
+            //html += "<div>" + Ext.encode(p) + "</div>";
+        });
+        control.container.innerHTML = html;
+        //       this.distributeQueries();
+        // org.systemsbiology.visualization.transplant.colorkey(org.systemsbiology.visualization.transplant.chrmcolors.human,document.getElementById('legenddiv'));
+    },
+
+    distributeQueries: function() {
+        for (var i = 0; i < 1; i++) {
+            if (this.query_array.length < 1) {
+                return;
+            }
+            var query_obj = this.query_array.shift();
+            var query = query_obj.query;
+            var s = query_obj.sample;
+            var transplantws = query_obj.transplantws;
+            $(s.id + "div").innerHTML = "Loading...";
+            query.send(this.getVisResponseHandler(s.id, s.pickleFile, transplantws, this.refgenUri, this.coverageDatasourceUri));
+
         }
-        html += "</tr></table>";
-        //html += "<div>" + Ext.encode(p) + "</div>";
-    });
-    control.container.innerHTML=html;
-//       this.distributeQueries();
-   // org.systemsbiology.visualization.transplant.colorkey(org.systemsbiology.visualization.transplant.chrmcolors.human,document.getElementById('legenddiv'));
-},
+    },
 
-distributeQueries: function(){
-    for (var i = 0;i <1; i++) {
-        if (this.query_array.length < 1) { return;}
-        var query_obj = this.query_array.shift();
-        var query = query_obj.query;
-        var s = query_obj.sample;
-        var transplantws = query_obj.transplantws;
-        $(s.id+"div").innerHTML = "Loading...";
-        query.send(this.getVisResponseHandler(s.id,s.pickleFile,transplantws,this.refgenUri,this.coverageDatasourceUri));
-        
-    }
-},
+    getVisResponseHandler: function(id, file, transplantws, genedatasource, trackds)
+    {
+        var control = this;
+        return function(resp) {
+            control.visResponseHandler(resp, id, file, transplantws, genedatasource, trackds);
+        }
+    },
 
-getVisResponseHandler: function(id,file,transplantws,genedatasource,trackds)
-{
-    var control = this;
-    return function(resp){ control.visResponseHandler(resp,id,file,transplantws,genedatasource,trackds);}
-},
-
-visResponseHandler: function(response,id,file,transplantws,genedatasource,trackds)
-{
-    var control = this;
+    visResponseHandler: function(response, id, file, transplantws, genedatasource, trackds)
+    {
+        var control = this;
         control.response_array.push(id);
-        if(control.response_array.length >= 1) {
+        if (control.response_array.length >= 1) {
             control.response_array = [];
             control.distributeQueries();
         }
@@ -321,23 +370,23 @@ visResponseHandler: function(response,id,file,transplantws,genedatasource,trackd
         }
         var data = response.getDataTable();
         //log("data table created");
-        var div = document.getElementById(id+"div");
+        var div = document.getElementById(id + "div");
         var vis = new org.systemsbiology.visualization.transplant(div);
 
-                var rangeItems = control.chromosomeRange.split("/");
+        var rangeItems = control.chromosomeRange.split("/");
         var chr = rangeItems[0];
         var start = rangeItems[1];
         var end = rangeItems[2];
         control.transplants.push(vis);
 
-        google.visualization.events.addListener(vis, 'select', control.getSelectionHandler(vis) );
-        google.visualization.events.addListener(vis, 'recenter', control.getRecenterListener(vis) );
+        google.visualization.events.addListener(vis, 'select', control.getSelectionHandler(vis));
+        google.visualization.events.addListener(vis, 'recenter', control.getRecenterListener(vis));
         var filters = control.getfilters();
-        vis.draw(data,{
+        vis.draw(data, {
             trackds:trackds,
             sample_id:id,
             widthfield:control.advParameters.widthfield,
-            //filters:filters,
+            filters:filters,
             width: control.options.div_width,
             height: control.options.div_height,
             chr:chr,
@@ -345,59 +394,59 @@ visResponseHandler: function(response,id,file,transplantws,genedatasource,trackd
             start:start,
             end:end,
             radius:control.advParameters.radius,
-            dataservice:transplantws+"?file="+file,
+            dataservice:transplantws + "?file=" + file,
             refgenomeUri: control.refgenUri
         });
-},
+    },
 
-getRecenterListener: function(vis)
-{
-    var control = this;
-	return function (loc) {
+    getRecenterListener: function(vis)
+    {
+        var control = this;
+        return function (loc) {
 
-    google.visualization.events.trigger(control,'rangeSelect',{chr:loc.chr.substring(3),start:loc.start,end:loc.end,gene:loc.gene,cancel_bubble: true});
-	//	log("recenter event");
-		control.locationhistory.push(loc);
-        control.onRangeSelection(loc.chr + '/' + loc.start + '/' + loc.end);
-		for(var i in control.transplants)
-		{
-			if(control.transplants[i]!=vis)
-				control.transplants[i].recenteronlocation(loc.chr,loc.start,loc.end);
-		}
-	}
+            google.visualization.events.trigger(control, 'rangeSelect', {chr:loc.chr.substring(3),start:loc.start,end:loc.end,gene:loc.gene,cancel_bubble: true});
+            //	log("recenter event");
+            control.locationhistory.push(loc);
+            control.onRangeSelection(loc.chr + '/' + loc.start + '/' + loc.end);
+            for (var i in control.transplants)
+            {
+                if (control.transplants[i] != vis)
+                    control.transplants[i].recenteronlocation(loc.chr, loc.start, loc.end);
+            }
+        }
 
 
-},
+    },
 
-getSelectionHandler: function(vis)
-{
-    var control = this;
-	return function () {
-		//log("selection event");
-        var loc = vis.recenteronrow(vis.getSelection());
-        google.visualization.events.trigger(control,'rangeSelect',{chr:loc.chr.substring(3),start:loc.start,end:loc.end,gene:null,cancel_bubble: true});
-		control.locationhistory.push(loc);
-        control.onRangeSelection(loc.chr + '/' + loc.start + '/' + loc.end);
-		for(var i in control.transplants)
-		{
-			if(control.transplants[i]!=vis)
-				control.transplants[i].recenteronlocation(loc.chr,loc.start,loc.end);
-		}
-	}
-},
+    getSelectionHandler: function(vis)
+    {
+        var control = this;
+        return function () {
+            //log("selection event");
+            var loc = vis.recenteronrow(vis.getSelection());
+            google.visualization.events.trigger(control, 'rangeSelect', {chr:loc.chr.substring(3),start:loc.start,end:loc.end,gene:null,cancel_bubble: true});
+            control.locationhistory.push(loc);
+            control.onRangeSelection(loc.chr + '/' + loc.start + '/' + loc.end);
+            for (var i in control.transplants)
+            {
+                if (control.transplants[i] != vis)
+                    control.transplants[i].recenteronlocation(loc.chr, loc.start, loc.end);
+            }
+        }
+    },
 
-getfilters: function(){
+    getfilters: function() {
 
-    var control = this;
+        var control = this;
         var filters = [];
-            if(control.advParameters.includeITX) {
-                filters.push({type:"ITX",minscore:control.advParameters.itxMinScore});
-            }
-            if(control.advParameters.includeCTX) {
-                filters.push({type:"CTX",minscore:control.advParameters.ctxMinScore});
-            }
+        if (control.advParameters.includeSmall) {
+            filters.push({type:"small",minscore:control.advParameters.smallMinScore});
+        }
+        if (control.advParameters.includeOther) {
+            filters.push({type:"other",minscore:control.advParameters.otherMinScore});
+        }
 
         return filters;
 
-}
+    }
 });
