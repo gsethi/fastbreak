@@ -25,6 +25,18 @@ var AsyncLoader = Class.create({
         pe.dataLoaders = this.dataLoaders;
     },
 
+    load: function(uri, callback) {
+        Ext.Ajax.request({
+            url: uri,
+            success: callback,
+            failure: function(o) {
+                if (o.status == 302) {
+                    setTimeout("location.href = redirectURL;",300);
+                }
+            }
+        })
+    },
+
     onPeriodic: function() {
         console.log("AsyncLoader.onPeriodic:" + this.dataLoaders.length);
 
