@@ -542,6 +542,7 @@ org.systemsbiology.visualization.transplant.prototype.draw = function(data, opti
     this.refgenomeUri = options.refgenomeUri;
     this.sproutshift=0;
     this.allowSelfStumpAdjust=true;
+    this.trackScale = 5;
 
 	var chrClause = function(c, s, e)
 	{ 
@@ -754,7 +755,9 @@ org.systemsbiology.visualization.transplant.prototype.drawTrackData = function(r
   	
   	for (var row = 0; row < data.getNumberOfRows(); row++) 
   	{
-  		var height = this.bottompad *data.getValue(row,4);
+  		var value = data.getValue(row,4);
+  		value = value < 1 ? 0 : Math.log(value);
+  		var height = this.trackScale * value;
 		var x1 = this.padby + this.xscale*(data.getValue(row,2) -this.stumpstart);
 		var y1 = this.origin.y;
 		var distance = this.xscale*data.getValue(row,3);
