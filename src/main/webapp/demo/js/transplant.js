@@ -757,7 +757,7 @@ org.systemsbiology.visualization.transplant.prototype.drawTrackData = function(r
   	{
   		var value = data.getValue(row,4);
   		value = value < 1 ? 0 : Math.log(value);
-  		var height = this.trackScale * value;
+  		var height = Math.round(this.trackScale * value);
 		var x1 = this.padby + this.xscale*(data.getValue(row,2) -this.stumpstart);
 		var y1 = this.origin.y;
 		var distance = this.xscale*data.getValue(row,3);
@@ -768,7 +768,7 @@ org.systemsbiology.visualization.transplant.prototype.drawTrackData = function(r
 		rect.setAttributeNS(null, "width", distance);
 		rect.setAttributeNS(null, "height", height);
 		rect.setAttributeNS(null, "fill", this.colors[this.stumpchr]);
-		rect.setAttributeNS(null, 'fill-opacity', .3);
+		rect.setAttributeNS(null, 'fill-opacity', .5);
 		this.svg.appendChild(rect);
   	
   	}
