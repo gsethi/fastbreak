@@ -74,7 +74,7 @@ var TransplantParameters = Class.create({
                                             xtype: 'textfield',
                                             fieldLabel: 'Maximum Branch Depth',
                                             ref: '../../../branchDepth',
-                                            value: 3,
+                                            value: control.branchdepth,
                                             anchor: '95%'
                                         }
                                     ]
@@ -87,7 +87,7 @@ var TransplantParameters = Class.create({
                                             xtype: 'textfield',
                                             fieldLabel: 'Search Radius',
                                             ref: '../../../searchradius',
-                                            value: 400000,
+                                            value: control.radius,
                                             anchor: '95%'
                                         }
                                     ]
@@ -112,14 +112,14 @@ var TransplantParameters = Class.create({
                                             fieldLabel: 'Distance',
                                             ref: '../../../includesmall',
                                             anchor: '95%',
-                                            checked: true
+                                            checked: control.includeSmall
                                         },
                                         {
                                             xtype: 'checkbox',
                                             fieldLabel: 'Orientation or Chromosome',
                                             ref: '../../../includeother',
                                             anchor: '95%',
-                                            checked: true
+                                            checked: control.includeOther
                                         }
                                     ]
                                 },
@@ -132,14 +132,14 @@ var TransplantParameters = Class.create({
                                             fieldLabel: 'Minimum Score',
                                             ref: '../../../smallminscore',
                                             anchor: '95%',
-                                            value: '98'
+                                            value: control.smallMinScore
                                         },
                                         {
                                             xtype: 'textfield',
                                             fieldLabel: 'Minimum Score',
                                             ref: '../../../otherminscore',
                                             anchor: '95%',
-                                            value: '98'
+                                            value: control.otherMinScore
                                         }
                                     ]
                                 }
