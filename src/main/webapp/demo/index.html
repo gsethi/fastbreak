@@ -262,7 +262,7 @@
                                     anchor: '100%'
                                  });
 
-                                  circvis_ov_gbm = new Ext.Panel({
+                 circvis_ov_gbm = new Ext.Panel({
                                     title: 'Circvis',
                                     contentEl: $("chromovis_ov_gbm_div"),
                                     autoScroll: true,
@@ -659,9 +659,10 @@
 
 
 //function called when data load for circvis is complete
-        function onLoadGBMDataComplete() {
+        function onLoadGBMDataComplete(height,width) {
             $('chromovis_gbm_div').innerHTML="";
-            circle_gbm = wedge_plot($('chromovis_gbm_div'),'gbm',circvis_gbm.getHeight() * 0.95,circvis_gbm.getHeight() * 0.95);
+             $('chromovis_gbm_div').style.height=circvis_gbm.getHeight();
+            circle_gbm = wedge_plot($('chromovis_gbm_div'),'gbm',height,width);
 
             var gbmDataTable = createDataTable(args_gbm['discrit_gene_count']);
             tablevis_gbm.removeAll();
@@ -673,8 +674,9 @@
                 }
         }
 
-         function onLoadOVDataComplete() {
+         function onLoadOVDataComplete(height,width) {
             $('chromovis_ov_div').innerHTML="";
+             $('chromovis_ov_div').style.height=circvis_ov.getHeight();
             circle_ov = wedge_plot($('chromovis_ov_div'),'ov',circvis_ov.getHeight() * 0.95,circvis_ov.getHeight() * 0.95);
 
             var ovDataTable = createDataTable(args_ov['discrit_gene_count']);
@@ -687,8 +689,9 @@
                 }
         }
 
-        function onLoadOVGBMDataComplete() {
+        function onLoadOVGBMDataComplete(height,width) {
             $('chromovis_ov_gbm_div').innerHTML="";
+            $('chromovis_ov_gbm_div').style.height=circvis_ov_gbm.getHeight();
             circle_ov_gbm = wedge_plot_ov_gbm($('chromovis_ov_gbm_div'),circvis_ov_gbm.getHeight() * 0.95,circvis_ov_gbm.getHeight() * 0.95);
 
             var ovgbmDataTable = createOVGBMDataTable(args_ovgbm['ov_gene_count'],args_ovgbm['gbm_gene_count']);
@@ -702,24 +705,38 @@
         }
 
     function onCircvisTypeSelected(circvisType){
-        if(circvisType == 'ov_gbm' && $('chromovis_ov_gbm_div').innerHTML == ""){
+        if(circvisType == 'ov_gbm') {
+
+            if ($('chromovis_ov_gbm_div').innerHTML == ""){
 
             loadMask['ovgbm'] = new Ext.LoadMask(comparatorPanel.getEl(), {msg:"Loading Circvis..."});
             loadMask['ovgbm'].show();
             loadDataOVGBM(onLoadOVGBMDataComplete,500,0);
+        }  else {
+                circle_ov_gbm.setSize(circvis_ov_gbm.getHeight() * 0.95,circvis_ov_gbm.getHeight() * 0.95);
+            }
         }
-        else if(circvisType == 'gbm' && $('chromovis_gbm_div').innerHTML == ""){
+         else if(circvisType == 'gbm') {
+
+        if($('chromovis_gbm_div').innerHTML == ""){
             loadMask['gbm'] = new Ext.LoadMask(gbmPanel.getEl(), {msg:"Loading Circvis..."});
             loadMask['gbm'].show();
             loadData(onLoadGBMDataComplete,circvisType,500,0);
+        } else {
+            circle_gbm.setSize(circvis_gbm.getHeight() * 0.95,circvis_gbm.getHeight() * 0.95);
+            }
         }
-        else if(circvisType == 'ov' && $('chromovis_ov_div').innerHTML == ""){
+
+        else if(circvisType == 'ov') {
+
+        if($('chromovis_ov_div').innerHTML == ""){
             loadMask['ov'] = new Ext.LoadMask(ovPanel.getEl(), {msg:"Loading Circvis..."});
             loadMask['ov'].show();
             loadData(onLoadOVDataComplete, circvisType,500,0);
+        }  else {
+            circle_ov.setSize(circvis_ov.getHeight() * 0.95,circvis_ov.getHeight() * 0.95);
+            }
         }
-
-
     }
 
             
