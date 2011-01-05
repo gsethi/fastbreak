@@ -129,7 +129,9 @@ initialized = False
 
 #Create results path if necessary
 try:
-	os.makedirs(resultsRelativePath)
+	#add check only because of permission errors
+	if os.path.exists(resultsRelativePath) != True:
+		os.makedirs(resultsRelativePath)
 except OSError, exc:
 	if exc.errno == errno.EEXIST: pass
 	else: raise
