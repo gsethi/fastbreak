@@ -25,5 +25,15 @@ def fullPass2(patient,dir):
 	
 	
 if __name__ == "__main__":
-	for patient in sys.argv[1:]:
+	patients=[]
+	if len(sys.argv)==1:
+		wigfiles = glob.glob("./*.tile.wig")
+		patients = {}
+		for filen in wigfiles:
+			patients[os.path.basename(filen)[0:12]] = 1
+			patients = patients.keys()
+	else:
+		patients = sys.argv[1:]
+	
+	for patient in patients:
 		fullPass2(patient,"./")
