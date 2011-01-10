@@ -28,10 +28,10 @@ if __name__ == "__main__":
 	patients=[]
 	if len(sys.argv)==1:
 		wigfiles = glob.glob("./*.tile.wig")
-		patients = {}
+		patientdic = {}
 		for filen in wigfiles:
-			patients[os.path.basename(filen)[0:12]] = 1
-			patients = patients.keys()
+			patientdic[os.path.basename(filen)[0:12]] = 1
+			patients = patientdic.keys()
 	else:
 		patients = sys.argv[1:]
 	
