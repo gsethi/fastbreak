@@ -65,7 +65,8 @@ if __name__ == "__main__":
 	
 	
 	searchpath=sys.argv[1]
-	days=sys.argv[2]
-	outputfile=sys.argv[2]
+	days=int(sys.argv[2])
+	outputfile=sys.argv[3]
+	findAndParse(searchpath,days,outputfile)
 	
 		
