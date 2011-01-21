@@ -10,6 +10,7 @@ from xml.etree.ElementTree import ElementTree
 
 def findAndParse(searchpath, days,outputfile):
 	
+	findcommand = "find %s -iname *clinical.TCGA-*.xml -atime -%i"%(searchpath,days)
 	findcommand = "find "+searchpath+" -name \""+ patient+"*"+fileNameEnd+"\""
 	print "Atempting to run : "+  findcommand
 	
