@@ -39,7 +39,7 @@ def findAndParse(searchpath, days,outputfile):
 		
 		for el in tree.iter():
 			patient_data_cols[el.tag]=True
-			patient_data[patient][el.tag]=el.text.rstrip().lstrip()
+			patient_data[patient][el.tag]=str(el.text).rstrip().lstrip()
 	print("\nOutputing Results to "+outputfile )
 	
 	outf = open(outputfile,"w")
