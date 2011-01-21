@@ -54,7 +54,7 @@ def findAndParse(searchpath, days,outputfile):
 			else:
 				# R standard NA character
 				out_data.append("NA")
-		outf.write("\t".join(out_data)+"\n")
+		outf.write("\t".join([ str(el) for el in out_data ])+"\n")
 		
 	
 			
