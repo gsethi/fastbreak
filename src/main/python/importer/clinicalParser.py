@@ -28,6 +28,7 @@ def findAndParse(searchpath, days,outputfile):
 			print "fn is \"\""
 			continue
 		sys.stdout.write(".")
+		sys.stdout.flush()
 		
 		basename= os.path.basename(fn)
 		tcgaindex= basename.find("TCGA")
@@ -41,7 +42,7 @@ def findAndParse(searchpath, days,outputfile):
 			patient_data[patient][el.tag]=el.text
 	print("\nOutputing Results to "+outputfile )
 	
-	outf = open(outputfilem,"w")
+	outf = open(outputfile,"w")
 	cols = patient_data_cols.keys()
 	cols.insert(0,"patient")
 	outf.write("\t".join(cols)+"\n")
