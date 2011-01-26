@@ -311,7 +311,7 @@ if __name__ == "__main__":
 # 		print "Processing " + infile
 # 		scoreBreakDancer(infile,infile,sys.argv[1],coveredregions)
 		
-	for scoreCutoff in [0,25,50,75,90,94,96,98,99]:
+	for scoreCutoff in [0]:
 		for infile in glob.glob(os.path.join(os.getcwd(),'TCGA*called')):
 			print "Processing " + infile
 			scoreCallsNoSubtract(infile,infile,sys.argv[1],coveredregions,scoreCutoff)
