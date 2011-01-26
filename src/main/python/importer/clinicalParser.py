@@ -52,13 +52,13 @@ def findAndParse(searchpath, days,outputfile):
 	for file,data in patient_data.items():
 		
 		out_data=[file,patient_by_file[file]]
-		for col in cols[1:]:
+		for col in cols[2:]:
 			if col in data:
 				out_data.append(data[col])
 			else:
 				# R standard NA character
 				out_data.append("NA")
-		outf.write("\t".join([ str(el) for el in out_data ])+"\n")
+		outf.write("\t".join([ str(el.rstrip().lstrip()) for el in out_data ])+"\n")
 		
 	
 			
