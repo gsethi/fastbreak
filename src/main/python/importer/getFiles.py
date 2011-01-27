@@ -6,7 +6,7 @@ import sys
 import subprocess, shlex, shutil
 import os, glob
 
-def getForPatient(searchpath,fileNameEnd,todir,patient):
+def getForPatient(searchpath,fileNameEnd,todir,patient,notfound):
 	
 	findcommand = "find "+searchpath+" -name \""+ patient+"*"+fileNameEnd+"\""
 	print "Atempting to run : "+  findcommand
@@ -20,6 +20,7 @@ def getForPatient(searchpath,fileNameEnd,todir,patient):
 	
 	for fn in filelist:
 		if fn == "":
+			notfound.write(patient+"\n")
 			print "fn is \"\""
 			continue
 		print "Copying " + fn + " to "+ todir
@@ -39,8 +40,10 @@ if __name__ == "__main__":
 	else:
 		patients = sys.argv[4:]
 	
+	notfound = open("notfount.txt","w")
 	for patient in patients:
-		getForPatient(sys.argv[1],sys.argv[2],sys.argv[3],patient)
+		getForPatient(sys.argv[1],sys.argv[2],sys.argv[3],patient,notfound)
+	notfound.close()
 		
 
 		
