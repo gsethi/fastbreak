@@ -307,9 +307,9 @@ if __name__ == "__main__":
 		print "Found %i tiles covered over cutoff and %i tiles covered but below cutoff"%(passedCount,fitleredcount)
 					
 		firstpass = False
-# 	for infile in glob.glob(os.path.join(os.getcwd(),'TCGA*.breakdancer.out')):
-# 		print "Processing " + infile
-# 		scoreBreakDancer(infile,infile,sys.argv[1],coveredregions)
+	for infile in glob.glob(os.path.join(os.getcwd(),'TCGA*.breakdancer.out')):
+		print "Processing " + infile
+		scoreBreakDancer(infile,infile,sys.argv[1],coveredregions)
 		
 	for scoreCutoff in [0]:
 		for infile in glob.glob(os.path.join(os.getcwd(),'TCGA*called')):
