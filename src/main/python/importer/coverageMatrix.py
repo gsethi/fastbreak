@@ -1,5 +1,5 @@
 import os, glob, errno, sys
-import makeCalls, genelist
+import makeCalls, genelist, scoreCalls
 resolution = 1000
 padby = 1000
 includeAllGenes = True
@@ -25,7 +25,7 @@ def score(genelistfn):
 			fitleredcount = 0
 			passedCount = 0
 			for chr in wig:
-				chrNorm = addChr(chr)
+				chrNorm = scoreCalls.addChr(chr)
 				if not chrNorm in coveredregions:
 					coveredregions[chrNorm] = {}
 				for tile in wig[chr]:
