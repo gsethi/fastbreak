@@ -161,7 +161,7 @@ def score():
 		scoreFiles("./*listcalled.minScore."+str(scoreCutoff)+".pergene.tsv",4,5,"fastbreak.per.gene.score.minscore."+str(scoreCutoff))
 	
 	print "Combining per gene breakdancer files"
-	scoreFiles("./*.breakdancer.out.t.per.gene",4,"breakdancer.per.gene.score")
+	scoreFiles("./*.breakdancer.out.t.per.gene",4,5,"breakdancer.per.gene.score")
 	
 	#print "Combining per tile fastbreak files"
 	#scoreFilesByTile("./*.listcalled.bined.tsv",2,"fastbreak.per.tile.score")
