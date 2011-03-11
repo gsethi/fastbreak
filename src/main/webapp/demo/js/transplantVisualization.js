@@ -299,7 +299,7 @@ var TransplantVisualization = Class.create({
         control.patients = control.patients.sort(sortpatientorsample);
 
         var html = "";
-        var transplantws = "/addama/tools/breakpoint";
+        var transplantws = "/simple-proxy-svc/addama/tools/breakpoint";
 
         var rangeItems = control.chromosomeRange.split("/");
         var chr = rangeItems[0];
@@ -381,7 +381,7 @@ var TransplantVisualization = Class.create({
 
         google.visualization.events.addListener(vis, 'select', control.getSelectionHandler(vis));
         google.visualization.events.addListener(vis, 'recenter', control.getRecenterListener(vis));
-        var filters = control.getfilters();
+        var filters = control.getfilters().toJSON();
         vis.draw(data, {
             trackds:trackds,
             sample_id:id,
