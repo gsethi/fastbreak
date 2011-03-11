@@ -271,7 +271,7 @@ org.systemsbiology.visualization.transplant.prototype.decorateChr = function(vis
 		
 		
 		var dec = vis.chrs[stumpchr].decorations[i];
-		vis.log("drawing decoration " + dec.label);
+		vis.log("drawing decoration " + dec.gene_symbol);
 
 		if((dec.start<stumpend && dec.start > stumpstart) || (dec.end<stumpend && dec.end > stumpstart) || (dec.end>stumpend && dec.start < stumpstart))
 		{
@@ -284,9 +284,9 @@ org.systemsbiology.visualization.transplant.prototype.decorateChr = function(vis
 			var cy = p((sx+ex)/2);
 			
 			//var c = (s.x+e.x)/2;
-			var l=depth==0?dec.label:"";
+			var l=depth==0?dec.gene_symbol:"";
 
-			var oc = "isbSWFvisualizations['"+vis.SWFid+"'].internalrecenteronlocation('"+stumpchr+"',"+(dec.start-vis.radius)+","+(dec.end+vis.radius)+",\'" + dec.label+"\');";
+			var oc = "isbSWFvisualizations['"+vis.SWFid+"'].internalrecenteronlocation('"+stumpchr+"',"+(dec.start-vis.radius)+","+(dec.end+vis.radius)+",\'" + dec.gene_symbol+"\');";
 			
 			var mo =dec.mouseover;
 			var rx = (Math.abs((ex-sx)/2));
@@ -303,7 +303,7 @@ org.systemsbiology.visualization.transplant.prototype.decorateChr = function(vis
 				//vis.log("labeloffset is " + labeloffset);
 				var offsetb= vis.origin.y + labeloffset*vis.padby;
 				//var offsetb= vis.origin.y + 4*vis.padby;
-				group.appendChild(vis.labelDecoration(cx,top,offsetb,dec.label,oc,mo));
+				group.appendChild(vis.labelDecoration(cx,top,offsetb,dec.gene_symbol,oc,mo));
 				labeloffset++;
 				labeloffset = (labeloffset==6?1:labeloffset);
 				
@@ -827,13 +827,15 @@ org.systemsbiology.visualization.transplant.prototype.handleChromosomeRangeItems
 //        new Ajax.Request(chromUri + "/genes", {
 //            method: "get",
 //            onSuccess: function(o) {
-          geneRequestPool.request(chromUri, function(o){
-                var json = o.responseJSON;
-                if (json && json.items) {
-                    for (var it = 0; it < json.items.length; it++) {
-                        var geneObj = json.items[it];
-                        var name = geneObj.label;
-                        var chromosome = geneObj.chromosome;
+          
+		
+		geneRequestPool.request(chromUri, function(o){
+                var datatableArray = GoogleDSUtils.dataTableToArray(o.getDataTable());
+		if (datatableArray && datatableArray.length > 0) {
+                    for (var it = 0; it < datatableArray.length; it++) {
+                        var geneObj = datatableArray[it];
+                        var name = geneObj.gene_symbol;
+                        var chromosome = "chr"+geneObj.chr;
                         geneObj.mouseover = ""+name+", "+chromosome+":"+geneObj.start+"-"+geneObj.end;
 
                         if(!me.chrs[chromosome]) {
@@ -942,7 +944,7 @@ org.systemsbiology.visualization.transplant.prototype.recenteronlocation = funct
 org.systemsbiology.visualization.transplant.prototype.doquery = function (chr,start,end)
 {
 	this.showloading();
-	var querystring = this.dataservice+'?filters='+this.filters+'&chr='+chr+'&start='+start+'&end='+end+'&depth='+this.depth+'&radius='+this.radius;
+	var querystring = this.dataservice+'&filters='+this.filters+'&chr='+chr+'&start='+start+'&end='+end+'&depth='+this.depth+'&radius='+this.radius;
 	this.log("loading: " + querystring);
 	var query = new google.visualization.Query(querystring);
 	
@@ -1083,13 +1085,17 @@ geneRequestPool.request = function(uri,callback) {
         callback(geneRequestPool.requestMap[uri]);
     }
     else{
-        new Ajax.Request(uri + "/genes", {
-            method: "get",
-            onSuccess: function(o) {
-                geneRequestPool.requestMap[uri] = o;
-                callback(o);
-            }
+ var chromUriArray = uri.split("/");
+          var endpos = chromUriArray[chromUriArray.length-1];
+          var startpos = chromUriArray[chromUriArray.length-2];
+          var chrom = chromUriArray[chromUriArray.length-3];
+          var chromIndex = uri.indexOf(chrom);
 
-        })
+          var gene_query = new google.visualization.Query(uri.substring(0,chromIndex-1));
+            gene_query.setQuery('select * where chr = \'' + chrom.substring(3) + '\' and start > ' + startpos + ' and start < ' + endpos);
+            gene_query.send(function(resp){
+                geneRequestPool.requestMap[uri] = resp;
+                callback(resp);
+            });
     }
 };
