@@ -56,47 +56,42 @@
                background-image:url(images/chart_line.png) !important
         }
     </style>
-        <link rel="stylesheet" type="text/css" href="/addama/ui/ext-js-3.3.0/examples/ux/gridfilters/css/GridFilters.css">
-         <link rel="stylesheet" type="text/css" href="/addama/ui/ext-js-3.3.0/examples/ux/gridfilters/css/RangeMenu.css">
-        <link rel="stylesheet" type="text/css" href="/addama/ui/ext-js-3.3.0/resources/css/ext-all.css">
+        <link rel="stylesheet" type="text/css" href="/ext-js-3.3.0/examples/ux/gridfilters/css/GridFilters.css">
+         <link rel="stylesheet" type="text/css" href="/ext-js-3.3.0/examples/ux/gridfilters/css/RangeMenu.css">
+        <link rel="stylesheet" type="text/css" href="/ext-js-3.3.0/resources/css/ext-all.css">
 
-        <link rel="stylesheet" type="text/css" href="/addama/ui/ext-js-3.3.0/resources/css/xtheme-slate.css" />
-        <script type="text/javascript" language="javascript" src="/addama/ui/prototype.js"></script>
+        <link rel="stylesheet" type="text/css" href="/ext-js-3.3.0/resources/css/xtheme-slate.css" />
         <script type="text/javascript" src="http://www.google.com/jsapi"></script>
         <script type="text/javascript">
             google.load("prototype", "1.6.1.0");
             google.load('visualization','1', {packages:['table']});
         </script>
-        <script type="text/javascript" src="/addama/ui/protovis-1.0/protovis-r3.3.1.js"></script>
-        <script type="text/javascript" src="/addama/ui/protovis-1.0/visdata.js"></script>
-        <script type="text/javascript" src="/addama/ui/protovis-1.0/google-ds-utils.js"></script>
-        <script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/utilities.js"></script>
+        <script type="text/javascript" src="/protovis-1.0/protovis-r3.3.1.js"></script>
+        <script type="text/javascript" src="/protovis-1.0/visdata.js"></script>
+        <script type="text/javascript" src="/protovis-1.0/google-ds-utils.js"></script>
+        <script type="text/javascript" src="/circvis/utilities.js"></script>
 
-        <script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/data_retrieval_transplantui.js"></script>
-        <script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/circvis.js"></script>
+        <script type="text/javascript" src="/circvis/data_retrieval_transplantui.js"></script>
+        <script type="text/javascript" src="/circvis/circvis.js"></script>
 
-        <script type="text/javascript" src="/addama/ui/ext-js-3.3.0/adapter/ext/ext-base.js"></script>
-        <script type="text/javascript" src="/addama/ui/ext-js-3.3.0/ext-all.js"></script>
-        <script type="text/javascript" src="/addama/ui/ext-js-3.3.0/examples/shared/examples.js"></script>
-        <script type="text/javascript" src="/addama/ui/ext-js-3.3.0/examples/ux/ux-all.js"></script>
-        <script type="text/javascript" src="/js/topbar.js"></script>
-        <script type="text/javascript" src="/addama/ui/refgenome/refgenome.js"></script>
-        <script type="text/javascript" language="javascript" src="/addama/ui/flexscroll/flexscroll.js"></script>
+        <script type="text/javascript" src="/ext-js-3.3.0/adapter/ext/ext-base.js"></script>
+        <script type="text/javascript" src="/ext-js-3.3.0/ext-all.js"></script>
+        <script type="text/javascript" src="/ext-js-3.3.0/examples/shared/examples.js"></script>
+        <script type="text/javascript" src="/ext-js-3.3.0/examples/ux/ux-all.js"></script>
+        <script type="text/javascript" language="javascript" src="/flexscroll/flexscroll.js"></script>
         <script type="text/javascript" src="./js/chromosomeRangeControl.js"></script>
         <script type="text/javascript" src="./js/transplantVisualization.js"></script>
         <script type="text/javascript" src="./js/transplant.js"></script>
         <script type="text/javascript" src="./js/patientSelectorControl.js"></script>
         <script type="text/javascript" src="./js/geneCountsDataView.js"></script>
         <script type="text/javascript">
-            Ext.BLANK_IMAGE_URL = '/addama/ui/ext-js-3.3.0/resources/images/default/s.gif';
+            Ext.BLANK_IMAGE_URL = '/ext-js-3.3.0/resources/images/default/s.gif';
         </script>
-        <script type="text/javascript" src="/addama/systemsbiology.org/applications/circvis/js/wedge_plot_transplantui.js"></script>
+        <script type="text/javascript" src="/circvis/wedge_plot_transplantui.js"></script>
 
         <script type="text/javascript">
         var centertabs = null;
-        var email = "";
             var helpWindowReference = null;
-            var topBarPanel = null;
             var topMenuPanel = null;
             var currentRange = null;
             var currentDataset = null;
@@ -115,7 +110,7 @@
             var loadMask = {};
             var tablevis_ov_gbm = null;
             var circle_ov_gbm, circle_ov, circle_gbm;
-            var workspaceUri = "/addama/repositories/workspaces/informatics@systemsbiology.org/ov_gbm_dataset";
+            var workspaceUri = "/fs-workspaces-svc/addama/repositories/workspaces/informatics@systemsbiology.org/ov_gbm_dataset";
 
             var tick_listener = function(node){
                 var chr = node.chr;
@@ -141,12 +136,6 @@
 
              Ext.onReady(function(){
                  Ext.QuickTips.init();
-                 new TopBar().initialize("container_north", {});
-
-                 topBarPanel = new Ext.Panel({
-                     contentEl: $("container_north")
-
-                 });
 
                  currentRange =  new Ext.FormPanel({
                      title: 'Current Selections',
@@ -238,7 +227,7 @@
 
                  });
                  
-                 rangeControl = new ChromosomeRangeControl("container_rangeControl","/addama/refgenome/hg18","22",0,51304566,29576000,29576000+750000);
+                 rangeControl = new ChromosomeRangeControl("container_rangeControl","/google-dsapi-svc","22",0,51304566,29576000,29576000+750000);
 
                  rangeControl.addSelectionListener(this);
 
@@ -526,7 +515,10 @@
                         id:'homepage-panel',
                         iconCls:'home',
                         layout: 'fit',
-                        html:'This is the homepage!',
+                        autoScroll: true,
+			autoLoad: {
+				url: 'home_tab.html'
+			},
                         title: 'Home'
                     },comparatorPanel,ovPanel,gbmPanel,visualizationPanel]
 
@@ -627,21 +619,7 @@
                      }
                  });
 
-                 new Ajax.Request("/addama/users/whoami", {
-                    method: "get",
-                    onSuccess: function(o) {
-                        var json = o.responseJSON;
-                        if (json && json.email) {
-                            email = json.email;
-
-
-                        } else {
-                            showError("Authentication", "User is not logged in");
-                        }
-                    }
-                });
-
-                visualizationControl = new TransplantVisualization("container_visualization","/addama/refgenome/hg18",workspaceUri +"/track.tsv",selectedChromRangeUri);
+                visualizationControl = new TransplantVisualization("container_visualization","/google-dsapi-svc/addama/systemsbiology.org/datasources/tcgajamboree/fastbreak/genes/query",workspaceUri +"/track.tsv",selectedChromRangeUri);
                 transplantParameters = new TransplantParameters();
                 transplantParameters.addListener(visualizationControl);
 
@@ -800,7 +778,7 @@
             function onGeneSelection(gene_symbol){
                 if (gene_symbol.length < 1 || gene_symbol.length > 10) { return;}
 
-                var network_query = new google.visualization.Query('/addama/systemsbiology.org/datasources/tcgajamboree/fastbreak/genes/query');
+                var network_query = new google.visualization.Query('/google-dsapi-svc/addama/systemsbiology.org/datasources/tcgajamboree/fastbreak/genes/query');
                 network_query.setQuery('select chr, start, end where `gene_symbol` = \'' + gene_symbol.toUpperCase() +'\'' );
                 function handleGeneQuery(response) {
                     if (response.isError()) {showError("Gene Selection", "Gene symbol not retrieved.");return;}
@@ -830,17 +808,11 @@
 
         function loadPage(){
 
-            topPanel = new Ext.Panel({
-                region: 'north',
-                height: 26,
-                items:[topBarPanel]
-            });
 
             viewPort = new Ext.Viewport({
                 layout: 'border',
                 renderTo: Ext.getBody(),
-                items: [    topPanel
-                    ,westPanel,centerPanel]
+                items: [ westPanel,centerPanel]
                 
             });
         }
