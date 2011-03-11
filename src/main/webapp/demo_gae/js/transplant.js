@@ -827,7 +827,9 @@ org.systemsbiology.visualization.transplant.prototype.handleChromosomeRangeItems
 //        new Ajax.Request(chromUri + "/genes", {
 //            method: "get",
 //            onSuccess: function(o) {
+
           geneRequestPool.request(chromUri, function(o){
+               
                 var json = o.responseJSON;
                 if (json && json.items) {
                     for (var it = 0; it < json.items.length; it++) {
@@ -1083,13 +1085,18 @@ geneRequestPool.request = function(uri,callback) {
         callback(geneRequestPool.requestMap[uri]);
     }
     else{
-        new Ajax.Request(uri + "/genes", {
-            method: "get",
-            onSuccess: function(o) {
-                geneRequestPool.requestMap[uri] = o;
-                callback(o);
-            }
+                  var chromUriArray = uri.split("/");
+          var endpos = chromUriArray[chromUriArray.length()-1];
+          var startpos = chromUriArray[chromUriArray.length()-2];
+          var chrom = chromUriArray[chromUriArray.length()-3];
+          var chromIndex = uri.indexOf(chrom);
 
-        })
+          var gene_query = new google.visualization.Query(uri.substring(0,chromIndex-1));
+            gene_query.setQuery('select * where chr=' + chrom + ' and start > ' + startpos + ' and end < ' + endpos);
+            gene_query.send(function(resp){
+                geneRequestPool.requestMap[uri] = resp;
+                callback(resp);
+            });
+
     }
 };
