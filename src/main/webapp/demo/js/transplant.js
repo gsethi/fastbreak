@@ -830,7 +830,7 @@ org.systemsbiology.visualization.transplant.prototype.handleChromosomeRangeItems
           
 		
 		geneRequestPool.request(chromUri, function(o){
-                var datatableArray = GoogleDSUtils.dataTableToArray(o.getDataTable());
+                var datatableArray = vq.utils.GoogleDSUtils.dataTableToArray(o.getDataTable());
 		if (datatableArray && datatableArray.length > 0) {
                     for (var it = 0; it < datatableArray.length; it++) {
                         var geneObj = datatableArray[it];
