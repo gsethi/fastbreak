@@ -48,7 +48,7 @@ var ChromosomeRangeControl = Class.create({
 
      handleChromInfoQuery: function(response) {
          var control = this;
-            var chromosomeArray = GoogleDSUtils.dataTableToArray(response.getDataTable());
+            var chromosomeArray = vq.utils.GoogleDSUtils.dataTableToArray(response.getDataTable());
              for (var i = 0; i < chromosomeArray.length; i++) {
                         var item = chromosomeArray[i];
                         control.chromosomes.set("chr"+item.chr_name, item.chr_length);
@@ -161,18 +161,20 @@ var ChromosomeRangeControl = Class.create({
            // control.publishSelection(control.startPosition, control.endPosition);
         };
 
-        var flexbar = new isbv.FlexScroll( Ext.getDom(this.container), listener);
+        var flexbar = new vq.FlexScroll();
 
-        var data ={DATATYPE : "isbv.models.FlexScrollData", CONTENTS : "test"};
+        var data ={DATATYPE : "vq.models.FlexScrollData", CONTENTS : {
+            PLOT :{width : 700, height: 50,
+           vertical_padding : 10, horizontal_padding: 10, font :"sans", min_position: Math.round(minPosition / 1000) ,
+           max_position: Math.round(maxPosition / 1000), scale_multiplier : 1000, container : this.container},
+            notifier : listener
+        }};
         var length = endPos - startPos;
 
-        var options = {plotWidth : 700, plotHeight: 50,
-           verticalPadding : 10, horizontalPadding: 10, font :"sans", minPosition: Math.round(minPosition / 1000) ,
-           maxPosition: Math.round(maxPosition / 1000), scaleMultiplier : 1000};
 
-        flexbar.draw(data,options);
+        flexbar.draw(data);
         if(minPosition != startPos && maxPosition != endPos){
-            flexbar.setPosition(Math.round(startPos / 1000),Math.round(length / 1000));
+            flexbar.set_position(Math.round(startPos / 1000),Math.round(length / 1000));
         }
        
     }
