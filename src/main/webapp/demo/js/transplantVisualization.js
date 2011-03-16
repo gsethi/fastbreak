@@ -317,8 +317,8 @@ var TransplantVisualization = Class.create({
                 var s = p.samples[i];
                 html += "<td class=\'outlined\'>" + s.classification + "<br/><div id=\'" + s.id + "div\' style=\"" +
                         "width: " + control.options.div_width + "; height: " + control.options.div_height + ";\"></div></td>";
-                //var filters = control.getfilters().toJSON();
-                var filters = JSON.stringify(control.getfilters());
+//                var filters = control.getfilters().toJSON();
+var filters = JSON.stringify(control.getfilters());
                 //var query = new google.visualization.Query(transplantws+'?key='+apiKey+'&filters='+filters+'&chr='+document.getElementById('chr').value+'&start='+document.getElementById('start').value+'&end='+document.getElementById('end').value+'&depth='+document.getElementById('depth').value+'&radius='+document.getElementById('radius').value+'&file='+s.pickleFile);
 
                 var query = new google.visualization.Query(transplantws + '?filters=' + filters + '&chr=' + chr + '&start=' + start + '&end=' + end + '&depth=' + control.advParameters.branchdepth + '&radius=' + control.advParameters.radius + '&file=' + s.pickleFile);
@@ -382,8 +382,8 @@ var TransplantVisualization = Class.create({
 
         google.visualization.events.addListener(vis, 'select', control.getSelectionHandler(vis));
         google.visualization.events.addListener(vis, 'recenter', control.getRecenterListener(vis));
-        //var filters = control.getfilters().toJSON();
-        var filters = JSON.stringify(control.getfilters());
+//        var filters = control.getfilters().toJSON();
+var filters = JSON.stringify(control.getfilters());
         vis.draw(data, {
             trackds:trackds,
             sample_id:id,

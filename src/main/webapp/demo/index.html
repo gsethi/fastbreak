@@ -55,21 +55,23 @@
         .current_selections {
                background-image:url(images/chart_line.png) !important
         }
+	.parallel_coordinates { background-image:url(images/control_equalizer.png) !important }
+        .comparator { background-image:url(images/contrast.png) !important }
+
     </style>
         <link rel="stylesheet" type="text/css" href="/ext-js-3.3.0/examples/ux/gridfilters/css/GridFilters.css">
          <link rel="stylesheet" type="text/css" href="/ext-js-3.3.0/examples/ux/gridfilters/css/RangeMenu.css">
         <link rel="stylesheet" type="text/css" href="/ext-js-3.3.0/resources/css/ext-all.css">
 
         <link rel="stylesheet" type="text/css" href="/ext-js-3.3.0/resources/css/xtheme-slate.css" />
-        <script type="text/javascript" src="http://www.google.com/jsapi"></script>
-        <script type="text/javascript">
-            google.load("prototype", "1.6.1.0");
-            google.load('visualization','1', {packages:['table']});
-        </script>
-    <script type="text/javascript" src="/protovis-1.0/google-code.js"></script>
-    <script type="text/javascript" src="/protovis-1.0/prototype.js"></script>
-    <script type="text/javascript" src="/protovis-1.0/protovis-r3.3.1.js"></script>
-    <script type="text/javascript" src="/protovis-1.0/visquick-utils.js"></script>
+        <script type="text/javascript" src="/protovis-1.0/google-code.js"></script>
+        <script type="text/javascript" src="/protovis-1.0/prototype.js"></script>
+        <script type="text/javascript" src="/protovis-1.0/protovis-r3.3.1.js"></script>
+        <script type="text/javascript" src="/protovis-1.0/visquick-utils.js"></script>
+
+	<script type="text/javascript" src="js/parallel_coordinates.js"></script>
+	<script type="text/javascript" src="js/data_retrieval.js"></script>
+        <script type="text/javascript" src="js/data_plot.js"></script>
 
         <script type="text/javascript" src="/circvis/data_retrieval_transplantui.js"></script>
         <script type="text/javascript" src="/circvis/circvis.js"></script>
@@ -80,7 +82,7 @@
         <script type="text/javascript" src="/ext-js-3.3.0/examples/shared/examples.js"></script>
         <script type="text/javascript" src="/ext-js-3.3.0/examples/ux/ux-all.js"></script>
         <script type="text/javascript" language="javascript" src="/flexscroll/flexscroll.js"></script>
-        <script type="text/javascript" src="./js/chromosomeRangeControl.js"></script>
+        <script type="text/javascript" src="./js/chromosomeRangeControl.js"></script> 
         <script type="text/javascript" src="./js/transplantVisualization.js"></script>
         <script type="text/javascript" src="./js/transplant.js"></script>
         <script type="text/javascript" src="./js/patientSelectorControl.js"></script>
@@ -315,7 +317,7 @@
 
                  comparatorPanel = new Ext.Panel({
                      title: 'Cancer Comparator',
-                     iconCls: 'circvis',
+                     iconCls: 'comparator',
                      id: 'comparator-panel',
                      items: [comparatorTabPanel],
                      tools: [{
@@ -326,6 +328,212 @@
                      }],
                      layout: 'fit'
                  });
+
+ var parallelcoordinatesPanel = new Ext.Panel({
+        id :'pc-panel',
+        name :'pc-panel',
+        title : 'Parallel Coordinates',
+        layout : 'border',
+        tools: [{
+            id: 'help',
+            handler: function(event, toolEl, panel){
+                openHelpWindow('Parallel Coordinates',parCoordHelpString);
+            }
+        }],
+        items:[{
+            region:'center',
+            xtype:'tabpanel',
+            id:'pc-tabpanel',
+            name:'pc-tabpanel',
+            border : false,
+            activeTab : 0,
+            items:[{
+                xtype:'panel',
+                id:'pc-items',
+                iconCls:'parallel_coordinates',
+                    autoScroll : true,
+                    title : 'Graphic',
+                    layout : 'auto',
+                items:[{
+                    id:'pc_text',
+                    padding	:'5',
+                    border :false,
+                    html :'<p>The parallel coordinates plot below shows the three different cancer ' +
+                            'types with their associated structural variation counts for each gene.  A range of items can be ' +
+                            'selected by clicking and dragging the mouse on any given column.  In this way, genes that display a ' +
+                            'trend across cancer types can be selected and further explored.'
+                },{
+                    xtype:'panel',
+                    id:'pc_draw',
+                    name:'pc_draw'
+                },{xtype:'panel',
+                                       border : false,
+                                       buttonAlign : 'center',
+                               buttons:[
+                               {	xtype :	'button',
+                                       x:0,
+                                       y:0,
+                                   text:'Add Filtered Set',
+                                   listeners : {
+                                       click : function() {
+                                           var set = paco_obj.getFiltered();
+                                           var record_set = set.map(function(json){return new (Ext.StoreMgr.get('pc_selection_store')).recordType(json,json.gene);})
+                                           appendToPCSelectionGrid(record_set);
+                                       }
+                                   }
+                               },
+                               {   xtype:'button',
+                                   x:30,
+                                   y:0,
+                                   text:'Add Selection',
+                                   listeners : {
+                                       click : function() {
+                                           var json = paco_obj.getSelected();
+                                           if (json ==null) { return;}
+                                          var record = new (Ext.StoreMgr.get('pc_selection_store')).recordType(json,json.gene);
+                                           appendToPCSelectionGrid(record);
+                                       }
+                                   }
+                               }
+                           ]}]
+
+            },{
+                xtype:'grid',
+                id:'pc_table',
+                iconCls : 'table',
+                draggable : true,
+                ddGroup : 'pc_drag_group',
+                enableDragDrop   : true,
+                stripeRows       : true,
+                name:'pc_table',
+                title : 'Data Table',
+                cm: new Ext.grid.ColumnModel({
+                    defaults : {
+                        width : 120,
+                        sortable : true
+                    },
+                    columns : [
+                        {id : 'gene', header:'Gene', dataIndex:'gene'},
+                        {id : 'COAD',header: 'COAD', dataIndex: 'COAD'},
+                        {id : 'GBM',header: 'GBM', dataIndex: 'GBM'},
+                        {id : 'OV',header: 'OV', dataIndex: 'OV'}
+                    ]
+                }),
+                store: new Ext.data.JsonStore({
+                    autoLoad: false,
+                    storeId:'pc_table_store',
+                    fields: ['gene', 'COAD', 'GBM', 'OV'],
+                    sortInfo : {
+                        field : 'gene',
+                        direction : 'ASC'
+                    },
+                    idProperty : 'gene'
+                }),
+		listeners : {
+			cellclick : function (g,row){
+				onGeneSelection(g.getSelectionModel().getSelected().data.gene);
+			}
+		}
+            }]
+        },{
+            region: 'east',
+            layout : 'anchor',
+            width:300,
+            split: true,
+            id:'pc_selection_panel',
+            title:'Selections',
+            collapsible : true,
+            minimizable : true,
+            collapsed : false,
+
+            items : [{
+                id:'pc_selection_grid',
+                name:'pc_selection_grid',
+                xtype:'grid',
+                margins: '0 5 5 0',
+                height : 400,
+                border:true,
+                autoScroll: true,
+                ddGroup : 'pc_drag_group',
+                pruneModifiedRecords : true,
+                stripeRows       : true,
+                cm: new Ext.grid.ColumnModel({
+                    defaults : {
+                        width : 60,
+                        sortable : true
+                    },
+                    columns : [
+                        {id : 'gene', header:'Gene', dataIndex:'gene', width:90},
+                        {id : 'COAD',header: 'COAD', dataIndex: 'COAD'},
+                        {id : 'GBM',header: 'GBM', dataIndex: 'GBM'},
+                        {id : 'OV',header: 'OV', dataIndex: 'OV'}
+                    ]
+                }),
+                store: new Ext.data.JsonStore({
+                    autoLoad: false,
+                    storeId:'pc_selection_store',
+                    fields: ['gene', 'COAD', 'GBM', 'OV'],
+                    sortInfo : {
+                        field : 'gene',
+                        direction : 'ASC'
+                    },
+                    idProperty : 'gene'
+                }),
+                buttons: [{
+                xtype:'button',
+                        text:'Remove Selection',
+                        listeners : {
+                            click : function(e) {
+                                var grid = Ext.getCmp('pc_selection_grid');
+                                var sels = grid.getSelectionModel().getSelections();
+                                if (sels.length > 0) {
+                                    grid.getStore().remove(sels);
+                                }
+                            }
+                        }
+                },{
+                xtype:'button',
+                        text:'Remove All',
+                        listeners : {
+                            click : function(e) {
+                                var grid = Ext.getCmp('pc_selection_grid');
+                                    grid.getStore().removeAll();
+                            }
+                        }
+                }],
+                listeners : {
+                    render : setupSelectionDropTarget
+                }
+           }]
+        }],
+        listeners : {
+            render : function() {loadCancerSV(renderCancerPaCo);}
+        }
+    });
+
+    function setupSelectionDropTarget() {
+        var pcSelectionDropTarget = new Ext.dd.DropTarget(Ext.getCmp('pc_selection_grid').getView().scroller.dom, {
+            ddGroup     : 'pc_drag_group',
+            notifyDrop : function(ddSource, e, data){
+                var records =  ddSource.dragData.selections;
+                appendToPCSelectionGrid(records);
+                return true;
+            }
+        });
+    }
+    function appendToPCSelectionGrid(records) {
+        var grid = Ext.getCmp('pc_selection_grid');
+
+        Ext.each(records, grid.store.remove, grid.store);
+        try{
+        grid.store.add(records);
+        grid.store.sort('gene', 'ASC');
+        }
+        catch(e) {
+            console.log(e);
+        }
+        return true;
+    }
 
                   ovPanel = new Ext.Panel({
                      title: 'OV Gene Disruption',
@@ -521,7 +729,7 @@
 				url: 'home_tab.html'
 			},
                         title: 'Home'
-                    },comparatorPanel,ovPanel,gbmPanel,visualizationPanel]
+                    },parallelcoordinatesPanel,comparatorPanel,ovPanel,gbmPanel,visualizationPanel]
 
 
                 });
@@ -553,11 +761,17 @@
                             iconCls: 'home',
                             leaf: true,
                             id: 'homepage'
-                         }, {
+                         }, /*{
                             text: 'Cancer Comparator',
                             iconCls:'circvis',
                             leaf: true,
                             id: 'comparator'
+                        },*/
+			{
+                            text: 'Cancer Comparator',
+                            iconCls:'comparator',
+                            leaf: true,
+                            id: 'comparator_paco'
                         },{
                             text: 'Gene Disruption',
                             leaf: false,
@@ -610,6 +824,9 @@
                           }
                          else if(n.id == 'comparator'){
                              onCircvisTypeSelected('ov_gbm');
+                         }
+			else if(n.id == 'comparator_paco'){
+                                Ext.getCmp('center-panel').layout.setActiveItem('pc-panel');
                          }
                          else if(n.id == 'ov'){
                              onCircvisTypeSelected('ov');
@@ -786,7 +1003,7 @@
                     var table = response.getDataTable();
                     var buffer = 20000;  //20Kbp window upstream and down
                     if(table.getNumberOfRows() == 1) {
-                        var json_array = GoogleDSUtils.dataTableToArray(table);
+                        var json_array = vq.utils.GoogleDSUtils.dataTableToArray(table);
                         var chrom = json_array[0]['chr'];
                         var startpos = json_array[0]['start'];
                         var endpos = json_array[0]['end'];
