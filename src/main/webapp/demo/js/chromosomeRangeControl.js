@@ -174,7 +174,7 @@ var ChromosomeRangeControl = Class.create({
 
         flexbar.draw(data);
         if(minPosition != startPos && maxPosition != endPos){
-            flexbar.set_position(Math.round(startPos / 1000),Math.round(length / 1000));
+ flexbar.set_position(Math.round(startPos / 1000),Math.round(length / 1000));
         }
        
     }
