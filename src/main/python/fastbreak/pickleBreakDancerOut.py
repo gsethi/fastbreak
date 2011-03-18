@@ -1,6 +1,8 @@
 #!/usr/bin/python
 import cPickle as pickle
-import os, glob, errno
+import os
+import glob
+import errno
 import sys
 import genelist
 import shutil

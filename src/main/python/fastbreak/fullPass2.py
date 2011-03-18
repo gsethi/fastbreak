@@ -1,10 +1,13 @@
 #example usage (in the directory with jakes output)
 #python fullPass2.py TCGA-25-1328 TCGA-25-1319 TCGA-25-1314
 
-import sys,os
+import sys
+import os
+import glob
+
 import plotL
 import makeCalls
-import glob
+
 do1stplots = False
 makecalls = True
 do2ndplots = False

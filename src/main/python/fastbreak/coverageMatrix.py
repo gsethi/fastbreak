@@ -1,5 +1,12 @@
-import os, glob, errno, sys
-import makeCalls, genelist, scoreCalls
+import os
+import glob
+import errno
+import sys
+
+import makeCalls
+import genelist
+import scoreCalls
+
 resolution = 1000
 padby = 1000
 includeAllGenes = True

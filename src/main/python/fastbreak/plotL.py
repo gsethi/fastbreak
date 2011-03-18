@@ -4,7 +4,8 @@ import sys
 import glob
 import random
 import os
-import shlex, subprocess
+import shlex
+import subprocess
 
 filenbase = ""
 ageprognosis = ""

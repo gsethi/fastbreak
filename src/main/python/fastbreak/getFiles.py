@@ -3,8 +3,11 @@
 # OR
 #/tools/bin/python ../../python/getFiles.py /titan/cancerregulome1/TCGA/clinical-data-repository/dbgap.ncbi.nlm.nih.gov/ov/phs000178v1/p1 08.sorted.bam.breakdancer.out /titan/cancerregulome2/synthetic_cancer/trans_out_patient/callednosubtract 
 import sys
-import subprocess, shlex, shutil
-import os, glob
+import subprocess
+import shlex
+import shutil
+import os
+import glob
 
 def getForPatient(searchpath,fileNameEnd,todir,patient,notfound):
 	

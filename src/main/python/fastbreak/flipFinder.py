@@ -1,5 +1,8 @@
-import makeCalls, tsvparser
-import os, glob
+import os
+import glob
+
+import makeCalls
+import tsvparser
 
 calledHeaders = ["fromC","fromP","toC","toP","ori","count","score","type"]
 

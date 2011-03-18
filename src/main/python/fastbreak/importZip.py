@@ -6,13 +6,14 @@
 # Note : pickle files will be created in /pickle/path/root/work/space/dir
 import urlparse
 import zipfile
-import pickleBreakDancerOut
-import wigToTsv
-import tsvToList
 import sys
 import os
 try: import json #python 2.6 included simplejson as json
 except ImportError: import simplejson as json
+
+import pickleBreakDancerOut
+import wigToTsv
+import tsvToList
 		
 #config section. Should be moved to sperate file if it grows much
 

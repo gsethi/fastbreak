@@ -1,19 +1,19 @@
 import sys
 import math
 import time
+
 import tsvparser
-import glob
 
 tileWidth=1000
-minNReads = 0
-minSameBinReads=0
-minRatio=0.0
-maxBinDistance = sys.maxint
+minNReads = 2
+minSameBinReads=4
+minRatio=.05
+maxBinDistance = 7
 minMapQ = 0
 minScore = 0
 headers = []
 debug = False
-writeDistance = False
+writeDistance = True
 types = ["10","01","00","11"]
 distanceCutoffs = [0,2,4,8]
 coverageCutoffs = [0,.1,.2,.3]
@@ -78,9 +78,30 @@ def outputTile(cout,acum,curChrm,tileStart):
 				score = (1.0-acum[chr][type][bin]["score"])*100
 				log("count %s score %s"%(count,score))
 				currentCov = 0
-				
-
-				cout.write("\t".join(["%s"%el for el in[curChrm,tileStart,chr,int(bin)*tileWidth,type,count,score]])+"\tother\n")
+				if curChrm in coverage and curBin in coverage[curChrm]:
+					currentCov = float(coverage[curChrm][curBin])
+				if writeDistance:
+					if curChrm == chr:
+						for d in distanceCutoffs:
+							if count >= int(d):
+								distanceFiles[type][d].write(str(1000*math.fabs(int(bin)-int(curBin)))+",")
+						for c in coverageCutoffs:
+							
+							if currentCov != 0:
+								if float(count)/currentCov >= c:
+									coverageFiles[type][c].write(str(1000*math.fabs(int(bin)-int(curBin)))+",")
+							else:
+								print "WARNING READS FOUND IN BIN WITH 0 COVERAGE"						
+								
+						
+				mr = minNReads
+				if curBin == bin: # and type == "01":
+					mr = minSameBinReads 
+				if currentCov != 0:
+					if count >= minNReads and float(count)/currentCov >= minRatio and ( (curChrm == chr and curBin != bin and type == "01" and math.fabs(int(curBin)-int(bin))<maxBinDistance)):
+						cout.write("\t".join(["%s"%el for el in[curChrm,tileStart,chr,int(bin)*tileWidth,type,count,score]])+"\tsmall\n")
+					elif count >= minNReads and float(count)/currentCov >= minRatio:
+						cout.write("\t".join(["%s"%el for el in[curChrm,tileStart,chr,int(bin)*tileWidth,type,count,score]])+"\tother\n")
 
 def getTile(pos):
 	return int(math.floor(float(pos)/float(tileWidth)))
@@ -89,21 +110,23 @@ def makeCalls(fo,cout,fn):
 	global headers
 	global tileWidth
 	global writeDistance, distanceCutoffs, coverageCutoffs, distanceFiles,coverageFiles, types, coverage
-
+	if writeDistance:
+		coverage = loadWigHash(fn.replace("oddreads.listdistances",".tile.wig"))
+		
+		for t in types:
+			distanceFiles[t]={}
+			coverageFiles[t]={}
+			for d in distanceCutoffs:
+				distanceFiles[t][d]=open(str(fn)+"distance"+str(t)+"cutoff"+str(d),"w")
+			for c in coverageCutoffs:
+				coverageFiles[t][c]=open(str(fn)+"distance"+str(t)+"coveragecutoff"+str(c),"w")
 	firstline = True
-	#curChrm = ""
-	#tileStart = 0
+	curChrm = ""
+	tileStart = 0
 	acum = {}
 	
 	for line in fo:
-		
-		headers = tsvparser.splitLine("#Chr1	Pos1	Orientation1	Chr2	Pos2	Orientation2	Type	Size	Score	num_Reads	num_Reads_lib	Allele_frequency	Version	Run_Param".replace("#Chr1","FromChr").replace("Chr2","ToChr").replace("Pos1","FromPos").replace("Pos2","ToPos").replace("Score","MapQ"))
-
 		if firstline:
-			if line.startswith("#") and not line.startswith("#Chr1"):
-				continue
-			line = line.replace("#Chr1","FromChr").replace("Chr2","ToChr").replace("Pos1","FromPos").replace("Pos2","ToPos").replace("Score","MapQ")
-			
 			headers = tsvparser.splitLine(line)
 			firstline=False
 			continue
@@ -118,44 +141,34 @@ def makeCalls(fo,cout,fn):
 		mapQ = float(vs["MapQ"])
 		if mapQ < minMapQ or fpos == tpos:
 			continue
-		#if curChrm != chr or fpos - tileStart > tileWidth:
-		#	log("Doing bin %s %i"%(chr,tileStart))
-		#	outputTile(cout,acum,curChrm,tileStart)
-		#	acum = {}
-		#	curChrm = chr
-		#	tileStart = getTile(fpos)*tileWidth
+		if curChrm != chr or fpos - tileStart > tileWidth:
+			log("Doing bin %s %i"%(chr,tileStart))
+			outputTile(cout,acum,curChrm,tileStart)
+			acum = {}
+			curChrm = chr
+			tileStart = getTile(fpos)*tileWidth
+		if not tchr in acum:
+			acum[tchr]={}
+		type = ""
 		
-		if not chr in acum:
-			acum[chr] ={}
-		fbin = getTile(fpos)
-		if not fbin in acum[chr]:
-			acum[chr][fbin] ={}
-		if not tchr in acum[chr][fbin]:
-			acum[chr][fbin][tchr]={}
-		type = vs["Type"]
-		if "StrandQ" in vs and "StrandM" in vs:
-			if int(fpos) > int(tpos) and tchr == chr:
-				type = bTo01s()+bTo01s(vs["StrandM"])
-			else:
-				type = bTo01s(vs["StrandM"])+bTo01s(vs["StrandQ"])
+		if int(fpos) > int(tpos) and tchr == chr:
+			type = bTo01s(vs["StrandQ"])+bTo01s(vs["StrandM"])
+		else:
+			type = bTo01s(vs["StrandM"])+bTo01s(vs["StrandQ"])
 		
-		if not type in acum[chr][fbin][tchr]:
-			acum[chr][fbin][tchr][type]={}
+		if not type in acum[tchr]:
+			acum[tchr][type]={}
 		
 		tobin = getTile(tpos)
 		
-		if not tobin in acum[chr][fbin][tchr][type]:
-			acum[chr][fbin][tchr][type][tobin]={"count":1,"score":1.0-float(vs["MapQ"])/100.0}
+		if not tobin in acum[tchr][type]:
+			acum[tchr][type][tobin]={"count":1,"score":1.0-float(vs["MapQ"])/100.0}
 		else:
 			log("bin exsists")
-			acum[chr][fbin][tchr][type][tobin]["count"]=int(acum[chr][fbin][tchr][type][tobin]["count"])+1
-			acum[chr][fbin][tchr][type][tobin]["score"]=float(acum[chr][fbin][tchr][type][tobin]["score"])*(1.0-mapQ/100.0)
+			acum[tchr][type][tobin]["count"]=int(acum[tchr][type][tobin]["count"])+1
+			acum[tchr][type][tobin]["score"]=float(acum[tchr][type][tobin]["score"])*(1.0-mapQ/100.0)
 	
-	
-	for curChrm in acum:
-		for bin in acum[curChrm]:
-			outputTile(cout,acum[curChrm][bin],curChrm,bin*tileWidth)
-		
+	outputTile(cout,acum,curChrm,tileStart)
 	if writeDistance:
 		for t in types:
 			for d in distanceCutoffs:
@@ -164,20 +177,6 @@ def makeCalls(fo,cout,fn):
 				coverageFiles[t][d].close()
 			
 if __name__ == "__main__":
-
 	filename = sys.argv[1]
-	if filename.endswith(".bam.breakdancer.out"):
-		writeDistance = False
-		minNReads = 0
-		minSameBinReads=0
-		minRatio=0
-		maxBinDistance = sys.maxint
-		distancefn = "./"+filename[0:28]+"*.tile.wig"
-
-		distancefn = glob.glob(distancefn)[0]
-		#distancefn = distancefn.replace(".tile.wig","oddreads.list")
-		
-		makeCalls(open(filename,"r"),open(filename+".binned","w"),distancefn)
-	else:
-		makeCalls(open(filename,"r"),open(filename+"called","w"),filename+"distances")
+	makeCalls(open(filename,"r"),open(filename+"called","w"),filename+"distances")
 	#makeCalls(sys.stdin,sys.stdout)

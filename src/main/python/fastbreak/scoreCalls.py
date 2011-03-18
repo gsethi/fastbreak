@@ -1,7 +1,8 @@
 import tsvparser
 import genelist
 import sys
-import os, glob
+import os
+import glob
 import makeCalls
 
 coveragecutoff = 1
