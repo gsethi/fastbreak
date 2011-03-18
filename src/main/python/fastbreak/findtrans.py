@@ -108,6 +108,27 @@ import math
 try: import json #python 2.6 included simplejson as json
 except ImportError: import simplejson as json
 
+
+detailedText="""
+findtrans.py - fastbreak pass1
+Usage with config file samtools view -h XXX.sorted.bam | python findtrans.py sample-label myConfig.config   
+ie nice /titan/cancerregulome2/bin/samtools-0.1.7_x86_64-linux/samtools view -h /titan/cancerregulome8/TCGA/clinical-data-repository/dbgap.ncbi.nlm.nih.gov/coad/wugsc/exchange/TCGA_phs000178/TCGA-AA-A02J-01A-01W-A00E-09_IlluminaGA-DNASeq_exome.sorted.bam | nice /tools/bin/python /titan/cancerregulome2/synthetic_cancer/python/findtrans.py TCGA-AA-A02J-01A-01W_refactored /titan/cancerregulome2/synthetic_cancer/python/configs/pass1.config	 	 	 
+
+Alternative usage with inline arguments ie 
+
+nice /path/samtools-0.1.7_x86_64-linux/samtools view -h /bamPath/myBam.sorted.bam | nice /tools/bin/python /path/findtrans.py BAMLabel resultsDir 1000 1000 50 1000 500000 1 0 1 0 0
+resultsDir = output directory 
+1000 = calledTransSize
+1000 = tileWindow
+50 = transRangeStart
+1000 = transRangeEnd
+500000 = outlierDistance
+1 = reportOrientationAndDistance 
+0 = generateFastQ (uses lots of disk space)
+1 = reportMappingMetrics
+0 = readGroups (Group outputs by readGroupID for QA purposes, see SAM Format Manual)
+0 = savedDiscarded Reads (uses lots of disk space)
+"""
 usage = "usage: Fastbreak Pass1 module is used to collect reads with odd distances and orientations. See Readme for more information. This script is designed to use samtools view -h with paired end bam files sorted by chromosome position. \nsamtools view -h XXX.sorted.bam | python findtrans.py sample-bam-label myConfig.config(see ./configs/pass1.config for template) \n[In-line Parameters mode ie\n %s]" % detailedText
 parser = optparse.OptionParser(usage=usage)
 

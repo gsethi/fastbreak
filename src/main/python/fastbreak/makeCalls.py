@@ -26,7 +26,6 @@ __author__ = "Ryan Bressler"
 
 import sys
 import math
-import time
 
 import tsvparser
 
@@ -73,7 +72,7 @@ def loadWigHash(filename):
 
 def log(msg):
 	global debug
-	if debug==True:
+	if debug:
 		print msg
 		# logf = open("log.txt","w")
 # 		logf.write("%s:\t%s\n"%(time.strftime("%c"), msg))
@@ -120,9 +119,6 @@ def outputTile(cout,acum,curChrm,tileStart):
 								print "WARNING READS FOUND IN BIN WITH 0 COVERAGE"						
 								
 						
-				mr = minNReads
-				if curBin == bin: # and type == "01":
-					mr = minSameBinReads 
 				if currentCov != 0:
 					if count >= minNReads and float(count)/currentCov >= minRatio and ( (curChrm == chr and curBin != bin and type == "01" and math.fabs(int(curBin)-int(bin))<maxBinDistance)):
 						cout.write("\t".join(["%s"%el for el in[curChrm,tileStart,chr,int(bin)*tileWidth,type,count,score]])+"\tsmall\n")
