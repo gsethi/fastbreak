@@ -1,7 +1,8 @@
 import makeCalls
 import math
 import glob
-import averageCorelations
+
+from fastbreak import averageCorelations
 
 
 def doCor(breakfn,covfn,breakFilter,breakTileCount):

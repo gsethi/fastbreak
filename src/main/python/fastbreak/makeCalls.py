@@ -2,7 +2,7 @@ import sys
 import math
 import time
 
-import tsvparser
+from fastbreak import tsvparser
 
 tileWidth=1000
 minNReads = 2

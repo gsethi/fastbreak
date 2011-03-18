@@ -2,9 +2,9 @@ import glob
 import os 
 import sys
 
-import scoreCalls
-import smallSMatrixByGene 
-import makeCalls
+from fastbreak import scoreCalls
+from fastbreak import smallSMatrixByGene 
+from fastbreak import makeCalls
 
 wigfiles = glob.glob("./*.tile.wig")
 coveredregions  = {}

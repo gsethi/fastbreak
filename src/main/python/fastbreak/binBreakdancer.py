@@ -3,7 +3,7 @@ import math
 import time
 import glob
 
-import tsvparser
+from fastbreak import tsvparser
 
 
 tileWidth=1000

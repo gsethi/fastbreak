@@ -2,9 +2,9 @@ import sys
 import os
 import glob
 
-import tsvparser
-import genelist
-import makeCalls
+from fastbreak import tsvparser
+from fastbreak import genelist
+from fastbreak import makeCalls
 
 coveragecutoff = 10
 padby=1000

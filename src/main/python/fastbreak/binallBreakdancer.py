@@ -1,5 +1,5 @@
-import binBreakdancer
 import glob
+from fastbreak import binBreakdancer
 
 for filename in glob.glob("*.bam.breakdancer.out"):
 	distancefnglob = "./"+filename[0:28]+"*.tile.wig"
