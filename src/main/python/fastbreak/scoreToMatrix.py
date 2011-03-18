@@ -1,4 +1,7 @@
-import os, glob, errno
+import os
+import glob
+import errno
+
 def score():
 	files = glob.glob("./*.t.per.gene")
 	print "%i files\n"%(len(files))

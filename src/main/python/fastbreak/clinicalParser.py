@@ -4,8 +4,11 @@
 #/tools/bin/python ../python_ryans/clinicalParser.py /titan/cancerregulome7/TCGA/repositories/dcc-mirror/ov/bcr/intgen.org/bio/clin 20 ov_clinical_data.tsv
 
 import sys
-import subprocess, shlex, shutil
-import os, glob
+import subprocess
+import shlex
+import shutil
+import os
+import glob
 from xml.etree.ElementTree import ElementTree
 
 def findAndParse(searchpath, days,outputfile):
