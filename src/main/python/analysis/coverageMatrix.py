@@ -29,8 +29,9 @@ import glob
 import errno
 import sys
 
-import makeCalls
-import genelist
+from fastbreak import makeCalls
+from fastbreak import genelist
+
 import scoreCalls
 
 resolution = 1000
