@@ -25,6 +25,7 @@
 __author__ = "Ryan Bressler"
 
 import glob
+
 import binBreakdancer
 
 def main():

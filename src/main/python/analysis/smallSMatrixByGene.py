@@ -28,8 +28,8 @@ import os
 import glob
 import errno
 
-import makeCalls
-import scoreCalls
+from fastbreak import makeCalls
+from fastbreak import scoreCalls
 
 def scoreFilesByTile(inFilePattern,scorecolid,filenamebase):
 	outf = open(filenamebase+".matrix.tsv","w")

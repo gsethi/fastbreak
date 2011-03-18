@@ -27,52 +27,6 @@ __author__ = "Ryan Bressler, Jake Lin"
 def main():
 	pf = open("patients.txt","r")
 	
-	# ps = pf.read()
-	# 
-	# pf.close()
-	# 
-	# pfs = ps.replace("./","").replace(".tile.wig","").replace("-",".").split("\n")
-	# 
-	# pf = open("patientNames.txt","w")
-	# plf  = open("patientList.txt","w")
-	# bcbypatient ={}
-	# 
-	# for filen in pfs:	
-	# 	pf.write("%s\t%s\n"%(filen,filen[0:15]))
-	# 	patienbc=filen[0:15]
-	# 	bcbypatient[patienbc[0:15]]=patienbc
-	# 	plf.write(patienbc+"\n")
-	# 
-	# pf.close()
-	# plf.close()
-	# 
-	# gif = open("genes.txt","r")
-	# gof = open("geneList.txt","w")
-	# 
-	# gof.write(gif.read().replace("\t","\n"))
-	# 
-	# gof.close()
-	
-	# dataf = open("fastbreak.per.gene.score.matrix.tsv","r")
-	# datalines=[]
-	# for line in dataf:
-	# 	datalines.append(line)
-	# dataf.close()
-	# 
-	# header=datalines[0]
-	# 
-	# newheadermembers = []
-	# 
-	# for colhead in header.rstrip().split("\t"):
-	# 	if colhead[0:4] == "TCGA":
-	# 		colhead=colhead[0:28]
-	# 	newheadermembers.append(colhead)
-	# 	
-	# datalines[0]="\t".join(newheadermembers)+"\n"
-	# dataf = open("fastbreak.per.gene.score.matrix.tsv","w")
-	# for line in datalines:
-	# 	dataf.write(line)
-	# dataf.close()
 	
 	bcbypatient ={}
 	

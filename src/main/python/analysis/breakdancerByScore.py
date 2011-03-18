@@ -28,9 +28,11 @@ import glob
 import os 
 import sys
 
+from fastbreak import makeCalls
+
 import scoreCalls
 import smallSMatrixByGene 
-import makeCalls
+
 
 def main():
 	wigfiles = glob.glob("./*.tile.wig")
