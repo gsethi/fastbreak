@@ -3,9 +3,9 @@ import glob
 import errno
 import sys
 
-import makeCalls
-import genelist
-import scoreCalls
+from fastbreak import makeCalls
+from fastbreak import genelist
+from fastbreak import scoreCalls
 
 resolution = 1000
 padby = 1000

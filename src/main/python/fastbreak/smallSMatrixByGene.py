@@ -1,6 +1,9 @@
-import os, glob, errno
-import makeCalls
-import scoreCalls
+import os
+import glob
+import errno
+
+from fastbreak import makeCalls
+from fastbreak import scoreCalls
 
 def scoreFilesByTile(inFilePattern,scorecolid,filenamebase):
 	outf = open(filenamebase+".matrix.tsv","w")

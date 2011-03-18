@@ -2,7 +2,7 @@ __author__ = 'rbressle'
 import sys
 import glob
 
-import genelist
+from fastbreak import genelist
 
 def formatMatrix(matrixfilen, gl):
     fo = open(matrixfilen,"r")

@@ -5,8 +5,8 @@ import sys
 import os
 import glob
 
-import plotL
-import makeCalls
+from fastbreak import plotL
+from fastbreak import makeCalls
 
 do1stplots = False
 makecalls = True

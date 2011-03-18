@@ -11,9 +11,9 @@ import os
 try: import json #python 2.6 included simplejson as json
 except ImportError: import simplejson as json
 
-import pickleBreakDancerOut
-import wigToTsv
-import tsvToList
+from fastbreak import pickleBreakDancerOut
+from fastbreak import wigToTsv
+from fastbreak import tsvToList
 		
 #config section. Should be moved to sperate file if it grows much
 
