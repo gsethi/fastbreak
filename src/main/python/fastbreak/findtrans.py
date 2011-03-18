@@ -1,11 +1,32 @@
-__author__ = 'RyanBressler_JakeLin'
-#findtrans.py - fastbreak pass1
-#Usage with config file samtools view -h XXX.sorted.bam | python findtrans.py sample-label myConfig.config   
-#ie nice /titan/cancerregulome2/bin/samtools-0.1.7_x86_64-linux/samtools view -h /titan/cancerregulome8/TCGA/clinical-data-repository/dbgap.ncbi.nlm.nih.gov/coad/wugsc/exchange/TCGA_phs000178/TCGA-AA-A02J-01A-01W-A00E-09_IlluminaGA-DNASeq_exome.sorted.bam | nice /tools/bin/python /titan/cancerregulome2/synthetic_cancer/python/findtrans.py TCGA-AA-A02J-01A-01W_refactored /titan/cancerregulome2/synthetic_cancer/python/configs/pass1.config	 	 	 
+#!/usr/bin/python
+#
+# 
+#     Copyright (C) 2003-2010 Institute for Systems Biology
+#                             Seattle, Washington, USA.
+# 
+#     This library is free software; you can redistribute it and/or
+#     modify it under the terms of the GNU Lesser General Public
+#     License as published by the Free Software Foundation; either
+#     version 2.1 of the License, or (at your option) any later version.
+# 
+#     This library is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#     Lesser General Public License for more details.
+# 
+#     You should have received a copy of the GNU Lesser General Public
+#     License along with this library; if not, write to the Free Software
+#     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+# 
 
-#Alternative usage with inline arguments ie 
+"""
+findtrans.py - fastbreak pass1
+Usage with config file samtools view -h XXX.sorted.bam | python findtrans.py sample-label myConfig.config   
+ie nice /titan/cancerregulome2/bin/samtools-0.1.7_x86_64-linux/samtools view -h /titan/cancerregulome8/TCGA/clinical-data-repository/dbgap.ncbi.nlm.nih.gov/coad/wugsc/exchange/TCGA_phs000178/TCGA-AA-A02J-01A-01W-A00E-09_IlluminaGA-DNASeq_exome.sorted.bam | nice /tools/bin/python /titan/cancerregulome2/synthetic_cancer/python/findtrans.py TCGA-AA-A02J-01A-01W_refactored /titan/cancerregulome2/synthetic_cancer/python/configs/pass1.config	 	 	 
 
-detailedText = """nice /path/samtools-0.1.7_x86_64-linux/samtools view -h /bamPath/myBam.sorted.bam | nice /tools/bin/python /path/findtrans.py BAMLabel resultsDir 1000 1000 50 1000 500000 1 0 1 0 0
+Alternative usage with inline arguments ie 
+
+nice /path/samtools-0.1.7_x86_64-linux/samtools view -h /bamPath/myBam.sorted.bam | nice /tools/bin/python /path/findtrans.py BAMLabel resultsDir 1000 1000 50 1000 500000 1 0 1 0 0
 resultsDir = output directory 
 1000 = calledTransSize
 1000 = tileWindow
@@ -17,7 +38,7 @@ resultsDir = output directory
 1 = reportMappingMetrics
 0 = readGroups (Group outputs by readGroupID for QA purposes, see SAM Format Manual)
 0 = savedDiscarded Reads (uses lots of disk space)
-"""
+
 #Email jlin or rbressler@systemsbiology.org if you need more help or have questions
 
 ##commenting courtesy of Sheila Reynold
@@ -68,6 +89,12 @@ resultsDir = output directory
 ##     that they are consistent ...
 ##
 ## -------------------------------------------------------------------------- ##
+"""
+
+__author__ = "Jake Lin, Ryan Bressler"
+
+
+
 
 import sys
 import os
