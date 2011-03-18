@@ -29,8 +29,9 @@ import os
 import glob
 import errno
 import sys
-import genelist
 import shutil
+
+import genelist
 
 
 
