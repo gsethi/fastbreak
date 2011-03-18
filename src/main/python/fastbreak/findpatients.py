@@ -22,7 +22,7 @@
 """
 """
 
-__author__ = "Ryan Bressler, Jake Lin"
+__author__ = "Ryan Bressler"
 
 import sys
 import os
