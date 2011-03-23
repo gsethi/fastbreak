@@ -858,7 +858,7 @@
         function onLoadGBMDataComplete(height,width) {
             $('chromovis_gbm_div').innerHTML="";
              $('chromovis_gbm_div').style.height=circvis_gbm.getHeight();
-            circle_gbm = wedge_plot($('chromovis_gbm_div'),'gbm',height,width);
+            circle_gbm = wedge_plot($('chromovis_gbm_div'),'gbm',circvis_gbm.getHeight() * 0.95,circvis_gbm.getHeight() * 0.95);
 
             var gbmDataTable = createDataTable(args_gbm['discrit_gene_count']);
             tablevis_gbm.removeAll();
