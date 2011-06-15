@@ -30,5 +30,5 @@ def splitLine(line):
 def parseLine(line,headerarg):
 	rv = {}
 	for i,v in enumerate(splitLine(line)):
-		rv[h[i]]=v
+		rv[headerarg[i]]=v
 	return rv
