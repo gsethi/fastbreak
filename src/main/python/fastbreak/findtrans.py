@@ -84,6 +84,16 @@ parser = optparse.OptionParser(usage=usage)
 args = parser.parse_args()
 argsLen = len(sys.argv)
 resultsPath = "./findtrans_out"
+transLowerBound = 0
+tileWindow = 0
+transRange1 = 0
+transRange2 = 0
+outlierDistance = 0
+reportOrientationAndDistance = 0
+generateFastQ = 0
+doReportMappingMetrics = 0
+doReadGroups = 0
+saveSkippedInfo = 0
 
 if argsLen < 2:
 	parser.error("BAMLabel is required")
